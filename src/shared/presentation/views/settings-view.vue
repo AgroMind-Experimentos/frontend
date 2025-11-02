@@ -1,5 +1,6 @@
 <script setup>
-import { ref, getCurrentInstance } from 'vue';
+import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import AppLayout from '../components/app-layout.vue';
 
 // PrimeVue
@@ -7,29 +8,16 @@ import Card from 'primevue/card';
 import Button from 'primevue/button';
 import InputSwitch from 'primevue/inputswitch';
 
+// i18n
+const { locale } = useI18n();
+
 // Estado UI
 const activePanel = ref('subscription'); // 'subscription' | 'language'
 const notifications = ref(true);
 
-// Idioma
-const currentLang = ref('es'); // 'es' | 'en'
-
-// Aplica idioma al i18n si está disponible
+// Aplica idioma (misma lógica que language-switcher)
 function applyLanguage(lang) {
-  currentLang.value = lang;
-
-  // Intento 1: Vue I18n v9 (Composition)
-  try {
-    // @ts-ignore
-    const inst = getCurrentInstance();
-    // @ts-ignore
-    if (inst?.appContext?.config?.globalProperties?.$i18n) {
-      // @ts-ignore
-      inst.appContext.config.globalProperties.$i18n.locale = lang;
-    }
-  } catch (_) {}
-
-  // Si usas useI18n/locale.value desde composable, puedo cambiarlo a esa API cuando me digas cómo lo montaste.
+  locale.value = lang;
 }
 
 // Acciones (placeholders)
@@ -101,16 +89,16 @@ function cancelPlan() { alert('Cancelar plan (WIP)'); }
             <div class="lang">
               <Button
                   label="Español"
-                  :severity="currentLang === 'es' ? 'warning' : 'secondary'"
+                  :severity="locale === 'es' ? 'warning' : 'secondary'"
                   @click="applyLanguage('es')"
               />
               <Button
                   label="Inglés"
-                  :severity="currentLang === 'en' ? 'warning' : 'secondary'"
+                  :severity="locale === 'en' ? 'warning' : 'secondary'"
                   @click="applyLanguage('en')"
               />
             </div>
-            <small class="hint">Se aplica inmediatamente si el i18n está configurado.</small>
+            <small class="hint">Se aplica inmediatamente.</small>
           </template>
         </Card>
       </div>
@@ -122,7 +110,7 @@ function cancelPlan() { alert('Cancelar plan (WIP)'); }
 .wrap { max-width: 1100px; margin: 0 auto; }
 .grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 2fr;
   gap: 22px;
   margin-top: 14px;
 }

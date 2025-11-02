@@ -49,7 +49,7 @@ const userName = userStore.state.user?.name || 'Usuario';
         <i class="pi pi-user"></i><span>Perfil</span>
       </router-link>
 
-      <router-link class="item" :to="{ name: 'settings' }" v-if="false">
+      <router-link class="item" :to="{ name: 'settings' }">
         <i class="pi pi-cog"></i><span>Configuración</span>
       </router-link>
     </nav>

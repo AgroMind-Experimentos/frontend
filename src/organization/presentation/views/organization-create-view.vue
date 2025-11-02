@@ -1,14 +1,15 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { organizationService } from '../../application/organization.service.js';
 import AppLayout from '../../../shared/presentation/components/app-layout.vue';
-
 import Card from 'primevue/card';
 import InputText from 'primevue/inputtext';
-import Textarea from 'primevue/textarea';
 import Button from 'primevue/button';
 import Avatar from 'primevue/avatar';
+
+const { t } = useI18n();
 
 const name = ref('');
 const description = ref('');
@@ -39,6 +40,7 @@ function toggleMember(id) {
   if (i >= 0) selected.value.splice(i, 1);
   else selected.value.push(id);
 }
+
 function removeMember(id) {
   selected.value = selected.value.filter(x => x !== id);
 }
@@ -47,7 +49,7 @@ const router = useRouter();
 
 async function createOrg() {
   if (!name.value.trim()) {
-    alert('Ingresa el nombre de la organización');
+    alert(t('organization.name'));
     return;
   }
 
@@ -62,19 +64,15 @@ async function createOrg() {
     router.push({ name: 'dashboard' });
   } catch (err) {
     console.error('Error creating organization:', err);
-    alert('Error al crear la organización');
+    alert(t('common.unexpectedError'));
   }
-}
-
-function goBack() {
-  router.push({ name: 'dashboard' });
 }
 </script>
 
 <template>
   <AppLayout>
     <div class="wrap">
-      <h2 class="page-title">Crear Organizacion</h2>
+      <h2 class="page-title">{{ t('organization.create') }}</h2>
 
       <div class="grid">
         <!-- Panel: Datos -->
@@ -82,19 +80,19 @@ function goBack() {
           <template #title>
             <div class="panel-title">
               <i class="pi pi-user mr-2 text-orange-500"></i>
-              <span>Datos:</span>
+              <span>{{ t('organization.data') }}:</span>
             </div>
           </template>
           <template #content>
             <div class="p-fluid">
-              <label class="label">Nombre</label>
-              <InputText v-model="name" placeholder="Nombre" class="mb-3" />
+              <label class="label">{{ t('organization.name') }}</label>
+              <InputText v-model="name" :placeholder="t('organization.name')" class="mb-3" />
 
-              <label class="label">Descripcion</label>
-              <InputText v-model="description" placeholder="Descripcion" class="mb-3" />
+              <label class="label">{{ t('organization.description') }}</label>
+              <InputText v-model="description" :placeholder="t('organization.description')" class="mb-3" />
 
-              <label class="label">Ubicacion</label>
-              <InputText v-model="locationTxt" placeholder="Ubicacion" />
+              <label class="label">{{ t('organization.location') }}</label>
+              <InputText v-model="locationTxt" :placeholder="t('organization.location')" />
             </div>
           </template>
         </Card>
@@ -104,13 +102,13 @@ function goBack() {
           <template #title>
             <div class="panel-title">
               <i class="pi pi-user mr-2 text-orange-500"></i>
-              <span>Miembros:</span>
+              <span>{{ t('organization.members') }}:</span>
             </div>
           </template>
           <template #content>
             <div class="search-box mb-3">
               <i class="pi pi-search"></i>
-              <InputText v-model="search" placeholder="Buscar" class="w-full" />
+              <InputText v-model="search" :placeholder="t('organization.searchMembers')" class="w-full" />
             </div>
 
             <div class="member-list">
@@ -123,10 +121,10 @@ function goBack() {
                   <i
                       v-if="selected.includes(m.id)"
                       class="pi pi-check-circle selected"
-                      title="Seleccionado"
+                      :title="t('organization.selected')"
                       @click="toggleMember(m.id)"
                   />
-                  <i class="pi pi-trash del" title="Quitar" @click="removeMember(m.id)" />
+                  <i class="pi pi-trash del" :title="t('organization.remove')" @click="removeMember(m.id)" />
                 </div>
               </div>
             </div>
@@ -135,7 +133,7 @@ function goBack() {
       </div>
 
       <div class="actions">
-        <Button label="Crear" class="btn-primary" @click="createOrg" />
+        <Button :label="t('common.create')" class="btn-primary" @click="createOrg" />
       </div>
     </div>
   </AppLayout>

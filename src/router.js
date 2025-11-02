@@ -6,12 +6,15 @@ import parcelRoutes from "./organization/presentation/parcel-routes.js"
 import weatherRoutes from "./weather/presentation/weather-routes.js"
 import reportRoutes from "./Report/report-routes.js"
 import DashboardView from "./shared/presentation/views/dashboard-view.vue"
+import SettingsView from "./shared/presentation/views/settings-view.vue"
 
 const router = createRouter({
     history: createWebHistory(),
     routes: [
         { path: '/', redirect: '/login' },
+
         { path: '/dashboard', name: 'dashboard', component: DashboardView },
+        { path: '/settings', name: 'settings', component: SettingsView },
         ...userRoutes,
         ...tasksRoutes,
         ...organizationRoutes,

@@ -1,10 +1,13 @@
 <script setup>
 import { onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { organizationService } from '../../../organization/application/organization.service.js';
 import AppLayout from '../components/app-layout.vue';
 import OrganizationCard from '../../../organization/presentation/components/organization-card.vue';
 import Button from 'primevue/button';
+
+const { t } = useI18n();
 
 const router = useRouter();
 
@@ -22,14 +25,16 @@ onMounted(async () => {
   }
 });
 
-const goCreate = () => router.push({ name:'organization-create' });
+const goCreate = () => router.push({ name: 'organization-create' });
+
 const onEnter = (org) => router.push({ name:'organization-detail', params:{ id: org.id }});
+
 const onDelete = async (org) => {
-  if (confirm(`¿Estás seguro de que quieres eliminar "${org.name}"?`)) {
+  if (confirm(`${t('dashboard.deleteConfirm')} "${org.name}"?`)) {
     try {
       await organizationService.deleteOrganization(org.id);
     } catch (err) {
-      alert('Error al eliminar la organización');
+      alert(t('common.unexpectedError'));
     }
   }
 };
@@ -39,13 +44,13 @@ const onDelete = async (org) => {
   <AppLayout>
     <div class="dashboard-content">
       <div class="header">
-        <h1>Mis Organizaciones</h1>
-        <p>Gestiona tus organizaciones agrícolas y cooperativas</p>
+        <h1>{{ t('dashboard.title') }}</h1>
+        <p>{{ t('dashboard.subtitle') }}</p>
       </div>
 
       <div class="actions">
         <Button
-          label="Crear Nueva Organización"
+          :label="t('dashboard.createNew')"
           icon="pi pi-plus"
           @click="goCreate"
           class="p-button-success"
@@ -56,7 +61,7 @@ const onDelete = async (org) => {
       <!-- Estado de carga -->
       <div v-if="loading" class="loading-state">
         <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
-        <p>Cargando organizaciones...</p>
+        <p>{{ t('dashboard.loadingOrganizations') }}</p>
       </div>
 
       <!-- Estado de error -->
@@ -64,7 +69,7 @@ const onDelete = async (org) => {
         <i class="pi pi-exclamation-triangle" style="font-size: 2rem; color: #e74c3c"></i>
         <p>{{ error }}</p>
         <Button
-          label="Reintentar"
+          :label="t('common.retry')"
           icon="pi pi-refresh"
           @click="organizationService.getAllOrganizations()"
           class="p-button-outlined"
@@ -74,10 +79,10 @@ const onDelete = async (org) => {
       <!-- Estado sin organizaciones -->
       <div v-else-if="organizations.length === 0" class="empty-state">
         <i class="pi pi-building" style="font-size: 3rem; color: #95a5a6"></i>
-        <h3>No tienes organizaciones</h3>
-        <p>Comienza creando tu primera organización agrícola</p>
+        <h3>{{ t('dashboard.noOrganizations') }}</h3>
+        <p>{{ t('dashboard.noOrganizationsDesc') }}</p>
         <Button
-          label="Crear Primera Organización"
+          :label="t('dashboard.createFirst')"
           icon="pi pi-plus"
           @click="goCreate"
           class="p-button-success"

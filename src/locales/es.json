@@ -7,10 +7,57 @@
   },
   "common": {
     "unexpectedError": "Ocurrió un error inesperado",
-    "serviceUnavailable": "Servicio no disponible, intente más tarde"
+    "serviceUnavailable": "Servicio no disponible, intente más tarde",
+    "loading": "Cargando...",
+    "retry": "Reintentar",
+    "create": "Crear",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "back": "Volver",
+    "search": "Buscar"
   },
   "dashboard": {
-    "title": "Panel de Control",
-    "welcome": "Bienvenido de nuevo"
+    "title": "Mis Organizaciones",
+    "welcome": "Bienvenido de nuevo",
+    "subtitle": "Gestiona tus organizaciones agrícolas y cooperativas",
+    "createNew": "Crear Nueva Organización",
+    "createFirst": "Crear Primera Organización",
+    "noOrganizations": "No tienes organizaciones",
+    "noOrganizationsDesc": "Comienza creando tu primera organización agrícola",
+    "loadingOrganizations": "Cargando organizaciones...",
+    "deleteConfirm": "¿Estás seguro de que quieres eliminar"
+  },
+  "organization": {
+    "create": "Crear Organización",
+    "details": "Detalles de la Organización",
+    "name": "Nombre",
+    "description": "Descripción",
+    "location": "Ubicación",
+    "members": "Miembros",
+    "memberCount": "miembros",
+    "createdAt": "Creada",
+    "data": "Datos",
+    "searchMembers": "Buscar",
+    "selected": "Seleccionado",
+    "remove": "Quitar",
+    "noParcels": "Aún no hay parcelas",
+    "noParcelsDesc": "Comienza creando la primera parcela para esta organización",
+    "createParcel": "Crear Parcela",
+    "createFirstParcel": "Crear Primera Parcela",
+    "parcelsTitle": "Parcelas de la Organización",
+    "loadingParcels": "Cargando parcelas...",
+    "area": "Área",
+    "crop": "Cultivo",
+    "actions": "Acciones",
+    "editParcel": "Editar parcela",
+    "deleteParcel": "Eliminar parcela",
+    "deleteParcelConfirm": "¿Estás seguro de que quieres eliminar la parcela"
+  },
+  "notFound": {
+    "title": "404",
+    "message": "Página no encontrada",
+    "backToHome": "Volver al inicio"
   }
 }
