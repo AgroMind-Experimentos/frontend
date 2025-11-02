@@ -1,13 +1,15 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { organizationService } from '../../application/organization.service.js';
 import { plotService } from '../../application/plot.service.js';
 import AppLayout from '../../../shared/presentation/components/app-layout.vue';
 import Button from 'primevue/button';
-import Card from 'primevue/card';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
+
+const { t } = useI18n();
 
 const route = useRoute();
 const router = useRouter();
@@ -38,11 +40,11 @@ const editPlot = (plot) => {
 };
 
 const deletePlot = async (plot) => {
-  if (confirm(`¿Estás seguro de que quieres eliminar la parcela "${plot.name}"?`)) {
+  if (confirm(`${t('organization.deleteParcelConfirm')} "${plot.name}"?`)) {
     try {
       await plotService.deletePlot(plot.id);
     } catch (err) {
-      alert('Error al eliminar la parcela');
+      alert(t('common.unexpectedError'));
       console.error('Error deleting plot:', err);
     }
   }
@@ -74,18 +76,18 @@ const formatDate = (dateString) => {
             </div>
             <div class="meta-item">
               <i class="pi pi-users"></i>
-              <span>{{ organization.getMemberCount() }} miembros</span>
+              <span>{{ organization.getMemberCount() }} {{ t('organization.memberCount') }}</span>
             </div>
             <div class="meta-item">
               <i class="pi pi-calendar"></i>
-              <span>Creada: {{ formatDate(organization.createdAt) }}</span>
+              <span>{{ t('organization.createdAt') }}: {{ formatDate(organization.createdAt) }}</span>
             </div>
           </div>
         </div>
 
         <div class="actions">
           <Button
-            label="Crear Parcela"
+            :label="t('organization.createParcel')"
             icon="pi pi-plus"
             @click="goCreateParcel"
             class="p-button-success"
@@ -97,7 +99,7 @@ const formatDate = (dateString) => {
       <!-- Estado de carga -->
       <div v-if="loading" class="loading-state">
         <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
-        <p>Cargando parcelas...</p>
+        <p>{{ t('organization.loadingParcels') }}</p>
       </div>
 
       <!-- Estado de error -->
@@ -105,7 +107,7 @@ const formatDate = (dateString) => {
         <i class="pi pi-exclamation-triangle" style="font-size: 2rem; color: #e74c3c"></i>
         <p>{{ error }}</p>
         <Button
-          label="Reintentar"
+          :label="t('common.retry')"
           icon="pi pi-refresh"
           @click="plotService.getPlotsByOrganizationId(orgId)"
           class="p-button-outlined"
@@ -114,10 +116,10 @@ const formatDate = (dateString) => {
 
       <!-- Lista de parcelas -->
       <div v-else-if="plots.length > 0" class="plots-section">
-        <h2>Parcelas de la Organización</h2>
+        <h2>{{ t('organization.parcelsTitle') }}</h2>
 
         <DataTable :value="plots" responsiveLayout="scroll" class="plots-table">
-          <Column field="name" header="Nombre" sortable>
+          <Column field="name" :header="t('organization.name')" sortable>
             <template #body="slotProps">
               <div class="plot-name">
                 <i class="pi pi-map text-green-600"></i>
@@ -126,13 +128,13 @@ const formatDate = (dateString) => {
             </template>
           </Column>
 
-          <Column field="area" header="Área" sortable>
+          <Column field="area" :header="t('organization.area')" sortable>
             <template #body="slotProps">
               <span class="area-badge">{{ slotProps.data.area }}</span>
             </template>
           </Column>
 
-          <Column field="crop" header="Cultivo" sortable>
+          <Column field="crop" :header="t('organization.crop')" sortable>
             <template #body="slotProps">
               <div class="crop-info">
                 <i class="pi pi-leaf text-green-500"></i>
@@ -141,32 +143,32 @@ const formatDate = (dateString) => {
             </template>
           </Column>
 
-          <Column field="location" header="Ubicación">
+          <Column field="location" :header="t('organization.location')">
             <template #body="slotProps">
               <span class="location-text">{{ slotProps.data.location }}</span>
             </template>
           </Column>
 
-          <Column field="members" header="Miembros">
+          <Column field="members" :header="t('organization.members')">
             <template #body="slotProps">
               <span class="members-count">{{ slotProps.data.getMemberCount() }}</span>
             </template>
           </Column>
 
-          <Column header="Acciones">
+          <Column :header="t('organization.actions')">
             <template #body="slotProps">
               <div class="action-buttons">
                 <Button
                   icon="pi pi-pencil"
                   class="p-button-rounded p-button-text p-button-warning"
                   @click="editPlot(slotProps.data)"
-                  title="Editar parcela"
+                  :title="t('organization.editParcel')"
                 />
                 <Button
                   icon="pi pi-trash"
                   class="p-button-rounded p-button-text p-button-danger"
                   @click="deletePlot(slotProps.data)"
-                  title="Eliminar parcela"
+                  :title="t('organization.deleteParcel')"
                 />
               </div>
             </template>
@@ -177,10 +179,10 @@ const formatDate = (dateString) => {
       <!-- Estado sin parcelas -->
       <div v-else class="empty-state">
         <i class="pi pi-map box-icon"></i>
-        <h2 class="title">Aún no hay parcelas</h2>
-        <p>Comienza creando la primera parcela para esta organización</p>
+        <h2 class="title">{{ t('organization.noParcels') }}</h2>
+        <p>{{ t('organization.noParcelsDesc') }}</p>
         <Button
-          label="Crear Primera Parcela"
+          :label="t('organization.createFirstParcel')"
           icon="pi pi-plus"
           @click="goCreateParcel"
           class="p-button-success"

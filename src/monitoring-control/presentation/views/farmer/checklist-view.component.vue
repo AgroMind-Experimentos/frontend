@@ -57,7 +57,7 @@ async function completeTask(){
 
 const finishTask = ()=>{
   if(task.value?.status === "Completed"){
-    alert("This task is already completed")
+    alert("This monitoring-control is already completed")
     return
   }
   const allChecked = Object.values(checkedItems.value).every(val => val === true)

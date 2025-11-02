@@ -150,6 +150,7 @@ export default {
 }
 
 .login-card {
+  margin: auto;
   width: 100%;
   max-width: 480px;
   background: rgba(255, 255, 255, 0.98) !important;

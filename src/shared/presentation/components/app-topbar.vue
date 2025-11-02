@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { userStore } from '../../../iam/application/user.store.js';
+import LanguagueSwitcher from "./languague-switcher.vue";
 
 // Obtener información del usuario de forma reactiva
 const userName = computed(() => userStore.state.user?.name || 'Usuario');
@@ -19,6 +20,7 @@ const userName = computed(() => userStore.state.user?.name || 'Usuario');
       <div class="user-info">
         <span class="user-name">{{ userName }}</span>
       </div>
+      <languague-switcher></languague-switcher>
       <i class="pi pi-envelope icon"></i>
       <i class="pi pi-bell icon"></i>
     </div>
