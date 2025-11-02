@@ -4,13 +4,13 @@ import App from './App.vue'
 import router from './router.js'
 import i18n from './i18n.js'
 import PrimeVue from 'primevue/config'
-import Material from '@primeuix/themes/material'
+import Lara from '@primeuix/themes/lara';
 import {Button, FloatLabel, Card, Checkbox, InputText, DatePicker, Toolbar, SelectButton} from 'primevue'
 import 'primeicons/primeicons.css'
 
 
 createApp(App)
-    .use(PrimeVue,{theme: {preset: Material}, ripple: true})
+    .use(PrimeVue, { theme: { preset: Lara, options: { darkModeSelector: false } } })
     .component('pv-toolbar', Toolbar)
     .component('pv-button', Button)
     .component('pv-floatlabel', FloatLabel)

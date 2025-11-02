@@ -37,19 +37,11 @@ const userName = userStore.state.user?.name || 'Usuario';
         <i class="pi pi-chart-line"></i><span>Reports</span>
       </router-link>
 
-      <router-link class="item" to="/crops" v-if="false">
-        <i class="pi pi-leaf"></i><span>Cultivos</span>
-      </router-link>
-
-      <router-link class="item" :to="{ name: 'activities' }" v-if="false">
-        <i class="pi pi-calendar"></i><span>Actividades</span>
-      </router-link>
-
-      <router-link class="item" :to="{ name: 'user-profile' }" v-if="false">
+      <router-link class="item" :to="{ name: 'user-profile' }">
         <i class="pi pi-user"></i><span>Perfil</span>
       </router-link>
 
-      <router-link class="item" :to="{ name: 'settings' }" v-if="false">
+      <router-link class="item" :to="{ name: 'settings' }">
         <i class="pi pi-cog"></i><span>Configuración</span>
       </router-link>
     </nav>

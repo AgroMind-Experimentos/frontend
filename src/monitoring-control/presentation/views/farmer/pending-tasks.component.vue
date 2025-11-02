@@ -32,7 +32,7 @@ async function startTask(taskID){
     alert("Tarea iniciada exitosamente")
     tasks.value = tasks.value.filter(task => Number(task.taskID) !== numericID)
   }catch(error){
-    console.error('Error starting task:', error)
+    console.error('Error starting monitoring-control:', error)
     alert("Error al iniciar la tarea")
   }
 }

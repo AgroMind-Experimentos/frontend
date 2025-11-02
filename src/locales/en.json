@@ -7,10 +7,57 @@
   },
   "common": {
     "unexpectedError": "Unexpected error occurred",
-    "serviceUnavailable": "Service unavailable, please try again later"
+    "serviceUnavailable": "Service unavailable, please try again later",
+    "loading": "Loading...",
+    "retry": "Retry",
+    "create": "Create",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel",
+    "back": "Back",
+    "search": "Search"
   },
   "dashboard": {
-    "title": "Dashboard",
-    "welcome": "Welcome back"
+    "title": "My Organizations",
+    "welcome": "Welcome back",
+    "subtitle": "Manage your agricultural organizations and cooperatives",
+    "createNew": "Create New Organization",
+    "createFirst": "Create First Organization",
+    "noOrganizations": "You have no organizations",
+    "noOrganizationsDesc": "Start by creating your first agricultural organization",
+    "loadingOrganizations": "Loading organizations...",
+    "deleteConfirm": "Are you sure you want to delete"
+  },
+  "organization": {
+    "create": "Create Organization",
+    "details": "Organization Details",
+    "name": "Name",
+    "description": "Description",
+    "location": "Location",
+    "members": "Members",
+    "memberCount": "members",
+    "createdAt": "Created",
+    "data": "Data",
+    "searchMembers": "Search",
+    "selected": "Selected",
+    "remove": "Remove",
+    "noParcels": "No parcels yet",
+    "noParcelsDesc": "Start by creating the first parcel for this organization",
+    "createParcel": "Create Parcel",
+    "createFirstParcel": "Create First Parcel",
+    "parcelsTitle": "Organization Parcels",
+    "loadingParcels": "Loading parcels...",
+    "area": "Area",
+    "crop": "Crop",
+    "actions": "Actions",
+    "editParcel": "Edit parcel",
+    "deleteParcel": "Delete parcel",
+    "deleteParcelConfirm": "Are you sure you want to delete the parcel"
+  },
+  "notFound": {
+    "title": "404",
+    "message": "Page not found",
+    "backToHome": "Back to home"
   }
 }
