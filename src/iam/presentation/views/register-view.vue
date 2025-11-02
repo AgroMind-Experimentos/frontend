@@ -235,6 +235,7 @@ export default {
 }
 
 .register-card {
+  margin: auto;
   width: 100%;
   max-width: 580px;
   background: rgba(255, 255, 255, 0.98) !important;

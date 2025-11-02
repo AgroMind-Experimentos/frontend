@@ -1,6 +1,6 @@
 import {createRouter, createWebHistory} from "vue-router"
 import userRoutes from "./iam/presentation/user-routes.js"
-import tasksRoutes from "./task/presentation/tasks-routes.js"
+import tasksRoutes from "./monitoring-control/presentation/tasks-routes.js"
 import organizationRoutes from "./organization/presentation/organization-routes.js"
 import parcelRoutes from "./organization/presentation/parcel-routes.js"
 import weatherRoutes from "./weather/presentation/weather-routes.js"
