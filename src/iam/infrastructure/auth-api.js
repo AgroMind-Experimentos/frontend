@@ -3,36 +3,34 @@ import axios from 'axios';
 export class AuthApi {
     baseUrl = import.meta.env.VITE_API_BASE_URL;
     usersEndpoint = import.meta.env.VITE_USERS_ENDPOINT;
-    http = axios.create({ baseURL: this.baseUrl });
+    loginEndpoint = import.meta.env.VITE_LOGIN_ENDPOINT;
+    http = axios.create({
+        baseURL: this.baseUrl,
+    });
 
     async login(email, password) {
         try {
-            // Obtener todos los usuarios
-            const { data: users } = await this.http.get(this.usersEndpoint);
-
-            // Buscar usuario que coincida con email y password
-            const user = users.find(u => u.email === email && u.password === password);
-
-            if (!user) {
-                const err = new Error('Invalid credentials');
-                err.response = { status: 401 };
-                throw err;
-            }
-
-            // Simular tokens JWT (en un backend real se generarían)
-            return {
-                user: { id: user.id, name: user.name, email: user.email },
-                tokens: {
-                    accessToken: `jwt-token-${user.id}`,
-                    refreshToken: `refresh-token-${user.id}`
+            // Enviar los datos de login con POST a la URL del backend
+            const { data } = await this.http.post(this.loginEndpoint, {
+                email,      // email enviado en el cuerpo
+                password    // password enviado en el cuerpo
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'  // Asegúrate de que el Content-Type sea application/json
                 }
+            });
+
+            // Si el login es exitoso, devuelve el mensaje y los tokens
+            return {
+                message: data.message,  // 'Logged in' o el mensaje del backend
+                tokens: data.tokens     // Tokens generados por el backend
             };
         } catch (error) {
+            // Manejo de errores en el frontend
             if (error.response?.status === 401) {
-                throw error;
+                throw new Error('Invalid credentials');  // Las credenciales son incorrectas
             }
-            // Si no es error 401, puede ser error de conexión
-            const err = new Error('Service unavailable');
+            const err = new Error('Service unavailable');  // Error de servicio
             err.response = { status: 503 };
             throw err;
         }
@@ -53,7 +51,7 @@ export class AuthApi {
             // Crear nuevo usuario
             const newUser = {
                 id: String(Date.now()), // ID simple basado en timestamp
-                name,
+                DisplayName: name,
                 email,
                 password
             };
@@ -76,4 +74,6 @@ export class AuthApi {
             throw err;
         }
     }
+
+
 }
