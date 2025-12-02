@@ -1,6 +1,6 @@
 export class Task{
-    constructor({taskID, title, responsibleId, status, startedAt, completedAt}){
-        this.taskID = taskID
+    constructor({id, title, responsibleId, status, startedAt, completedAt}){
+        this.id = id
         this.title = title
         this.responsibleId = responsibleId
         this.status = status

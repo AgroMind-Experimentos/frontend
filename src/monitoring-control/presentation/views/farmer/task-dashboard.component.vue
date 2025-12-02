@@ -18,6 +18,8 @@ onMounted(() => {
     activeTab.value = 'pending'
   } else if (currentPath.includes('/logs')) {
     activeTab.value = 'logs'
+  } else if(currentPath.includes('/new-task')) {
+    activeTab.value = 'new-task'
   } else {
     router.push('/tasks/completed')
   }
@@ -84,6 +86,13 @@ const navigateToTab = (tab) => {
         >
           <i class="pi pi-list"></i>
           Registros
+        </button>
+        <button
+            :class="['tab-button', { active: activeTab === 'new-task' }]"
+            @click="navigateToTab('new-task')"
+        >
+          <i class="pi pi-plus"></i>
+          Nueva Tarea
         </button>
       </div>
 

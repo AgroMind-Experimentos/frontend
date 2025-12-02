@@ -21,6 +21,18 @@ onMounted(async () => {
 function goToCheckList(taskId){
   router.push(`/tasks/in-progress/${taskId}/checklist`)
 }
+
+function formatDate(dateString){
+  if(!dateString){
+    return 'N/A'
+  }
+  const date = new Date(dateString)
+  return date.toLocaleDateString('es-ES', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  })
+}
 </script>
 
 <template>
@@ -33,12 +45,12 @@ function goToCheckList(taskId){
     </div>
 
     <div v-else-if="tasks.length > 0" class="tasks">
-      <div class="task-card" v-for="task in tasks" :key="task.taskID">
+      <div class="task-card" v-for="task in tasks" :key="task.id">
         <div class="task-content">
           <div class="task-info">
             <h4 class="task-title">{{ task.title }}</h4>
             <p class="task-meta">Responsable: {{ task.responsibleId }}</p>
-            <p class="task-meta" v-if="task.completedAt">Completada: {{ task.completedAt }}</p>
+            <p class="task-meta" v-if="task.completedAt">Completada: {{ formatDate(task.completedAt) }}</p>
             <div class="status-badge completed">
               <i class="pi pi-check"></i>
               Completada
@@ -47,7 +59,7 @@ function goToCheckList(taskId){
           <div class="task-actions">
             <pv-button
               class="more-button"
-              @click="goToCheckList(task.taskID)"
+              @click="goToCheckList(task.id)"
               icon="pi pi-eye"
             >
               Ver detalles
@@ -154,7 +166,7 @@ function goToCheckList(taskId){
   border: none !important;
   border-radius: 8px;
   color: white !important;
-  padding: 0.75rem 1.5rem;
+  padding: 0.75rem 2.5rem;
 }
 
 .more-button:hover {

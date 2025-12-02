@@ -10,4 +10,13 @@ export class ChecklistAssembler{
             items: response.items.map(item=>ItemAssembler.toEntityFromResponse(item))
         })
     }
+
+    static toEntityFromResource(resource){
+        return new CheckList({
+            id: Date.now().toString(),
+            taskId: resource.taskId,
+            title: resource.title,
+            items: Array.isArray(resource.items) ? resource.items.map(item=>ItemAssembler.toEntityFromResponse(item)) : []
+        })
+    }
 }

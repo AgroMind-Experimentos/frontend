@@ -49,6 +49,7 @@ onMounted(async () => {
   box-shadow: 1px 1px 7px rgb(218, 218, 218) !important;
   text-align: center;
   padding: 5px;
+  color: black;
 }
 .container h3{
   margin-top: 2rem;
