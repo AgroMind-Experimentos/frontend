@@ -81,13 +81,6 @@ const navigateToTab = (tab) => {
           Pendientes
         </button>
         <button
-          :class="['tab-button', { active: activeTab === 'logs' }]"
-          @click="navigateToTab('logs')"
-        >
-          <i class="pi pi-list"></i>
-          Registros
-        </button>
-        <button
             :class="['tab-button', { active: activeTab === 'new-task' }]"
             @click="navigateToTab('new-task')"
         >

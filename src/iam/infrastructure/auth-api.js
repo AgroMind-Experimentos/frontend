@@ -2,8 +2,9 @@ import axios from 'axios';
 
 export class AuthApi {
     baseUrl = import.meta.env.VITE_API_BASE_URL;
-    usersEndpoint = import.meta.env.VITE_USERS_ENDPOINT;
     loginEndpoint = import.meta.env.VITE_LOGIN_ENDPOINT;
+    registerEndpoint = import.meta.env.VITE_REGISTER_ENDPOINT;
+    logoutEndpoint = import.meta.env.VITE_LOGOUT_ENDPOINT;
     http = axios.create({
         baseURL: this.baseUrl,
     });
@@ -38,40 +39,47 @@ export class AuthApi {
 
     async register(name, email, password) {
         try {
-            // Verificar si el email ya existe
-            const { data: users } = await this.http.get(this.usersEndpoint);
-            const existingUser = users.find(u => u.email === email);
+            // Enviar los datos de registro con POST al backend
+            const { data } = await this.http.post(this.registerEndpoint, {
+                email,
+                password,
+                displayName: name
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
 
-            if (existingUser) {
+            // Si el registro es exitoso, devuelve el usuario y los tokens
+            return {
+                user: data.user,
+                tokens: data.tokens
+            };
+        } catch (error) {
+            // Manejo de errores específicos del backend
+            if (error.response?.status === 409) {
                 const err = new Error('Email already exists');
                 err.response = { status: 409 };
                 throw err;
             }
-
-            // Crear nuevo usuario
-            const newUser = {
-                id: String(Date.now()), // ID simple basado en timestamp
-                DisplayName: name,
-                email,
-                password
-            };
-
-            const { data: createdUser } = await this.http.post(this.usersEndpoint, newUser);
-
-            return {
-                user: { id: createdUser.id, name: createdUser.name, email: createdUser.email },
-                tokens: {
-                    accessToken: `jwt-token-${createdUser.id}`,
-                    refreshToken: `refresh-token-${createdUser.id}`
-                }
-            };
-        } catch (error) {
-            if (error.response?.status === 409) {
-                throw error;
+            if (error.response?.status === 400) {
+                const err = new Error('Invalid registration data');
+                err.response = { status: 400 };
+                throw err;
             }
             const err = new Error('Registration failed');
             err.response = { status: 500 };
             throw err;
+        }
+    }
+
+    async logout() {
+        try {
+            const { data } = await this.http.post(this.logoutEndpoint);
+            return data;
+        } catch (error) {
+            console.error('Logout failed:', error);
+            throw error;
         }
     }
 
