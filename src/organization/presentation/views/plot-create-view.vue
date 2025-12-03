@@ -134,34 +134,7 @@ function goBack() {
           </template>
         </Card>
 
-        <!-- Panel: Miembros -->
-        <Card class="panel">
-          <template #title>
-            <div class="panel-title">
-              <i class="pi pi-user mr-2 text-orange-500"></i>
-              <span>Miembros:</span>
-            </div>
-          </template>
-          <template #content>
-            <div class="search-box mb-3">
-              <i class="pi pi-search"></i>
-              <InputText v-model="search" placeholder="Buscar" class="w-full" />
-            </div>
 
-            <div class="member-list">
-              <div v-for="m in filtered" :key="m.id" class="member-row">
-                <div class="left" @click="toggleMember(m.id)">
-                  <Avatar :image="m.avatar" shape="circle" class="mr-2" />
-                  <span class="member-name">{{ m.name }}</span>
-                </div>
-                <div class="right">
-                  <i v-if="selected.includes(m.id)" class="pi pi-check-circle selected" @click="toggleMember(m.id)" />
-                  <i class="pi pi-trash del" @click="removeMember(m.id)" />
-                </div>
-              </div>
-            </div>
-          </template>
-        </Card>
       </div>
 
       <div class="actions">
