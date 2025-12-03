@@ -62,22 +62,35 @@ async function createParcel() {
   }
 
   try {
+    // Construir la descripción con toda la información
+    const description = [
+      area.value.trim() ? `Área: ${area.value.trim()}` : '',
+      locationTxt.value.trim() ? `Ubicación: ${locationTxt.value.trim()}` : '',
+      crop.value.trim() ? `Cultivo: ${crop.value.trim()}` : '',
+      selected.value.length > 0 ? `Miembros: ${selected.value.length}` : ''
+    ].filter(Boolean).join(' | ');
+
     const plotData = {
       organizationId: orgId,
       name: name.value.trim(),
+      description: description,
+      // Campos adicionales para el estado local (no se envían al backend)
       area: area.value.trim(),
       location: locationTxt.value.trim(),
       crop: crop.value.trim(),
       members: selected.value.map(id => String(id))
     };
 
+    console.log('🚀 Creando parcela con datos:', plotData);
     await plotService.createPlot(plotData);
+    console.log('✅ Parcela creada exitosamente');
 
+    alert('Parcela creada exitosamente!');
     // Redirigir al detalle de la organización
     router.push({ name: 'organization-detail', params: { id: orgId } });
   } catch (err) {
-    console.error('Error creating plot:', err);
-    alert('Error al crear la parcela');
+    console.error('❌ Error creating plot:', err);
+    alert(`Error al crear la parcela: ${err.message || 'Error desconocido'}`);
   }
 }
 
@@ -121,34 +134,7 @@ function goBack() {
           </template>
         </Card>
 
-        <!-- Panel: Miembros -->
-        <Card class="panel">
-          <template #title>
-            <div class="panel-title">
-              <i class="pi pi-user mr-2 text-orange-500"></i>
-              <span>Miembros:</span>
-            </div>
-          </template>
-          <template #content>
-            <div class="search-box mb-3">
-              <i class="pi pi-search"></i>
-              <InputText v-model="search" placeholder="Buscar" class="w-full" />
-            </div>
 
-            <div class="member-list">
-              <div v-for="m in filtered" :key="m.id" class="member-row">
-                <div class="left" @click="toggleMember(m.id)">
-                  <Avatar :image="m.avatar" shape="circle" class="mr-2" />
-                  <span class="member-name">{{ m.name }}</span>
-                </div>
-                <div class="right">
-                  <i v-if="selected.includes(m.id)" class="pi pi-check-circle selected" @click="toggleMember(m.id)" />
-                  <i class="pi pi-trash del" @click="removeMember(m.id)" />
-                </div>
-              </div>
-            </div>
-          </template>
-        </Card>
       </div>
 
       <div class="actions">

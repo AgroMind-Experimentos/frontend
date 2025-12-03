@@ -18,16 +18,42 @@ class OrganizationService {
      * @returns {Promise<Array<Organization>>}
      */
     async getAllOrganizations() {
+        console.log('[OrganizationService] Obteniendo todas las organizaciones...');
         this.state.loading = true;
         this.state.error = null;
 
         try {
             const data = await this.#api.getAll();
-            this.state.organizations = this.#assembler.toOrganizationArray(data);
+            console.log('[OrganizationService] Data recibida del backend:', data);
+
+            // El backend puede devolver los datos en diferentes formatos
+            const organizationsData = data?.data || data?.organizations || data;
+            console.log('[OrganizationService] Organizaciones a transformar:', organizationsData);
+
+            this.state.organizations = this.#assembler.toOrganizationArray(organizationsData);
+
+            // 💾 HARDCODED: Restaurar miembros desde localStorage
+            const memberCache = JSON.parse(localStorage.getItem('org_members_cache') || '{}');
+            console.log('[OrganizationService] 💾 Cache de miembros:', memberCache);
+
+            this.state.organizations.forEach(org => {
+                if (memberCache[org.id]) {
+                    org.members = memberCache[org.id];
+                    console.log(`[OrganizationService] ✅ Restaurados ${memberCache[org.id].length} miembros para "${org.name}"`);
+                }
+            });
+
+            console.log('[OrganizationService] Total organizaciones cargadas:', this.state.organizations.length);
+
+            // Log del conteo de miembros de cada organizacion
+            this.state.organizations.forEach(org => {
+                console.log(`[OrganizationService] "${org.name}" tiene ${org.getMemberCount()} miembro(s)`);
+            });
+
             return this.state.organizations;
         } catch (error) {
             this.state.error = 'Error al cargar las organizaciones';
-            console.error('Error fetching organizations:', error);
+            console.error('[OrganizationService] Error fetching organizations:', error);
             throw error;
         } finally {
             this.state.loading = false;
@@ -45,7 +71,13 @@ class OrganizationService {
 
         try {
             const data = await this.#api.getById(id);
-            this.state.currentOrganization = this.#assembler.toOrganization(data);
+
+            // 💾 HARDCODED: Restaurar miembros desde localStorage
+            const memberCache = JSON.parse(localStorage.getItem('org_members_cache') || '{}');
+            const cachedMembers = memberCache[id] || null;
+            console.log('[OrganizationService] 💾 Miembros en cache para org', id, ':', cachedMembers);
+
+            this.state.currentOrganization = this.#assembler.toOrganization(data, cachedMembers);
             return this.state.currentOrganization;
         } catch (error) {
             this.state.error = 'Error al cargar la organización';
@@ -62,13 +94,31 @@ class OrganizationService {
      * @returns {Promise<Organization>}
      */
     async createOrganization(organizationData) {
+        console.log('[OrganizationService] Creando organizacion:', organizationData);
+        console.log('[OrganizationService] Miembros seleccionados:', organizationData.members);
         this.state.loading = true;
         this.state.error = null;
 
         try {
             const apiData = this.#assembler.fromFormData(organizationData);
+            console.log('[OrganizationService] Datos transformados para API:', apiData);
+
             const createdData = await this.#api.create(apiData);
-            const newOrganization = this.#assembler.toOrganization(createdData);
+            console.log('[OrganizationService] Respuesta del backend:', createdData);
+
+            // 🔥 HARDCODED: Forzar los miembros que seleccionó el usuario
+            const newOrganization = this.#assembler.toOrganization(createdData, organizationData.members);
+            console.log('[OrganizationService] Nueva organizacion creada:', newOrganization);
+            console.log('[OrganizationService] Total miembros:', newOrganization.getMemberCount());
+
+            // 💾 Guardar en localStorage para persistir los miembros
+            const orgId = newOrganization.id || createdData.id;
+            if (orgId) {
+                const memberCache = JSON.parse(localStorage.getItem('org_members_cache') || '{}');
+                memberCache[orgId] = organizationData.members || [];
+                localStorage.setItem('org_members_cache', JSON.stringify(memberCache));
+                console.log('[OrganizationService] 💾 Miembros guardados en cache:', memberCache[orgId]);
+            }
 
             // Add to local state
             this.state.organizations.push(newOrganization);
@@ -76,7 +126,7 @@ class OrganizationService {
             return newOrganization;
         } catch (error) {
             this.state.error = 'Error al crear la organización';
-            console.error('Error creating organization:', error);
+            console.error('[OrganizationService] Error creating organization:', error);
             throw error;
         } finally {
             this.state.loading = false;

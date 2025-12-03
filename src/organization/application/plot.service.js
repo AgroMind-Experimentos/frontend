@@ -1,33 +1,32 @@
 import { reactive } from 'vue';
 import { PlotsApi } from '../infrastructure/plots.api.js';
-import { PlotAssembler } from '../infrastructure/plot-assembler.js';
 
 class PlotService {
-    state = reactive({
-        plots: [],
-        currentPlot: null,
-        loading: false,
-        error: null
-    });
+    #api;
 
-    #api = new PlotsApi();
-    #assembler = new PlotAssembler();
+    constructor() {
+        this.#api = new PlotsApi();
+        this.state = reactive({
+            plots: [],
+            currentPlot: null,
+            loading: false,
+            error: null
+        });
+    }
 
     /**
-     * Get all plots
-     * @returns {Promise<Array<Plot>>}
+     * Obtiene todas las parcelas
      */
     async getAllPlots() {
         this.state.loading = true;
         this.state.error = null;
-
         try {
             const data = await this.#api.getAll();
-            this.state.plots = this.#assembler.toPlotArray(data);
-            return this.state.plots;
+            this.state.plots = data; // La API ya retorna entidades convertidas
+            return data;
         } catch (error) {
-            this.state.error = 'Error al cargar las parcelas';
-            console.error('Error fetching plots:', error);
+            this.state.error = error.message || 'Error al cargar las parcelas';
+            console.error('Error fetching all plots:', error);
             throw error;
         } finally {
             this.state.loading = false;
@@ -35,21 +34,17 @@ class PlotService {
     }
 
     /**
-     * Get plots by organization ID
-     * @param {string} organizationId - Organization ID
-     * @returns {Promise<Array<Plot>>}
+     * Obtiene las parcelas de una organización
      */
     async getPlotsByOrganizationId(organizationId) {
         this.state.loading = true;
         this.state.error = null;
-
         try {
             const data = await this.#api.getByOrganizationId(organizationId);
-            const plots = this.#assembler.toPlotArray(data);
-            this.state.plots = plots;
-            return plots;
+            this.state.plots = data; // La API ya retorna entidades convertidas
+            return data;
         } catch (error) {
-            this.state.error = 'Error al cargar las parcelas de la organización';
+            this.state.error = error.message || 'Error al cargar las parcelas';
             console.error('Error fetching plots by organization:', error);
             throw error;
         } finally {
@@ -58,21 +53,18 @@ class PlotService {
     }
 
     /**
-     * Get plot by ID
-     * @param {string} id - Plot ID
-     * @returns {Promise<Plot>}
+     * Obtiene una parcela por ID
      */
     async getPlotById(id) {
         this.state.loading = true;
         this.state.error = null;
-
         try {
             const data = await this.#api.getById(id);
-            this.state.currentPlot = this.#assembler.toPlot(data);
-            return this.state.currentPlot;
+            this.state.currentPlot = data; // La API ya retorna entidad convertida
+            return data;
         } catch (error) {
-            this.state.error = 'Error al cargar la parcela';
-            console.error('Error fetching plot:', error);
+            this.state.error = error.message || 'Error al cargar la parcela';
+            console.error(`Error fetching plot ${id}:`, error);
             throw error;
         } finally {
             this.state.loading = false;
@@ -80,25 +72,18 @@ class PlotService {
     }
 
     /**
-     * Create new plot
-     * @param {Object} plotData - Plot form data
-     * @returns {Promise<Plot>}
+     * Crea una nueva parcela
      */
     async createPlot(plotData) {
         this.state.loading = true;
         this.state.error = null;
-
         try {
-            const apiData = this.#assembler.fromFormData(plotData);
-            const createdData = await this.#api.create(apiData);
-            const newPlot = this.#assembler.toPlot(createdData);
-
-            // Add to local state
+            // La API se encarga de convertir usando PlotAssembler.fromFormData
+            const newPlot = await this.#api.create(plotData);
             this.state.plots.push(newPlot);
-
             return newPlot;
         } catch (error) {
-            this.state.error = 'Error al crear la parcela';
+            this.state.error = error.message || 'Error al crear la parcela';
             console.error('Error creating plot:', error);
             throw error;
         } finally {
@@ -107,34 +92,30 @@ class PlotService {
     }
 
     /**
-     * Update plot
-     * @param {string} id - Plot ID
-     * @param {Object} plotData - Updated plot data
-     * @returns {Promise<Plot>}
+     * Actualiza una parcela existente
      */
     async updatePlot(id, plotData) {
         this.state.loading = true;
         this.state.error = null;
-
         try {
-            const apiData = this.#assembler.fromFormData(plotData);
-            const updatedData = await this.#api.update(id, apiData);
-            const updatedPlot = this.#assembler.toPlot(updatedData);
+            // La API se encarga de convertir usando PlotAssembler.fromFormData
+            const updatedPlot = await this.#api.update(id, plotData);
 
-            // Update in local state
-            const index = this.state.plots.findIndex(plot => plot.id === id);
+            // Actualizar en el array de plots
+            const index = this.state.plots.findIndex(p => p.id === id);
             if (index !== -1) {
                 this.state.plots[index] = updatedPlot;
             }
 
+            // Actualizar currentPlot si es el mismo
             if (this.state.currentPlot?.id === id) {
                 this.state.currentPlot = updatedPlot;
             }
 
             return updatedPlot;
         } catch (error) {
-            this.state.error = 'Error al actualizar la parcela';
-            console.error('Error updating plot:', error);
+            this.state.error = error.message || 'Error al actualizar la parcela';
+            console.error(`Error updating plot ${id}:`, error);
             throw error;
         } finally {
             this.state.loading = false;
@@ -142,28 +123,26 @@ class PlotService {
     }
 
     /**
-     * Delete plot
-     * @param {string} id - Plot ID
-     * @returns {Promise<boolean>}
+     * Elimina una parcela
      */
     async deletePlot(id) {
         this.state.loading = true;
         this.state.error = null;
-
         try {
             await this.#api.delete(id);
 
-            // Remove from local state
-            this.state.plots = this.state.plots.filter(plot => plot.id !== id);
+            // Remover del array
+            this.state.plots = this.state.plots.filter(p => p.id !== id);
 
+            // Limpiar currentPlot si es el mismo
             if (this.state.currentPlot?.id === id) {
                 this.state.currentPlot = null;
             }
 
             return true;
         } catch (error) {
-            this.state.error = 'Error al eliminar la parcela';
-            console.error('Error deleting plot:', error);
+            this.state.error = error.message || 'Error al eliminar la parcela';
+            console.error(`Error deleting plot ${id}:`, error);
             throw error;
         } finally {
             this.state.loading = false;
@@ -171,33 +150,24 @@ class PlotService {
     }
 
     /**
-     * Add member to plot
-     * @param {string} plotId - Plot ID
-     * @param {string} memberId - Member ID
-     * @returns {Promise<Plot>}
+     * Agrega un miembro a una parcela
      */
-    async addMember(plotId, memberId) {
+    async addMemberToPlot(plotId, memberId) {
         this.state.loading = true;
         this.state.error = null;
-
         try {
-            const updatedData = await this.#api.addMember(plotId, memberId);
-            const updatedPlot = this.#assembler.toPlot(updatedData);
+            const updatedPlot = await this.#api.addMember(plotId, memberId);
 
-            // Update in local state
-            const index = this.state.plots.findIndex(plot => plot.id === plotId);
+            // Actualizar en el array
+            const index = this.state.plots.findIndex(p => p.id === plotId);
             if (index !== -1) {
                 this.state.plots[index] = updatedPlot;
             }
 
-            if (this.state.currentPlot?.id === plotId) {
-                this.state.currentPlot = updatedPlot;
-            }
-
             return updatedPlot;
         } catch (error) {
-            this.state.error = 'Error al agregar miembro';
-            console.error('Error adding member:', error);
+            this.state.error = error.message || 'Error al agregar miembro';
+            console.error(`Error adding member to plot ${plotId}:`, error);
             throw error;
         } finally {
             this.state.loading = false;
@@ -205,33 +175,24 @@ class PlotService {
     }
 
     /**
-     * Remove member from plot
-     * @param {string} plotId - Plot ID
-     * @param {string} memberId - Member ID
-     * @returns {Promise<Plot>}
+     * Remueve un miembro de una parcela
      */
-    async removeMember(plotId, memberId) {
+    async removeMemberFromPlot(plotId, memberId) {
         this.state.loading = true;
         this.state.error = null;
-
         try {
-            const updatedData = await this.#api.removeMember(plotId, memberId);
-            const updatedPlot = this.#assembler.toPlot(updatedData);
+            const updatedPlot = await this.#api.removeMember(plotId, memberId);
 
-            // Update in local state
-            const index = this.state.plots.findIndex(plot => plot.id === plotId);
+            // Actualizar en el array
+            const index = this.state.plots.findIndex(p => p.id === plotId);
             if (index !== -1) {
                 this.state.plots[index] = updatedPlot;
             }
 
-            if (this.state.currentPlot?.id === plotId) {
-                this.state.currentPlot = updatedPlot;
-            }
-
             return updatedPlot;
         } catch (error) {
-            this.state.error = 'Error al remover miembro';
-            console.error('Error removing member:', error);
+            this.state.error = error.message || 'Error al remover miembro';
+            console.error(`Error removing member from plot ${plotId}:`, error);
             throw error;
         } finally {
             this.state.loading = false;
@@ -239,19 +200,20 @@ class PlotService {
     }
 
     /**
-     * Clear current plot
+     * Limpia el estado actual
      */
     clearCurrentPlot() {
         this.state.currentPlot = null;
     }
 
     /**
-     * Clear error state
+     * Limpia el error
      */
     clearError() {
         this.state.error = null;
     }
 }
 
-// Export singleton instance
+// Exportar una instancia singleton
 export const plotService = new PlotService();
+

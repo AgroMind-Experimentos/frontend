@@ -4,6 +4,7 @@ const inProgressTasks = ()=> import('./views/farmer/in-progress-tasks.component.
 const logs = ()=> import('./views/farmer/logs.component.vue')
 const checkList = ()=> import('./views/farmer/checklist-view.component.vue')
 const taskDashboard = ()=> import('./views/farmer/task-dashboard.component.vue')
+const newTask = ()=> import('./views/farmer/new-task.component.vue')
 
 const tasksRoutes = [
     {
@@ -30,6 +31,10 @@ const tasksRoutes = [
             {
                 path: "in-progress/:id/checklist",
                 components: {"task-dashboard": checkList},
+            },
+            {
+                path: "new-task",
+                components: {"task-dashboard": newTask},
             }
         ]
     }

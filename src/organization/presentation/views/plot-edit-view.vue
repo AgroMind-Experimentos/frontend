@@ -74,22 +74,35 @@ async function updateParcel() {
   }
 
   try {
+    // Construir la descripción con toda la información
+    const description = [
+      area.value.trim() ? `Área: ${area.value.trim()}` : '',
+      locationTxt.value.trim() ? `Ubicación: ${locationTxt.value.trim()}` : '',
+      crop.value.trim() ? `Cultivo: ${crop.value.trim()}` : '',
+      selected.value.length > 0 ? `Miembros: ${selected.value.length}` : ''
+    ].filter(Boolean).join(' | ');
+
     const plotData = {
       organizationId: currentPlot.value.organizationId,
       name: name.value.trim(),
+      description: description,
+      // Campos adicionales para el estado local
       area: area.value.trim(),
       location: locationTxt.value.trim(),
       crop: crop.value.trim(),
       members: selected.value.map(id => String(id))
     };
 
+    console.log('🚀 Actualizando parcela con datos:', plotData);
     await plotService.updatePlot(plotId, plotData);
+    console.log('✅ Parcela actualizada exitosamente');
 
+    alert('Parcela actualizada exitosamente!');
     // Redirigir al detalle de la organización
     router.push({ name: 'organization-detail', params: { id: currentPlot.value.organizationId } });
   } catch (err) {
-    console.error('Error updating plot:', err);
-    alert('Error al actualizar la parcela');
+    console.error('❌ Error updating plot:', err);
+    alert(`Error al actualizar la parcela: ${err.message || 'Error desconocido'}`);
   }
 }
 

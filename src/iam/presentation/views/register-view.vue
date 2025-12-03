@@ -74,7 +74,7 @@ export default {
 <template>
   <!-- Fondo con gradiente consistente -->
   <div class="register-container">
-    <div class="flex align-items-center justify-content-center min-h-screen p-4">
+    <div class="flex align-items-center justify-content-center min-h-screen p-4 card-wrapper">
       <!-- Tarjeta de registro mejorada -->
       <Card class="register-card">
         <!-- Header con logo -->
@@ -232,6 +232,11 @@ export default {
   background:
     radial-gradient(circle at 20% 80%, rgba(255,255,255,0.1) 0%, transparent 50%),
     radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 50%);
+}
+
+.card-wrapper {
+  padding-top: 3rem !important;
+  padding-bottom: 3rem !important;
 }
 
 .register-card {
@@ -517,6 +522,11 @@ export default {
 
 .login-button:hover {
   color: #1B5E20 !important;
+  .card-wrapper {
+    padding-top: 2rem !important;
+    padding-bottom: 2rem !important;
+  }
+
   text-decoration: underline !important;
 }
 

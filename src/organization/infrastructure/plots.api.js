@@ -1,74 +1,89 @@
 import axios from 'axios';
+import { PlotAssembler } from './plot-assembler.js';
 
 export class PlotsApi {
     baseUrl = import.meta.env.VITE_API_BASE_URL;
-    plotsEndpoint = import.meta.env.VITE_PLOTS_ENDPOINT;
-    http = axios.create({ baseURL: this.baseUrl });
+    cropsEndpoint = import.meta.env.VITE_CROPS_ENDPOINT;
+    http = axios.create({
+        baseURL: this.baseUrl,
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
 
     async getAll() {
         try {
-            const { data } = await this.http.get(this.plotsEndpoint);
-            return data;
+            console.log('📥 GET todas las parcelas/crops desde:', `${this.baseUrl}${this.cropsEndpoint}`);
+            const { data } = await this.http.get(this.cropsEndpoint);
+            console.log('✅ Parcelas recibidas del backend:', data.length, 'parcelas');
+            return data.map(plot => PlotAssembler.toEntityFromResponse(plot));
         } catch (error) {
-            console.error('Error fetching plots:', error);
+            console.error('❌ Error fetching plots:', error);
             throw error;
         }
     }
 
     async getById(id) {
         try {
-            const { data } = await this.http.get(`${this.plotsEndpoint}/${id}`);
-            return data;
+            console.log('📥 GET parcela por ID:', id);
+            const { data } = await this.http.get(`${this.cropsEndpoint}/${id}`);
+            console.log('✅ Parcela recibida:', data);
+            return PlotAssembler.toEntityFromResponse(data);
         } catch (error) {
-            console.error(`Error fetching plot ${id}:`, error);
+            console.error(`❌ Error fetching plot ${id}:`, error);
             throw error;
         }
     }
 
     async getByOrganizationId(organizationId) {
         try {
-            const { data } = await this.http.get(`${this.plotsEndpoint}?organizationId=${organizationId}`);
-            return data;
+            console.log('📥 GET parcelas por organizationId:', organizationId);
+            const { data } = await this.http.get(`${this.cropsEndpoint}/organization/${organizationId}`);
+            console.log('✅ Parcelas de la organización recibidas:', data.length, 'parcelas');
+            return data.map(plot => PlotAssembler.toEntityFromResponse(plot));
         } catch (error) {
-            console.error(`Error fetching plots for organization ${organizationId}:`, error);
+            console.error(`❌ Error fetching plots for organization ${organizationId}:`, error);
             throw error;
         }
     }
 
     async create(plotData) {
         try {
-            const newPlot = {
-                id: String(Date.now()),
-                ...plotData,
-                createdAt: new Date().toISOString().split('T')[0],
-                status: 'active',
-                members: plotData.members || []
-            };
-
-            const { data } = await this.http.post(this.plotsEndpoint, newPlot);
-            return data;
+            const payload = PlotAssembler.fromFormData(plotData);
+            console.log('📤 POST crear parcela/crop:', payload);
+            const { data } = await this.http.post(this.cropsEndpoint, payload);
+            console.log('✅ Parcela creada:', data);
+            return PlotAssembler.toEntityFromResponse(data);
         } catch (error) {
             console.error('Error creating plot:', error);
+            console.error('Error details:', error.response?.data);
             throw error;
         }
     }
 
     async update(id, plotData) {
         try {
-            const { data } = await this.http.put(`${this.plotsEndpoint}/${id}`, plotData);
-            return data;
+            const payload = PlotAssembler.fromFormData(plotData);
+            console.log('📤 PUT actualizar parcela/crop:', payload);
+            const { data } = await this.http.put(`${this.cropsEndpoint}/${id}`, payload);
+            console.log('✅ Parcela actualizada:', data);
+            return PlotAssembler.toEntityFromResponse(data);
         } catch (error) {
             console.error(`Error updating plot ${id}:`, error);
+            console.error('Error details:', error.response?.data);
             throw error;
         }
     }
 
     async delete(id) {
         try {
-            await this.http.delete(`${this.plotsEndpoint}/${id}`);
+            console.log('🗑️ DELETE parcela/crop:', id);
+            await this.http.delete(`${this.cropsEndpoint}/${id}`);
+            console.log('✅ Parcela eliminada exitosamente');
             return true;
         } catch (error) {
-            console.error(`Error deleting plot ${id}:`, error);
+            console.error('❌ Error deleting plot:', error);
+            console.error('Error details:', error.response?.data);
             throw error;
         }
     }
@@ -76,6 +91,8 @@ export class PlotsApi {
     async addMember(plotId, memberId) {
         try {
             const plot = await this.getById(plotId);
+            if (!plot.members) plot.members = [];
+
             if (!plot.members.includes(memberId)) {
                 plot.members.push(memberId);
                 return await this.update(plotId, plot);
@@ -90,11 +107,15 @@ export class PlotsApi {
     async removeMember(plotId, memberId) {
         try {
             const plot = await this.getById(plotId);
-            plot.members = plot.members.filter(id => id !== memberId);
-            return await this.update(plotId, plot);
+            if (plot.members) {
+                plot.members = plot.members.filter(id => id !== memberId);
+                return await this.update(plotId, plot);
+            }
+            return plot;
         } catch (error) {
             console.error(`Error removing member from plot ${plotId}:`, error);
             throw error;
         }
     }
 }
+

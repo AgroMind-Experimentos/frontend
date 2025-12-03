@@ -27,18 +27,22 @@ export class OrganizationApi {
 
     async create(organizationData) {
         try {
-            const newOrganization = {
-                id: String(Date.now()),
-                ...organizationData,
-                createdAt: new Date().toISOString().split('T')[0],
-                status: 'active',
-                members: []
+            // Enviar los campos que el backend espera incluyendo members
+            const payload = {
+                name: organizationData.name,
+                description: organizationData.description,
+                status: organizationData.status || 'active',
+                members: organizationData.members || []
             };
 
-            const { data } = await this.http.post(this.organizationsEndpoint, newOrganization);
+            console.log('📤 Enviando al backend:', payload);
+            console.log('👥 Miembros incluidos:', payload.members);
+            const { data } = await this.http.post(this.organizationsEndpoint, payload);
+            console.log('✅ Respuesta del backend:', data);
             return data;
         } catch (error) {
-            console.error('Error creating organization:', error);
+            console.error('❌ Error creating organization:', error);
+            console.error('Error details:', error.response?.data);
             throw error;
         }
     }
@@ -55,10 +59,13 @@ export class OrganizationApi {
 
     async delete(id) {
         try {
+            console.log('🗑️ DELETE organización:', id);
             await this.http.delete(`${this.organizationsEndpoint}/${id}`);
+            console.log('✅ Organización eliminada exitosamente');
             return true;
         } catch (error) {
-            console.error(`Error deleting organization ${id}:`, error);
+            console.error('❌ Error deleting organization:', error);
+            console.error('Error details:', error.response?.data);
             throw error;
         }
     }

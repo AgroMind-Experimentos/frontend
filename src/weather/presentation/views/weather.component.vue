@@ -1,13 +1,16 @@
 <script setup lang="js">
 import { WeatherService } from '../../application/weather.service.js'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import AppLayout from '../../../shared/presentation/components/app-layout.vue'
 import Card from 'primevue/card'
 import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
 
 const weatherData = ref(null)
 const loading = ref(true)
 const error = ref(null)
+const locationInput = ref('Peru')
+const currentLocation = ref('Peru')
 
 const weather = new WeatherService()
 
@@ -19,7 +22,7 @@ const loadWeather = async () => {
   loading.value = true
   error.value = null
   try {
-    const result = await weather.getWeather()
+    const result = await weather.getWeather(currentLocation.value)
     weatherData.value = result
   } catch (err) {
     error.value = err.message || 'Error al cargar el clima'
@@ -31,6 +34,115 @@ const loadWeather = async () => {
 const refreshWeather = () => {
   loadWeather()
 }
+
+const searchLocation = () => {
+  if (locationInput.value.trim()) {
+    currentLocation.value = locationInput.value.trim()
+    loadWeather()
+  }
+}
+
+const handleKeyPress = (event) => {
+  if (event.key === 'Enter') {
+    searchLocation()
+  }
+}
+
+// Información agrícola dinámica según temperatura
+const agriculturalInfo = computed(() => {
+  if (!weatherData.value || weatherData.value.temperature === undefined) {
+    return {
+      gradient: 'linear-gradient(135deg, #6c757d, #868e96)',
+      icon: 'pi-info-circle',
+      iconColor: '#6c757d',
+      title: 'Información Agrícola',
+      tips: [
+        { icon: 'pi-info-circle', color: '#17a2b8', text: 'Esperando datos del clima...' }
+      ]
+    }
+  }
+  console.log("WEATHER_BASE_URL:", import.meta.env.VITE_WEATHER_API_BASE_URL);
+  const temp = weatherData.value.temperature
+
+  // Muy frío (< 5°C)
+  if (temp < 5) {
+    return {
+      gradient: 'linear-gradient(135deg, #6495ED, #87CEEB)',
+      icon: 'pi-bolt',
+      iconColor: '#4169E1',
+      title: 'Alerta: Temperaturas Muy Bajas',
+      tips: [
+        { icon: 'pi-exclamation-triangle', color: '#dc3545', text: 'Riesgo de heladas. Protege cultivos sensibles con coberturas' },
+        { icon: 'pi-times-circle', color: '#dc3545', text: 'No realizar riegos, el agua puede congelarse' },
+        { icon: 'pi-shield', color: '#ffc107', text: 'Considera usar mantas térmicas o sistemas de calefacción' },
+        { icon: 'pi-eye', color: '#17a2b8', text: 'Monitorea cultivos de raíces y tubérculos constantemente' }
+      ]
+    }
+  }
+
+  // Frío (5°C - 15°C)
+  if (temp >= 5 && temp < 15) {
+    return {
+      gradient: 'linear-gradient(135deg, #4FC3F7, #81D4FA)',
+      icon: 'pi-cloud',
+      iconColor: '#0288D1',
+      title: 'Temperatura Fresca',
+      tips: [
+        { icon: 'pi-check-circle', color: '#28a745', text: 'Condiciones óptimas para cultivos de clima frío (lechugas, espinacas)' },
+        { icon: 'pi-calendar', color: '#17a2b8', text: 'Buen momento para plantar brócoli, coliflor y coles' },
+        { icon: 'pi-times-circle', color: '#dc3545', text: 'Evita plantar cultivos tropicales' },
+        { icon: 'pi-sun', color: '#ffc107', text: 'Asegura que los cultivos reciban suficiente luz solar' }
+      ]
+    }
+  }
+
+  // Templado (15°C - 25°C)
+  if (temp >= 15 && temp < 25) {
+    return {
+      gradient: 'linear-gradient(135deg, #4CAF50, #66BB6A)',
+      icon: 'pi-check-circle',
+      iconColor: '#2E7D32',
+      title: 'Condiciones Ideales',
+      tips: [
+        { icon: 'pi-thumbs-up', color: '#28a745', text: 'Temperatura perfecta para la mayoría de cultivos' },
+        { icon: 'pi-calendar-plus', color: '#28a745', text: 'Excelente para siembra y trasplantes' },
+        { icon: 'pi-leaf', color: '#28a745', text: 'Condiciones óptimas para crecimiento vegetativo' },
+        { icon: 'pi-sun', color: '#ffc107', text: 'Ideal para aplicar fertilizantes y tratamientos foliares' }
+      ]
+    }
+  }
+
+  // Cálido (25°C - 32°C)
+  if (temp >= 25 && temp < 32) {
+    return {
+      gradient: 'linear-gradient(135deg, #FF9800, #FFB74D)',
+      icon: 'pi-sun',
+      iconColor: '#F57C00',
+      title: 'Temperatura Cálida',
+      tips: [
+        { icon: 'pi-check-circle', color: '#28a745', text: 'Ideal para cultivos de verano (tomates, pimientos, sandías)' },
+        { icon: 'pi-tint', color: '#17a2b8', text: 'Aumenta la frecuencia de riego, especialmente por la mañana' },
+        { icon: 'pi-calendar', color: '#ffc107', text: 'Considera aplicar mulch para retener humedad del suelo' },
+        { icon: 'pi-eye', color: '#17a2b8', text: 'Monitorea signos de estrés hídrico en las plantas' }
+      ]
+    }
+  }
+
+  // Muy caliente (> 32°C)
+  return {
+    gradient: 'linear-gradient(135deg, #FF5722, #FF7043)',
+    icon: 'pi-exclamation-triangle',
+    iconColor: '#D84315',
+    title: 'Alerta: Temperaturas Muy Altas',
+    tips: [
+      { icon: 'pi-exclamation-triangle', color: '#dc3545', text: 'Riesgo de estrés térmico en plantas. Aumenta sombreado' },
+      { icon: 'pi-tint', color: '#dc3545', text: 'Riega temprano en la mañana o al atardecer, nunca a mediodía' },
+      { icon: 'pi-times-circle', color: '#dc3545', text: 'Evita trasplantes y podas durante las horas más calurosas' },
+      { icon: 'pi-shield', color: '#ffc107', text: 'Protege cultivos sensibles con mallas de sombra (30-50%)' },
+      { icon: 'pi-eye', color: '#17a2b8', text: 'Vigila plagas, se reproducen más rápido con el calor' }
+    ]
+  }
+})
 </script>
 
 <template>
@@ -39,6 +151,43 @@ const refreshWeather = () => {
       <div class="header">
         <h1>Información del Clima</h1>
         <p>Datos meteorológicos actuales para la gestión agrícola</p>
+      </div>
+
+      <!-- Buscador de ubicación -->
+      <div class="location-search-container">
+        <Card class="location-search-card">
+          <template #content>
+            <div class="search-wrapper">
+              <div class="search-icon-wrapper">
+                <i class="pi pi-map-marker"></i>
+              </div>
+              <div class="search-input-group">
+                <label for="location-input" class="search-label">Ubicación</label>
+                <div class="input-with-button">
+                  <InputText
+                      id="location-input"
+                      v-model="locationInput"
+                      placeholder="Ej: Lima, Puno"
+                      @keypress="handleKeyPress"
+                      class="location-input"
+                      :disabled="loading"
+                  />
+                  <Button
+                      label="Buscar"
+                      icon="pi pi-search"
+                      @click="searchLocation"
+                      :loading="loading"
+                      class="search-button"
+                  />
+                </div>
+                <small class="search-hint">
+                  <i class="pi pi-info-circle"></i>
+                  Ingresa ciudad, región
+                </small>
+              </div>
+            </div>
+          </template>
+        </Card>
       </div>
 
       <div class="actions">
@@ -106,28 +255,30 @@ const refreshWeather = () => {
         </Card>
 
         <!-- Información adicional para agricultura -->
-        <Card class="agricultural-info">
+        <Card class="agricultural-info" :style="{ background: agriculturalInfo.gradient }">
           <template #header>
             <div class="info-header">
-              <i class="pi pi-leaf"></i>
-              <h3>Información Agrícola</h3>
+              <i class="pi" :class="agriculturalInfo.icon" :style="{ color: agriculturalInfo.iconColor }"></i>
+              <h3>{{ agriculturalInfo.title }}</h3>
             </div>
           </template>
           <template #content>
             <div class="agricultural-tips">
-              <div class="tip-item">
-                <i class="pi pi-check-circle" style="color: #28a745"></i>
-                <span>Condiciones favorables para actividades al aire libre</span>
-              </div>
-              <div class="tip-item">
-                <i class="pi pi-info-circle" style="color: #17a2b8"></i>
-                <span>Monitorea las condiciones antes de realizar tratamientos</span>
+              <div
+                v-for="(tip, index) in agriculturalInfo.tips"
+                :key="index"
+                class="tip-item"
+              >
+                <i class="pi" :class="tip.icon" :style="{ color: tip.color }"></i>
+                <span>{{ tip.text }}</span>
               </div>
             </div>
           </template>
         </Card>
       </div>
     </div>
+
+
   </AppLayout>
 </template>
 
@@ -139,7 +290,7 @@ const refreshWeather = () => {
 }
 
 .header {
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .header h1 {
@@ -152,6 +303,129 @@ const refreshWeather = () => {
   margin: 0;
   color: #666;
   font-size: 1.1rem;
+}
+
+/* Estilos del buscador de ubicación */
+.location-search-container {
+  margin-bottom: 1.5rem;
+}
+
+.location-search-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fef9 100%) !important;
+  border: 2px solid #e8f5e9 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.1) !important;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.location-search-card:hover {
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.15) !important;
+  transform: translateY(-2px);
+}
+
+.search-wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+  padding: 0.5rem;
+}
+
+.search-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #4CAF50, #66BB6A);
+  border-radius: 12px;
+  flex-shrink: 0;
+  margin-top: 1.5rem;
+}
+
+.search-icon-wrapper i {
+  font-size: 1.5rem;
+  color: white;
+}
+
+.search-input-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.search-label {
+  font-weight: 600;
+  color: #2c5530;
+  font-size: 0.95rem;
+  margin-bottom: 0.25rem;
+}
+
+.input-with-button {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.location-input {
+  flex: 1;
+  height: 48px;
+  border: 2px solid #e0e0e0 !important;
+  border-radius: 12px !important;
+  padding: 0 1rem !important;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.location-input:hover {
+  border-color: #4CAF50 !important;
+}
+
+.location-input:focus {
+  border-color: #4CAF50 !important;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1) !important;
+}
+
+.location-input:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.search-button {
+  height: 48px;
+  padding: 0 1.5rem;
+  background: linear-gradient(135deg, #4CAF50, #66BB6A) !important;
+  border: none !important;
+  border-radius: 12px !important;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+}
+
+.search-button:hover {
+  background: linear-gradient(135deg, #45a049, #5cb860) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3) !important;
+}
+
+.search-button:active {
+  transform: translateY(0);
+}
+
+.search-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #666;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.search-hint i {
+  color: #4CAF50;
+  font-size: 0.875rem;
 }
 
 .actions {
@@ -256,34 +530,47 @@ const refreshWeather = () => {
 }
 
 .agricultural-info {
-  background: white !important;
   border-radius: 16px !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.agricultural-info:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2) !important;
 }
 
 .info-header {
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 1rem;
-  color: #2c5530;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .info-header i {
-  font-size: 1.5rem;
-  color: #4CAF50;
+  font-size: 2rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
 .info-header h3 {
   margin: 0;
-  color: #2c5530;
+  color: white;
+  font-size: 1.25rem;
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .agricultural-tips {
-  padding: 1rem;
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
 }
 
 .tip-item {
@@ -291,12 +578,23 @@ const refreshWeather = () => {
   align-items: flex-start;
   gap: 0.75rem;
   color: #333;
-  line-height: 1.5;
+  line-height: 1.6;
+  padding: 0.75rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.tip-item:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .tip-item i {
   margin-top: 0.25rem;
   flex-shrink: 0;
+  font-size: 1.1rem;
 }
 
 /* Responsive */
@@ -312,6 +610,34 @@ const refreshWeather = () => {
 
   .weather-container {
     padding: 0.5rem;
+  }
+
+  .search-wrapper {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .search-icon-wrapper {
+    align-self: center;
+    margin-top: 0;
+  }
+
+  .input-with-button {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .location-input,
+  .search-button {
+    width: 100%;
+  }
+
+  .header h1 {
+    font-size: 1.5rem;
+  }
+
+  .header p {
+    font-size: 1rem;
   }
 }
 </style>

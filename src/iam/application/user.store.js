@@ -6,12 +6,33 @@ class UserStore {
     state = reactive({
         loading: false,
         errorKey: null,     // i18n key (p.e. 'auth.invalidCredentials')
-        user: null,
-        tokens: null
+        user: this.#loadFromStorage('user'),
+        tokens: this.#loadFromStorage('tokens')
     });
 
     #api = new AuthApi();
     #assembler = new AuthAssembler();
+
+    #loadFromStorage(key) {
+        try {
+            const item = localStorage.getItem(`ecotrack_${key}`);
+            return item ? JSON.parse(item) : null;
+        } catch {
+            return null;
+        }
+    }
+
+    #saveToStorage(key, value) {
+        try {
+            if (value) {
+                localStorage.setItem(`ecotrack_${key}`, JSON.stringify(value));
+            } else {
+                localStorage.removeItem(`ecotrack_${key}`);
+            }
+        } catch (error) {
+            console.error(`Error saving ${key} to localStorage:`, error);
+        }
+    }
 
     async login({ email, password }) {
         this.state.loading = true;
@@ -20,6 +41,11 @@ class UserStore {
             const data = await this.#api.login(email, password);
             this.state.user = this.#assembler.toUser(data.user);
             this.state.tokens = this.#assembler.toTokens(data.tokens);
+
+            // Guardar en localStorage
+            this.#saveToStorage('user', this.state.user);
+            this.#saveToStorage('tokens', this.state.tokens);
+
             return true;
         } catch (err) {
             this.state.errorKey = err?.response?.status === 401
@@ -40,6 +66,11 @@ class UserStore {
             const data = await this.#api.register(name, email, password);
             this.state.user = this.#assembler.toUser(data.user);
             this.state.tokens = this.#assembler.toTokens(data.tokens);
+
+            // Guardar en localStorage
+            this.#saveToStorage('user', this.state.user);
+            this.#saveToStorage('tokens', this.state.tokens);
+
             return true;
         } catch (err) {
             this.state.errorKey = err?.response?.status === 409
@@ -54,6 +85,9 @@ class UserStore {
     logout() {
         this.state.user = null;
         this.state.tokens = null;
+        // Limpiar localStorage
+        this.#saveToStorage('user', null);
+        this.#saveToStorage('tokens', null);
     }
 }
 
