@@ -23,4 +23,4 @@ createApp(App)
     .use(i18n)
     .mount('#app')
 
-console.log("ENV", import.meta.env);
+console.log("ENV:", import.meta.env);
