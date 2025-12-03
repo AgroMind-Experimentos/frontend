@@ -4,7 +4,7 @@ export class WeatherService{
     constructor(){
         this.weatherApi = new WeatherApi()
     }
-    async getWeather(){
-        return this.weatherApi.getWeather()
+    async getWeather(location = null){
+        return this.weatherApi.getWeather(location)
     }
 }
