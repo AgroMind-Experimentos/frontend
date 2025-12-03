@@ -1,8 +1,10 @@
 <script setup>
 import { userStore } from '../../../iam/application/user.store.js';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
 const router = useRouter();
+const { t } = useI18n();
 
 const handleLogout = () => {
   userStore.logout();
@@ -17,38 +19,38 @@ const userName = userStore.state.user?.name || 'Usuario';
   <aside class="sidebar">
     <div class="profile">
       <img class="avatar" src="https://files.catbox.moe/7kr0f6.png" alt="User" />
-      <div class="welcome">Bienvenido {{ userName }}</div>
+      <div class="welcome">{{ t('sidebar.welcome') }} {{ userName }}</div>
     </div>
 
     <nav class="menu">
       <router-link class="item" :to="{ name: 'dashboard' }">
-        <i class="pi pi-desktop"></i><span>Inicio</span>
+        <i class="pi pi-desktop"></i><span>{{ t('sidebar.home') }}</span>
       </router-link>
 
       <router-link class="item" to="/tasks/completed">
-        <i class="pi pi-check-square"></i><span>Tareas</span>
+        <i class="pi pi-check-square"></i><span>{{ t('sidebar.tasks') }}</span>
       </router-link>
 
       <router-link class="item" :to="{ name: 'weather' }">
-        <i class="pi pi-sun"></i><span>Clima</span>
+        <i class="pi pi-sun"></i><span>{{ t('sidebar.weather') }}</span>
       </router-link>
 
       <router-link class="item" :to="{ name: 'reports' }">
-        <i class="pi pi-chart-line"></i><span>Reports</span>
+        <i class="pi pi-chart-line"></i><span>{{ t('sidebar.reports') }}</span>
       </router-link>
 
       <router-link class="item" :to="{ name: 'user-profile' }">
-        <i class="pi pi-user"></i><span>Perfil</span>
+        <i class="pi pi-user"></i><span>{{ t('sidebar.profile') }}</span>
       </router-link>
 
       <router-link class="item" :to="{ name: 'settings' }">
-        <i class="pi pi-cog"></i><span>Configuración</span>
+        <i class="pi pi-cog"></i><span>{{ t('sidebar.settings') }}</span>
       </router-link>
     </nav>
 
     <div class="logout">
       <button class="item logout-btn" @click="handleLogout">
-        <i class="pi pi-power-off"></i><span>Cerrar sesión</span>
+        <i class="pi pi-power-off"></i><span>{{ t('sidebar.logout') }}</span>
       </button>
     </div>
   </aside>
