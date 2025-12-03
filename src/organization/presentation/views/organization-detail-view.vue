@@ -15,7 +15,6 @@ const route = useRoute();
 const router = useRouter();
 const orgId = route.params.id;
 
-// Estados reactivos
 const organization = computed(() => organizationService.state.currentOrganization);
 const plots = computed(() => plotService.state.plots);
 const loading = computed(() => plotService.state.loading || organizationService.state.loading);
@@ -23,7 +22,6 @@ const error = computed(() => plotService.state.error || organizationService.stat
 
 onMounted(async () => {
   try {
-    // Cargar organización y sus parcelas
     await organizationService.getOrganizationById(orgId);
     await plotService.getPlotsByOrganizationId(orgId);
   } catch (err) {
@@ -59,12 +57,49 @@ const formatDate = (dateString) => {
     day: 'numeric'
   });
 };
+
+const parseDescription = (description) => {
+  if (!description) return {};
+
+  const data = {};
+  const parts = description.split('|').map(p => p.trim());
+
+  parts.forEach(part => {
+    if (part.includes('Área:')) {
+      data.area = part.replace('Área:', '').trim();
+    } else if (part.includes('Ubicación:')) {
+      data.location = part.replace('Ubicación:', '').trim();
+    } else if (part.includes('Cultivo:')) {
+      data.crop = part.replace('Cultivo:', '').trim();
+    } else if (part.includes('Miembros:')) {
+      data.membersCount = part.replace('Miembros:', '').trim();
+    }
+  });
+
+  return data;
+};
+
+const getPlotField = (plot, field) => {
+  if (plot[field]) return plot[field];
+  const parsedData = parseDescription(plot.description);
+  return parsedData[field] || '-';
+};
+
+const getMemberCount = (plot) => {
+  if (plot.members && Array.isArray(plot.members)) {
+    return plot.members.length;
+  }
+  if (plot.getMemberCount) {
+    return plot.getMemberCount();
+  }
+  const parsedData = parseDescription(plot.description);
+  return parsedData.membersCount || '0';
+};
 </script>
 
 <template>
   <AppLayout>
     <div class="organization-detail">
-      <!-- Header de la organización -->
       <div class="header" v-if="organization">
         <div class="organization-info">
           <h1>{{ organization.name }}</h1>
@@ -96,13 +131,11 @@ const formatDate = (dateString) => {
         </div>
       </div>
 
-      <!-- Estado de carga -->
       <div v-if="loading" class="loading-state">
         <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
         <p>{{ t('organization.loadingParcels') }}</p>
       </div>
 
-      <!-- Estado de error -->
       <div v-else-if="error" class="error-state">
         <i class="pi pi-exclamation-triangle" style="font-size: 2rem; color: #e74c3c"></i>
         <p>{{ error }}</p>
@@ -114,12 +147,11 @@ const formatDate = (dateString) => {
         />
       </div>
 
-      <!-- Lista de parcelas -->
       <div v-else-if="plots.length > 0" class="plots-section">
         <h2>{{ t('organization.parcelsTitle') }}</h2>
 
         <DataTable :value="plots" responsiveLayout="scroll" class="plots-table">
-          <Column field="name" :header="t('organization.name')" sortable>
+          <Column field="name" :header="t('organization.name')" :sortable="true">
             <template #body="slotProps">
               <div class="plot-name">
                 <i class="pi pi-map text-green-600"></i>
@@ -128,30 +160,30 @@ const formatDate = (dateString) => {
             </template>
           </Column>
 
-          <Column field="area" :header="t('organization.area')" sortable>
+          <Column field="area" :header="t('organization.area')" :sortable="true">
             <template #body="slotProps">
-              <span class="area-badge">{{ slotProps.data.area }}</span>
+              <span class="area-badge">{{ getPlotField(slotProps.data, 'area') }}</span>
             </template>
           </Column>
 
-          <Column field="crop" :header="t('organization.crop')" sortable>
+          <Column field="crop" :header="t('organization.crop')" :sortable="true">
             <template #body="slotProps">
               <div class="crop-info">
                 <i class="pi pi-leaf text-green-500"></i>
-                <span>{{ slotProps.data.crop }}</span>
+                <span>{{ getPlotField(slotProps.data, 'crop') }}</span>
               </div>
             </template>
           </Column>
 
           <Column field="location" :header="t('organization.location')">
             <template #body="slotProps">
-              <span class="location-text">{{ slotProps.data.location }}</span>
+              <span class="location-text">{{ getPlotField(slotProps.data, 'location') }}</span>
             </template>
           </Column>
 
           <Column field="members" :header="t('organization.members')">
             <template #body="slotProps">
-              <span class="members-count">{{ slotProps.data.getMemberCount() }}</span>
+              <span class="members-count">{{ getMemberCount(slotProps.data) }}</span>
             </template>
           </Column>
 
@@ -176,7 +208,6 @@ const formatDate = (dateString) => {
         </DataTable>
       </div>
 
-      <!-- Estado sin parcelas -->
       <div v-else class="empty-state">
         <i class="pi pi-map box-icon"></i>
         <h2 class="title">{{ t('organization.noParcels') }}</h2>
@@ -204,10 +235,13 @@ const formatDate = (dateString) => {
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 2rem;
-  padding: 1.5rem;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.organization-info {
+  flex: 1;
+  min-width: 300px;
 }
 
 .organization-info h1 {
@@ -217,9 +251,8 @@ const formatDate = (dateString) => {
 }
 
 .description {
-  margin: 0 0 1rem 0;
   color: #666;
-  font-size: 1.1rem;
+  margin: 0 0 1rem 0;
   line-height: 1.5;
 }
 
@@ -237,53 +270,12 @@ const formatDate = (dateString) => {
 }
 
 .meta-item i {
-  color: #4CAF50;
-}
-
-.plots-section h2 {
   color: #2c5530;
-  margin-bottom: 1rem;
 }
 
-.plots-table {
-  background: white;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.plot-name, .crop-info {
+.actions {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-}
-
-.area-badge {
-  background: #E8F5E8;
-  color: #2E7D32;
-  padding: 0.25rem 0.75rem;
-  border-radius: 16px;
-  font-weight: 600;
-  font-size: 0.875rem;
-}
-
-.location-text {
-  color: #666;
-  font-size: 0.9rem;
-}
-
-.members-count {
-  background: #F3E5F5;
-  color: #7B1FA2;
-  padding: 0.25rem 0.75rem;
-  border-radius: 16px;
-  font-weight: 600;
-  font-size: 0.875rem;
-}
-
-.action-buttons {
-  display: flex;
-  gap: 0.5rem;
 }
 
 .loading-state, .error-state, .empty-state {
@@ -311,26 +303,80 @@ const formatDate = (dateString) => {
   margin-bottom: 1rem;
 }
 
-.empty-state .title {
+.empty-state h2 {
   margin: 0.5rem 0;
   color: #2c5530;
   font-size: 1.5rem;
 }
 
-/* Responsive */
+.plots-section {
+  margin-top: 2rem;
+}
+
+.plots-section h2 {
+  margin-bottom: 1rem;
+  color: #2c5530;
+  font-size: 1.5rem;
+}
+
+.plots-table {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.plot-name {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.crop-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.area-badge {
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.location-text {
+  color: #555;
+}
+
+.members-count {
+  color: #555;
+  font-weight: 500;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.text-green-600 {
+  color: #16a34a;
+}
+
+.text-green-500 {
+  color: #22c55e;
+}
+
 @media (max-width: 768px) {
   .header {
     flex-direction: column;
-    gap: 1rem;
+    align-items: stretch;
   }
 
   .meta-info {
     flex-direction: column;
     gap: 0.5rem;
   }
-
-  .organization-detail {
-    padding: 0.5rem;
-  }
 }
 </style>
+

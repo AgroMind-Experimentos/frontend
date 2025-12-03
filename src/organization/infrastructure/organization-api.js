@@ -57,10 +57,13 @@ export class OrganizationApi {
 
     async delete(id) {
         try {
+            console.log('🗑️ DELETE organización:', id);
             await this.http.delete(`${this.organizationsEndpoint}/${id}`);
+            console.log('✅ Organización eliminada exitosamente');
             return true;
         } catch (error) {
-            console.error(`Error deleting organization ${id}:`, error);
+            console.error('❌ Error deleting organization:', error);
+            console.error('Error details:', error.response?.data);
             throw error;
         }
     }

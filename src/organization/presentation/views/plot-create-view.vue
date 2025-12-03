@@ -62,22 +62,35 @@ async function createParcel() {
   }
 
   try {
+    // Construir la descripción con toda la información
+    const description = [
+      area.value.trim() ? `Área: ${area.value.trim()}` : '',
+      locationTxt.value.trim() ? `Ubicación: ${locationTxt.value.trim()}` : '',
+      crop.value.trim() ? `Cultivo: ${crop.value.trim()}` : '',
+      selected.value.length > 0 ? `Miembros: ${selected.value.length}` : ''
+    ].filter(Boolean).join(' | ');
+
     const plotData = {
       organizationId: orgId,
       name: name.value.trim(),
+      description: description,
+      // Campos adicionales para el estado local (no se envían al backend)
       area: area.value.trim(),
       location: locationTxt.value.trim(),
       crop: crop.value.trim(),
       members: selected.value.map(id => String(id))
     };
 
+    console.log('🚀 Creando parcela con datos:', plotData);
     await plotService.createPlot(plotData);
+    console.log('✅ Parcela creada exitosamente');
 
+    alert('Parcela creada exitosamente!');
     // Redirigir al detalle de la organización
     router.push({ name: 'organization-detail', params: { id: orgId } });
   } catch (err) {
-    console.error('Error creating plot:', err);
-    alert('Error al crear la parcela');
+    console.error('❌ Error creating plot:', err);
+    alert(`Error al crear la parcela: ${err.message || 'Error desconocido'}`);
   }
 }
 
