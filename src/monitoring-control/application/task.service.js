@@ -33,4 +33,8 @@ export class TaskService {
     async getTaskById(taskId){
         return await this.taskApi.getTaskById(taskId);
     }
+
+    async registerNewTask(task){
+        return await this.taskApi.registerNewTask(task);
+    }
 }

@@ -8,11 +8,39 @@ export class CheckListApi{
     async getCheckListByTaskId(taskId){
         const stringId = String(taskId)
         const endpoint = `${this.baseUrl}${this.checklistsEndpoint}?taskId=${stringId}`
-        const response = await axios.get(endpoint)
-        if (!response.data || response.data.length === 0) {
-            console.warn(`API: No se encontró checklist para taskId=${stringId}`);
-            return null;
+        try{
+            const response = await axios.get(endpoint);
+            if(response.data.message === "Checklist not found"){
+                return null;
+            }
+            const data = Array.isArray(response.data.data) ? response.data[0] : response.data;
+            return ChecklistAssembler.toEntityFromResponse(data);
+        }catch (error){
+            if(error.response?.status === 404 || error.response?.data?.message){
+                return null;
+            }
+            console.error("Error cargando las checklists: ", error);
+            throw error;
         }
-        return ChecklistAssembler.toEntityFromResponse(response.data[0])
+    }
+
+    async registerNewChecklist(resource) {
+        try {
+            const endpoint = `${this.baseUrl}${this.checklistsEndpoint}`;
+            const items = Array.isArray(resource.items) ? resource.items : [];
+            const payload = {
+                TaskId: String(resource.taskId),
+                Title: resource.title?.trim() || "Checklist",
+                Items: items.map(item => ({
+                    Description: (item.description || item.Description || "").trim()
+                })).filter(i => i.Description)
+            };
+            console.log("CHECKLIST PAYLOAD FINAL ENVIADO:", payload);
+            await axios.post(endpoint, payload);
+            return true;
+        } catch (error) {
+            console.error("ERROR CREANDO CHECKLIST:", error.response?.data || error.message);
+            return false;
+        }
     }
 }

@@ -36,7 +36,7 @@ export class TaskApi{
     }
 
     async updateStatus(taskID, newStatus){
-        const endpoint = `${this.baseUrl}${this.tasksEndpoint}/${taskID}`
+        const endpoint = `${this.baseUrl}${this.tasksEndpoint}/${taskID}/status`
         try{
             const response = await axios.patch(endpoint, {status: newStatus})
             return response.data
@@ -73,6 +73,26 @@ export class TaskApi{
             return TaskAssembler.toEntityFromResponse(response.data)
         }catch(error){
             console.log(error)
+        }
+    }
+
+    async registerNewTask(resource) {
+        try {
+            const endpoint = `${this.baseUrl}${this.tasksEndpoint}`;
+            const payload = {
+                Title: resource.title.trim(),
+                ResponsibleId: resource.responsibleId,
+            };
+
+            console.log("Payload FINAL enviado:", payload);
+
+            const response = await axios.post(endpoint, payload);
+            console.log("Tarea creada correctamente:", response.data);
+            return response.data;
+
+        } catch (error) {
+            console.error("ERROR FINAL:", error.response?.data || error.message);
+            return false;
         }
     }
 }

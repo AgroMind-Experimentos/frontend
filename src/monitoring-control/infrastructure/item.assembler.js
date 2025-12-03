@@ -7,4 +7,10 @@ export class ItemAssembler{
             description: response.description
         })
     }
+    static toEntityFromResource(resource){
+        return new Items({
+            id: null,
+            description: resource.description,
+        })
+    }
 }

@@ -20,17 +20,14 @@ onMounted(async () => {
 
 async function startTask(taskID){
   try{
+    console.log(taskID)
     const numericID = Number(taskID)
     const now = new Date();
-    const startedAt = new Intl.DateTimeFormat('en-US', {
-      month: '2-digit',
-      day: '2-digit',
-      year: 'numeric',
-    }).format(now);
+    const startedAt = new Date()
     await taskService.updateStartedDate(numericID, startedAt);
     await taskService.updateStatus(numericID, 'InProgress')
     alert("Tarea iniciada exitosamente")
-    tasks.value = tasks.value.filter(task => Number(task.taskID) !== numericID)
+    tasks.value = tasks.value.filter(task => Number(task.id) !== numericID)
   }catch(error){
     console.error('Error starting monitoring-control:', error)
     alert("Error al iniciar la tarea")
@@ -48,7 +45,7 @@ async function startTask(taskID){
     </div>
 
     <div v-else-if="tasks.length > 0" class="tasks">
-      <div class="task-card" v-for="task in tasks" :key="task.taskID">
+      <div class="task-card" v-for="task in tasks" :key="task.id">
         <div class="task-content">
           <div class="task-info">
             <h4 class="task-title">{{ task.title }}</h4>
@@ -61,7 +58,7 @@ async function startTask(taskID){
           <div class="task-actions">
             <pv-button
               class="start-button"
-              @click="startTask(task.taskID)"
+              @click="startTask(task.id)"
               icon="pi pi-play"
             >
               Iniciar

@@ -88,59 +88,104 @@ const finishTask = ()=>{
 
 <style scoped>
 .container {
+  width: 80%;
+  margin: 2rem auto;
+  padding: 2.5rem;
+  background: #f7f9fc;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
   display: flex;
   flex-direction: column;
-  box-shadow: 1px 1px 7px rgb(218, 218, 218) !important;
   text-align: center;
-  height: 100%;
-}
-.checklist-item {
-  align-items: center;
-  margin: 0.5rem;
-  display: flex;
-  justify-content: left;
-}
-.checkbox{
-  margin-right: 1rem;
-}
-.container h3{
-  margin-top: 2rem;
-}
-.finish-btn{
-  margin: 3rem auto 0 auto;
-  width: 50%;
-  background-color: #FF9900 !important;
-  border: none !important;
-  color: white !important;
-  border-radius: 10px;
-  outline: none;
-}
-.finish-btn:hover{
-  background-color: #df8600 !important;
-}
-:deep(.p-checkbox .p-checkbox-box) {
-  border: 1px solid black !important;
-  background-color: transparent !important;
-  transition: all 0.2s ease;
+  animation: fadeIn 0.4s ease;
+  color: #222 !important;
 }
 
-/* Para todas las versiones de PrimeVue */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.container h3 {
+  margin-bottom: 2rem;
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Cada ítem */
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 0.7rem 0;
+  padding: 0.8rem 1rem;
+  background: white;
+  border-radius: 10px;
+  border: 1px solid #e1e1e1;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.checklist-item:hover {
+  transform: translateX(5px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+
+.checklist-name {
+  font-size: 1.1rem;
+  color: #444;
+}
+
+/* Checkbox personalizado PrimeVue */
+.checkbox {
+  transform: scale(1.3);
+}
+
+/* Caja del checkbox */
+:deep(.p-checkbox .p-checkbox-box) {
+  border: 2px solid #222 !important;
+  background-color: #fff !important;
+}
+
+/* Check activo */
 :deep(.p-checkbox.p-checkbox-checked .p-checkbox-box),
 :deep(.p-checkbox.p-checked .p-checkbox-box),
 :deep(.p-checkbox .p-checkbox-box.p-highlight) {
-  background-color: white !important;
-  border-color: black !important;
+  border-color: #ff9900 !important;
+  background-color: #fff !important;
 }
 
-/* Ícono (check) en color blanco */
-:deep(.p-checkbox.p-checkbox-checked .p-checkbox-icon),
-:deep(.p-checkbox.p-checked .p-checkbox-icon),
-:deep(.p-checkbox .p-checkbox-box.p-highlight .p-checkbox-icon) {
-  color: white !important;
+/* Icono del check */
+:deep(.p-checkbox .p-checkbox-icon) {
+  color: #ff9900 !important;
 }
 
-/* Hover */
+/* Hover del checkbox */
 :deep(.p-checkbox:hover .p-checkbox-box) {
-  border-color: #df8600 !important;
+  border-color: #ff9900 !important;
+}
+
+/* Botón Finalizar */
+.finish-btn {
+  margin: 3rem auto 0 auto;
+  width: 60%;
+  padding: 0.9rem;
+  font-size: 1.2rem;
+  border-radius: 12px;
+  background-color: #ff9900 !important;
+  color: white !important;
+  border: none !important;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.finish-btn:hover {
+  background-color: #df8600 !important;
+  transform: scale(1.02);
+}
+
+.finish-btn:disabled {
+  background-color: #bbbbbb !important;
+  cursor: not-allowed;
+  transform: none;
 }
 </style>

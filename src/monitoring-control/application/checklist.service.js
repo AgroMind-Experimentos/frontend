@@ -8,4 +8,8 @@ export class CheckListService{
     async getChecklistByTaskId(taskId){
         return  await  this.checkListApi.getCheckListByTaskId(taskId)
     }
+
+    async registerNewChecklist(checklist){
+        return await  this.checkListApi.registerNewChecklist(checklist)
+    }
 }
