@@ -1,8 +1,9 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { organizationService } from '../../application/organization.service.js';
+import { userProfileService } from '../../../profile/application/user-profile.service.js';
 import AppLayout from '../../../shared/presentation/components/app-layout.vue';
 import Card from 'primevue/card';
 import InputText from 'primevue/inputtext';
@@ -14,20 +15,16 @@ const { t } = useI18n();
 const name = ref('');
 const description = ref('');
 const locationTxt = ref('');
+const search = ref('');
+const selected = ref([]);
 
 // Estados del servicio
 const loading = computed(() => organizationService.state.loading);
 const error = computed(() => organizationService.state.error);
 
-const allMembers = ref([
-  { id: 1, name: 'Miembro 1', avatar: 'https://i.pravatar.cc/100?img=12' },
-  { id: 2, name: 'Miembro 2', avatar: 'https://i.pravatar.cc/100?img=32' },
-  { id: 3, name: 'Ana Torres', avatar: 'https://i.pravatar.cc/100?img=21' },
-  { id: 4, name: 'Luis Paredes', avatar: 'https://i.pravatar.cc/100?img=41' }
-]);
-
-const search = ref('');
-const selected = ref([]);
+// Obtener usuarios reales desde el servicio
+const allMembers = computed(() => userProfileService.state.users);
+const loadingUsers = computed(() => userProfileService.state.loading);
 
 const filtered = computed(() => {
   const q = search.value.trim().toLowerCase();
@@ -47,6 +44,18 @@ function removeMember(id) {
 
 const router = useRouter();
 
+// Cargar usuarios al montar el componente
+onMounted(async () => {
+  console.log('🔄 Cargando usuarios desde el backend...');
+  try {
+    const users = await userProfileService.fetchAllUsers();
+    console.log('✅ Usuarios cargados:', users);
+    console.log('📊 Total usuarios:', userProfileService.state.users.length);
+  } catch (err) {
+    console.error('❌ Error cargando usuarios:', err);
+  }
+});
+
 async function createOrg() {
   if (!name.value.trim()) {
     alert(t('organization.name'));
@@ -57,12 +66,17 @@ async function createOrg() {
     const organizationData = {
       name: name.value.trim(),
       description: description.value.trim(),
-      status: 'active' // El backend requiere el campo status
+      location: locationTxt.value.trim(),
+      status: 'active',
+      members: selected.value
     };
 
     console.log('🚀 Creando organización:', organizationData);
+    console.log('👥 Miembros seleccionados:', selected.value);
+    console.log('📊 Total miembros:', selected.value.length);
     const result = await organizationService.createOrganization(organizationData);
     console.log('✅ Organización creada:', result);
+    console.log('👥 Miembros en la organización creada:', result.getMemberCount());
 
     alert('Organización creada exitosamente!');
     router.push({ name: 'dashboard' });
@@ -105,8 +119,9 @@ async function createOrg() {
         <Card class="panel">
           <template #title>
             <div class="panel-title">
-              <i class="pi pi-user mr-2 text-orange-500"></i>
+              <i class="pi pi-users mr-2 text-orange-500"></i>
               <span>{{ t('organization.members') }}:</span>
+              <span class="member-counter">{{ selected.length }} seleccionado{{ selected.length !== 1 ? 's' : '' }}</span>
             </div>
           </template>
           <template #content>
@@ -115,7 +130,16 @@ async function createOrg() {
               <InputText v-model="search" :placeholder="t('organization.searchMembers')" class="w-full" />
             </div>
 
-            <div class="member-list">
+            <div v-if="loadingUsers" class="loading-message">
+              <i class="pi pi-spin pi-spinner"></i>
+              <span>Cargando usuarios...</span>
+            </div>
+
+            <div v-else-if="allMembers.length === 0" class="no-users-message">
+              No hay usuarios disponibles
+            </div>
+
+            <div v-else class="member-list">
               <div v-for="m in filtered" :key="m.id" class="member-row">
                 <div class="left" @click="toggleMember(m.id)">
                   <Avatar :image="m.avatar" shape="circle" class="mr-2" />
@@ -148,7 +172,11 @@ async function createOrg() {
 .page-title{margin:12px 0 22px 0;text-align:center;color:#111}
 
 /* panel y textos en negro */
-.panel{background:#fff;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,.08);color:#111}
+.panel-title{display:flex;align-items:center;font-weight:700;color:#111;gap:12px}
+.member-counter{
+  background:#16a34a;color:#fff;padding:4px 12px;border-radius:20px;
+  font-size:0.85rem;font-weight:600;margin-left:auto
+}
 .panel-title{display:flex;align-items:center;font-weight:700;color:#111}
 .label{display:block;font-weight:600;margin-bottom:6px;color:#111}
 
@@ -158,6 +186,11 @@ async function createOrg() {
   color:#111 !important;
   border-color:#d1d5db;
 }
+.loading-message, .no-users-message{
+  text-align:center;padding:24px;color:#6b7280;display:flex;align-items:center;
+  justify-content:center;gap:12px;font-size:0.95rem
+}
+
 :deep(.p-inputtext::placeholder){ color:#9ca3af; }
 
 /* buscador */
