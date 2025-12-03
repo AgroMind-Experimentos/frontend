@@ -57,14 +57,18 @@ async function createOrg() {
     const organizationData = {
       name: name.value.trim(),
       description: description.value.trim(),
-      location: locationTxt.value.trim()
+      status: 'active' // El backend requiere el campo status
     };
 
-    await organizationService.createOrganization(organizationData);
+    console.log('🚀 Creando organización:', organizationData);
+    const result = await organizationService.createOrganization(organizationData);
+    console.log('✅ Organización creada:', result);
+
+    alert('Organización creada exitosamente!');
     router.push({ name: 'dashboard' });
   } catch (err) {
-    console.error('Error creating organization:', err);
-    alert(t('common.unexpectedError'));
+    console.error('❌ Error creating organization:', err);
+    alert(`Error: ${err.message || t('common.unexpectedError')}`);
   }
 }
 </script>

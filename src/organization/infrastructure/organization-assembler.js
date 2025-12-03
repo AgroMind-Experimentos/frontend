@@ -53,7 +53,7 @@ export class OrganizationAssembler {
         return {
             name: formData.name,
             description: formData.description,
-            location: formData.location
+            status: formData.status || 'active'
         };
     }
 }

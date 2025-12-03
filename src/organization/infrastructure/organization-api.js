@@ -27,18 +27,20 @@ export class OrganizationApi {
 
     async create(organizationData) {
         try {
-            const newOrganization = {
-                id: String(Date.now()),
-                ...organizationData,
-                createdAt: new Date().toISOString().split('T')[0],
-                status: 'active',
-                members: []
+            // Solo enviar los campos que el backend espera: name, description, status
+            const payload = {
+                name: organizationData.name,
+                description: organizationData.description,
+                status: organizationData.status || 'active'
             };
 
-            const { data } = await this.http.post(this.organizationsEndpoint, newOrganization);
+            console.log('📤 Enviando al backend:', payload);
+            const { data } = await this.http.post(this.organizationsEndpoint, payload);
+            console.log('✅ Respuesta del backend:', data);
             return data;
         } catch (error) {
-            console.error('Error creating organization:', error);
+            console.error('❌ Error creating organization:', error);
+            console.error('Error details:', error.response?.data);
             throw error;
         }
     }

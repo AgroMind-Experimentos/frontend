@@ -1,7 +1,13 @@
+import OrganizationListView from './views/organization-list-view.vue';
 import OrganizationCreateView from './views/organization-create-view.vue';
 import OrganizationDetailView from './views/organization-detail-view.vue';
 
 export default [
+    {
+        path: '/organizations',
+        name: 'organization-list',
+        component: OrganizationListView
+    },
     {
         path: '/organizations/create',
         name: 'organization-create',
