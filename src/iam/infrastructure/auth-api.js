@@ -21,9 +21,14 @@ export class AuthApi {
                 }
             });
 
-            // Si el login es exitoso, devuelve el mensaje y los tokens
+            // Si el login es exitoso, devuelve el usuario y los tokens
             return {
-                message: data.message,  // 'Logged in' o el mensaje del backend
+                user: data.user || {
+                    id: data.userId,
+                    name: data.displayName || data.name || email.split('@')[0],
+                    email: data.email || email,
+                    displayName: data.displayName || data.name || email.split('@')[0]
+                },
                 tokens: data.tokens     // Tokens generados por el backend
             };
         } catch (error) {
@@ -52,7 +57,12 @@ export class AuthApi {
 
             // Si el registro es exitoso, devuelve el usuario y los tokens
             return {
-                user: data.user,
+                user: data.user || {
+                    id: data.userId,
+                    name: data.displayName || name,
+                    email: data.email || email,
+                    displayName: data.displayName || name
+                },
                 tokens: data.tokens
             };
         } catch (error) {
