@@ -5,10 +5,11 @@ export class AuthAssembler {
     toUser(dto) {
         return new User({
             id: dto?.id ?? null,
-            name: dto?.name ?? '',
+            name: dto?.name ?? '',  // Aquí estamos usando DisplayName
             email: dto?.email ?? ''
         });
     }
+
     toTokens(dto) {
         return new AuthToken({
             accessToken: dto?.accessToken ?? '',
