@@ -11,62 +11,49 @@ export class AuthApi {
 
     async login(email, password) {
         try {
-            // Enviar los datos de login con POST a la URL del backend
-            const { data } = await this.http.post(this.loginEndpoint, {
-                email,      // email enviado en el cuerpo
-                password    // password enviado en el cuerpo
-            }, {
-                headers: {
-                    'Content-Type': 'application/json'  // Asegúrate de que el Content-Type sea application/json
-                }
+            const { data } = await this.http.post(this.loginEndpoint, { email, password }, {
+                headers: { 'Content-Type': 'application/json' }
             });
 
-            // Si el login es exitoso, devuelve el usuario y los tokens
             return {
-                user: data.user || {
+                user: {
                     id: data.userId,
-                    name: data.displayName || data.name || email.split('@')[0],
-                    email: data.email || email,
-                    displayName: data.displayName || data.name || email.split('@')[0]
+                    name: data.displayName || email.split('@')[0],
+                    email: email,
+                    displayName: data.displayName || email.split('@')[0],
+                    role: data.role
                 },
-                tokens: data.tokens     // Tokens generados por el backend
+                tokens: { accessToken: data.token, refreshToken: null }
             };
         } catch (error) {
-            // Manejo de errores en el frontend
             if (error.response?.status === 401) {
-                throw new Error('Invalid credentials');  // Las credenciales son incorrectas
+                const err = new Error('Invalid credentials');
+                err.response = { status: 401 };
+                throw err;
             }
-            const err = new Error('Service unavailable');  // Error de servicio
+            const err = new Error('Service unavailable');
             err.response = { status: 503 };
             throw err;
         }
     }
 
-    async register(name, email, password) {
+    async register(name, email, password, role) {
         try {
-            // Enviar los datos de registro con POST al backend
             const { data } = await this.http.post(this.registerEndpoint, {
                 email,
                 password,
-                displayName: name
+                displayName: name,
+                role: role
             }, {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
+                headers: { 'Content-Type': 'application/json' }
             });
 
-            // Si el registro es exitoso, devuelve el usuario y los tokens
             return {
-                user: data.user || {
-                    id: data.userId,
-                    name: data.displayName || name,
-                    email: data.email || email,
-                    displayName: data.displayName || name
-                },
-                tokens: data.tokens
+                userId: data.userId,
+                email: data.email,
+                displayName: data.displayName
             };
         } catch (error) {
-            // Manejo de errores específicos del backend
             if (error.response?.status === 409) {
                 const err = new Error('Email already exists');
                 err.response = { status: 409 };

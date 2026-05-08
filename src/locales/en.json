@@ -2,6 +2,7 @@
   "auth": {
     "invalidCredentials": "Invalid credentials",
     "emailAlreadyExists": "Email already exists",
+    "invalidData": "Invalid data. Password must be at least 6 characters.",
     "registrationSuccess": "Registration successful",
     "logout": "Logout"
   },

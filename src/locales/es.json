@@ -1,7 +1,8 @@
 {
   "auth": {
     "invalidCredentials": "Credenciales inválidas",
-    "emailAlreadyExists": "El email ya existe",
+    "emailAlreadyExists": "El email ya está en uso",
+    "invalidData": "Datos inválidos. La contraseña debe tener al menos 6 caracteres.",
     "registrationSuccess": "Registro exitoso",
     "logout": "Cerrar Sesión"
   },
