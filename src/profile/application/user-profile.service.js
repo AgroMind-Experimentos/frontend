@@ -12,21 +12,6 @@ class UserProfileService {
     #api = new UserProfileApi();
     #assembler = new UserProfileAssembler();
 
-    async fetchFarmers() {
-        this.state.loading = true;
-        this.state.error = null;
-        try {
-            const data = await this.#api.getFarmers();
-            this.state.users = this.#assembler.toEntityList(data);
-            return this.state.users;
-        } catch (error) {
-            this.state.error = error.message;
-            return [];
-        } finally {
-            this.state.loading = false;
-        }
-    }
-
     async fetchAllUsers() {
         console.log('🚀 [UserProfileService] Iniciando fetchAllUsers...');
         this.state.loading = true;

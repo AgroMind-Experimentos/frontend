@@ -1,16 +1,14 @@
 <script setup lang="js">
-import {ref, computed, onMounted} from 'vue'
+import {ref, onMounted} from 'vue'
 import {useRouter, useRoute} from 'vue-router'
 import AppLayout from '../../../../shared/presentation/components/app-layout.vue'
-import { userStore } from '../../../../iam/application/user.store.js'
 
 const router = useRouter()
 const route = useRoute()
 const activeTab = ref('completed')
 
-const isAgronomist = computed(() => userStore.state.user?.role === 'Agronomist')
-
 onMounted(() => {
+  // Detectar la pestaña activa basada en la ruta actual
   const currentPath = route.path
   if (currentPath.includes('/completed')) {
     activeTab.value = 'completed'
@@ -20,12 +18,8 @@ onMounted(() => {
     activeTab.value = 'pending'
   } else if (currentPath.includes('/logs')) {
     activeTab.value = 'logs'
-  } else if (currentPath.includes('/new-task')) {
-    if (!isAgronomist.value) {
-      router.push('/tasks/completed')
-    } else {
-      activeTab.value = 'new-task'
-    }
+  } else if(currentPath.includes('/new-task')) {
+    activeTab.value = 'new-task'
   } else {
     router.push('/tasks/completed')
   }
@@ -87,7 +81,6 @@ const navigateToTab = (tab) => {
           Pendientes
         </button>
         <button
-            v-if="isAgronomist"
             :class="['tab-button', { active: activeTab === 'new-task' }]"
             @click="navigateToTab('new-task')"
         >

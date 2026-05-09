@@ -6,22 +6,29 @@ import { userStore } from '../../application/user.store.js';
 // PrimeVue
 import InputText from 'primevue/inputtext';
 import Password from 'primevue/password';
-import RadioButton from 'primevue/radiobutton';
+import Checkbox from 'primevue/checkbox';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
 
 export default {
   name: 'register-view',
-  components: { InputText, Password, RadioButton, Button, Card },
+  components: { InputText, Password, Checkbox, Button, Card },
   setup() {
     const router = useRouter();
 
+    // Form
     const name = ref('');
     const email = ref('');
     const password = ref('');
     const confirmPassword = ref('');
-    const role = ref('');
 
+    // Roles (al menos uno)
+    const roles = ref({
+      agronomo: false,
+      agricultor: false
+    });
+
+    // Logo (puedes cambiarlo)
     const logoUrl = 'https://files.catbox.moe/2ws3bu.png';
 
     const loading = computed(() => userStore.state.loading);
@@ -30,6 +37,7 @@ export default {
     const goLogin = () => router.push({ name: 'user-login' });
 
     const submit = async () => {
+      // Validaciones mínimas locales
       if (!name.value || !email.value || !password.value || !confirmPassword.value) {
         alert('Completa todos los campos.');
         return;
@@ -38,26 +46,26 @@ export default {
         alert('Las contraseñas no coinciden.');
         return;
       }
-      if (!role.value) {
-        alert('Selecciona un rol.');
+      if (!roles.value.agronomo && !roles.value.agricultor) {
+        alert('Selecciona al menos un rol.');
         return;
       }
 
+      // Llamar al registro real usando el store
       const ok = await userStore.register({
         name: name.value.trim(),
         email: email.value.trim(),
-        password: password.value,
-        role: role.value
+        password: password.value
       });
 
       if (ok) {
-        router.push({ name: 'user-login' });
+        router.push('/dashboard');
       }
     };
 
     return {
       name, email, password, confirmPassword,
-      role, logoUrl, loading, errorKey, goLogin, submit
+      roles, logoUrl, loading, errorKey, goLogin, submit
     };
   }
 };
@@ -137,14 +145,14 @@ export default {
               </div>
             </div>
 
-            <!-- Selección de rol -->
+            <!-- Selección de roles -->
             <div class="roles-section">
               <label class="field-label">Tipo de usuario</label>
               <div class="roles-container">
-                <div class="role-option" :class="{ active: role === 'Agronomist' }">
-                  <RadioButton
-                    v-model="role"
-                    value="Agronomist"
+                <div class="role-option" :class="{ active: roles.agronomo }">
+                  <Checkbox
+                    v-model="roles.agronomo"
+                    :binary="true"
                     inputId="role-agronomo"
                     class="role-checkbox"
                   />
@@ -155,10 +163,10 @@ export default {
                   </label>
                 </div>
 
-                <div class="role-option" :class="{ active: role === 'Farmer' }">
-                  <RadioButton
-                    v-model="role"
-                    value="Farmer"
+                <div class="role-option" :class="{ active: roles.agricultor }">
+                  <Checkbox
+                    v-model="roles.agricultor"
+                    :binary="true"
                     inputId="role-agricultor"
                     class="role-checkbox"
                   />
@@ -183,7 +191,7 @@ export default {
               label="Crear Cuenta"
               class="register-button"
               :loading="loading"
-              :disabled="!name || !email || !password || !confirmPassword || !role"
+              :disabled="!name || !email || !password || !confirmPassword || (!roles.agronomo && !roles.agricultor)"
             />
 
             <!-- Divider -->

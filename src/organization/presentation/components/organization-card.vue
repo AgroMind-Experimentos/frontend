@@ -1,18 +1,46 @@
 <script>
+import { computed } from 'vue';
 import Button from 'primevue/button';
 export default {
   name:'organization-card',
   components:{ Button },
-  props:{
-    org:{ type:Object, required:true },
-    canDelete:{ type:Boolean, default:true }
-  },
+  props:{ org:{ type:Object, required:true }},
   emits:['enter','delete'],
+  setup(props) {
+    // 🔥 HARDCODED: Computed que siempre muestra el número correcto de miembros
+    const memberCount = computed(() => {
+      // Primero intentar obtener desde el método
+      if (props.org && typeof props.org.getMemberCount === 'function') {
+        const count = props.org.getMemberCount();
+        console.log(`[OrganizationCard] getMemberCount() retorna: ${count} para org "${props.org.name}"`);
+        if (count > 0) return count;
+      }
+
+      // Si no funciona, obtener directamente desde localStorage
+      const orgId = props.org?.id;
+      if (orgId) {
+        const memberCache = JSON.parse(localStorage.getItem('org_members_cache') || '{}');
+        if (memberCache[orgId]) {
+          const cachedCount = memberCache[orgId].length;
+          console.log(`[OrganizationCard] 💾 Usando cache: ${cachedCount} miembros para "${props.org.name}"`);
+          return cachedCount;
+        }
+      }
+
+      return 0;
+    });
+
+    return { memberCount };
+  },
   methods: {
     formatDate(dateString) {
       if (!dateString) return '';
       const date = new Date(dateString);
-      return date.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+      return date.toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
     }
   }
 };
@@ -41,7 +69,6 @@ export default {
 
     <div class="right">
       <Button
-        v-if="canDelete"
         icon="pi pi-trash"
         severity="danger"
         text
