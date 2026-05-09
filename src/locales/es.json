@@ -12,6 +12,8 @@
     "loading": "Cargando...",
     "retry": "Reintentar",
     "create": "Crear",
+    "accept": "Aceptar",
+    "reject": "Rechazar",
     "edit": "Editar",
     "delete": "Eliminar",
     "save": "Guardar",
@@ -28,7 +30,10 @@
     "noOrganizations": "No tienes organizaciones",
     "noOrganizationsDesc": "Comienza creando tu primera organización agrícola",
     "loadingOrganizations": "Cargando organizaciones...",
-    "deleteConfirm": "¿Estás seguro de que quieres eliminar"
+    "deleteConfirm": "¿Estás seguro de que quieres eliminar",
+    "pendingInvitations": "Invitaciones Pendientes",
+    "invitationFromOrg": "Invitación a organización",
+    "invitationPending": "Has sido invitado a unirte a esta organización"
   },
   "organization": {
     "create": "Crear Organización",
@@ -54,7 +59,18 @@
     "actions": "Acciones",
     "editParcel": "Editar parcela",
     "deleteParcel": "Eliminar parcela",
-    "deleteParcelConfirm": "¿Estás seguro de que quieres eliminar la parcela"
+    "deleteParcelConfirm": "¿Estás seguro de que quieres eliminar la parcela",
+    "nameRequired": "El nombre de la organización es requerido."
+  },
+  "invitation": {
+    "panelTitle": "Invitar Farmer por Email",
+    "emailPlaceholder": "farmer@email.com",
+    "sendButton": "Enviar Invitación",
+    "successSent": "Invitación enviada exitosamente.",
+    "errorEmptyEmail": "Por favor ingresa un correo electrónico.",
+    "errorInvalidEmail": "El formato del correo electrónico es inválido.",
+    "errorUserNotFound": "No se encontró ningún usuario registrado con ese correo.",
+    "errorDuplicate": "Este usuario ya tiene una invitación pendiente en esta organización."
   },
   "notFound": {
     "title": "404",

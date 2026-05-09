@@ -3,6 +3,7 @@ import { onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { organizationService } from '../../../organization/application/organization.service.js';
+import { invitationService } from '../../../organization/application/invitation.service.js';
 import { userStore } from '../../../iam/application/user.store.js';
 import AppLayout from '../components/app-layout.vue';
 import OrganizationCard from '../../../organization/presentation/components/organization-card.vue';
@@ -13,6 +14,17 @@ const { t } = useI18n();
 const router = useRouter();
 
 const isAgronomist = computed(() => userStore.state.user?.role === 'Agronomist');
+const isFarmer = computed(() => userStore.state.user?.role === 'Farmer');
+const pendingInvitations = computed(() => invitationService.state.invitations);
+
+async function acceptInvitation(inv) {
+  await invitationService.accept(inv.id, userStore.state.user.id);
+  await organizationService.getAllOrganizations();
+}
+
+async function rejectInvitation(inv) {
+  await invitationService.reject(inv.id, userStore.state.user.id);
+}
 
 // State reactivo del servicio
 const organizations = computed(() => organizationService.state.organizations);
@@ -23,6 +35,9 @@ const error = computed(() => organizationService.state.error);
 onMounted(async () => {
   try {
     await organizationService.getAllOrganizations();
+    if (isFarmer.value && userStore.state.user?.id) {
+      await invitationService.fetchPending(userStore.state.user.id);
+    }
   } catch (err) {
     console.error('Error loading organizations:', err);
   }
@@ -49,6 +64,36 @@ const onDelete = async (org) => {
       <div class="header">
         <h1>{{ t('dashboard.title') }}</h1>
         <p>{{ t('dashboard.subtitle') }}</p>
+      </div>
+
+      <!-- Invitaciones pendientes (solo Farmer) -->
+      <div v-if="isFarmer && pendingInvitations.length > 0" class="invitations-section">
+        <h2 class="invitations-title">{{ t('dashboard.pendingInvitations') }}</h2>
+        <div class="invitations-list">
+          <div v-for="inv in pendingInvitations" :key="inv.id" class="invitation-card">
+            <div class="invitation-info">
+              <i class="pi pi-envelope" style="font-size:1.4rem;color:#2c5530"></i>
+              <div>
+                <p class="invitation-org">{{ inv.organizationName || t('dashboard.invitationFromOrg') }}</p>
+                <p class="invitation-sub">{{ t('dashboard.invitationPending') }}</p>
+              </div>
+            </div>
+            <div class="invitation-actions">
+              <Button
+                :label="t('common.accept')"
+                icon="pi pi-check"
+                class="p-button-success p-button-sm"
+                @click="acceptInvitation(inv)"
+              />
+              <Button
+                :label="t('common.reject')"
+                icon="pi pi-times"
+                class="p-button-danger p-button-sm p-button-outlined"
+                @click="rejectInvitation(inv)"
+              />
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="actions" v-if="isAgronomist">
@@ -166,5 +211,56 @@ const onDelete = async (org) => {
 
 .error-state .p-button {
   margin-top: 1rem;
+}
+
+.invitations-section {
+  margin-bottom: 2rem;
+}
+
+.invitations-title {
+  font-size: 1.3rem;
+  color: #2c5530;
+  margin: 0 0 1rem 0;
+}
+
+.invitations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.invitation-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  border: 1px solid #d4edda;
+  border-left: 4px solid #2c5530;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+}
+
+.invitation-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.invitation-org {
+  margin: 0 0 0.2rem 0;
+  font-weight: 600;
+  color: #111;
+  font-size: 1rem;
+}
+
+.invitation-sub {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+.invitation-actions {
+  display: flex;
+  gap: 0.5rem;
 }
 </style>

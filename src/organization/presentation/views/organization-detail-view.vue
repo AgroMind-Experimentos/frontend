@@ -1,11 +1,14 @@
 <script setup>
-import { onMounted, computed } from 'vue';
+import { onMounted, computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { organizationService } from '../../application/organization.service.js';
 import { plotService } from '../../application/plot.service.js';
+import { invitationService } from '../../application/invitation.service.js';
+import { userStore } from '../../../iam/application/user.store.js';
 import AppLayout from '../../../shared/presentation/components/app-layout.vue';
 import Button from 'primevue/button';
+import InputText from 'primevue/inputtext';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 
@@ -15,10 +18,47 @@ const route = useRoute();
 const router = useRouter();
 const orgId = route.params.id;
 
+const isAgronomist = computed(() => userStore.state.user?.role === 'Agronomist');
 const organization = computed(() => organizationService.state.currentOrganization);
 const plots = computed(() => plotService.state.plots);
 const loading = computed(() => plotService.state.loading || organizationService.state.loading);
 const error = computed(() => plotService.state.error || organizationService.state.error);
+
+// Invitation by email
+const inviteEmail = ref('');
+const inviteLoading = ref(false);
+const inviteMessage = ref(null); // { type: 'success'|'error', text: string }
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+async function sendInvitation() {
+  inviteMessage.value = null;
+  const email = inviteEmail.value.trim();
+
+  if (!email) {
+    inviteMessage.value = { type: 'error', text: t('invitation.errorEmptyEmail') };
+    return;
+  }
+  if (!EMAIL_REGEX.test(email)) {
+    inviteMessage.value = { type: 'error', text: t('invitation.errorInvalidEmail') };
+    return;
+  }
+
+  inviteLoading.value = true;
+  try {
+    await invitationService.sendInvitationByEmail(orgId, email, userStore.state.user?.id);
+    inviteEmail.value = '';
+    inviteMessage.value = { type: 'success', text: t('invitation.successSent') };
+  } catch (err) {
+    const status = err.response?.status;
+    if (status === 400) inviteMessage.value = { type: 'error', text: t('invitation.errorInvalidEmail') };
+    else if (status === 404) inviteMessage.value = { type: 'error', text: t('invitation.errorUserNotFound') };
+    else if (status === 409) inviteMessage.value = { type: 'error', text: t('invitation.errorDuplicate') };
+    else inviteMessage.value = { type: 'error', text: t('common.unexpectedError') };
+  } finally {
+    inviteLoading.value = false;
+  }
+}
 
 onMounted(async () => {
   try {
@@ -128,6 +168,34 @@ const getMemberCount = (plot) => {
             class="p-button-success"
             :disabled="loading"
           />
+        </div>
+      </div>
+
+      <!-- Panel: Invitar farmer por email (solo Agrónomo) -->
+      <div v-if="isAgronomist" class="invite-panel">
+        <h2 class="invite-title">
+          <i class="pi pi-envelope"></i>
+          {{ t('invitation.panelTitle') }}
+        </h2>
+        <div class="invite-form">
+          <InputText
+            v-model="inviteEmail"
+            :placeholder="t('invitation.emailPlaceholder')"
+            class="invite-input"
+            type="email"
+            @keyup.enter="sendInvitation"
+          />
+          <Button
+            :label="t('invitation.sendButton')"
+            icon="pi pi-send"
+            class="p-button-success"
+            :loading="inviteLoading"
+            @click="sendInvitation"
+          />
+        </div>
+        <div v-if="inviteMessage" :class="['invite-msg', inviteMessage.type]">
+          <i :class="inviteMessage.type === 'success' ? 'pi pi-check-circle' : 'pi pi-exclamation-circle'"></i>
+          {{ inviteMessage.text }}
         </div>
       </div>
 
@@ -360,6 +428,60 @@ const getMemberCount = (plot) => {
 
 .text-green-500 {
   color: #22c55e;
+}
+
+.invite-panel {
+  background: #f0faf2;
+  border: 1px solid #b7dfc0;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.invite-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.1rem;
+  color: #2c5530;
+  margin: 0 0 1rem 0;
+}
+
+.invite-form {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.invite-input {
+  flex: 1;
+  min-width: 220px;
+}
+
+:deep(.invite-input.p-inputtext) {
+  background: #fff !important;
+  color: #111 !important;
+}
+
+.invite-msg {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+}
+
+.invite-msg.success {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.invite-msg.error {
+  background: #fee2e2;
+  color: #991b1b;
 }
 
 @media (max-width: 768px) {

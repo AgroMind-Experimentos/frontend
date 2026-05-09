@@ -65,23 +65,12 @@ export class OrganizationAssembler {
      * @returns {Object}
      */
     fromFormData(formData) {
-        console.log('[OrganizationAssembler] Transformando form data a API format:', formData);
-        console.log('[OrganizationAssembler] 👥 Miembros recibidos del form:', formData.members);
-
-        const apiData = {
+        return {
             name: formData.name,
             description: formData.description || '',
             status: formData.status || 'active',
-            members: Array.isArray(formData.members) ? formData.members : [],
-            location: formData.location || '',
-            createdAt: new Date().toISOString()
+            agronomistId: formData.agronomistId || null
         };
-
-        console.log('[OrganizationAssembler] 📤 API data generado:', apiData);
-        console.log('[OrganizationAssembler] 👥 Miembros a enviar:', apiData.members);
-        console.log('[OrganizationAssembler] 📊 Total miembros:', apiData.members.length);
-
-        return apiData;
     }
 }
 
