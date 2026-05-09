@@ -12,4 +12,8 @@ export class CheckListService{
     async registerNewChecklist(checklist){
         return await  this.checkListApi.registerNewChecklist(checklist)
     }
+
+    async updateChecklist(checklistId, items) {
+        return await this.checkListApi.updateChecklist(checklistId, items)
+    }
 }

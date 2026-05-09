@@ -5,9 +5,12 @@ export class OrganizationApi {
     organizationsEndpoint = import.meta.env.VITE_ORGANIZATIONS_ENDPOINT;
     http = axios.create({ baseURL: this.baseUrl });
 
-    async getAll() {
+    async getAll(profileId) {
         try {
-            const { data } = await this.http.get(this.organizationsEndpoint);
+            const url = profileId
+                ? `${this.organizationsEndpoint}?profileId=${profileId}`
+                : this.organizationsEndpoint;
+            const { data } = await this.http.get(url);
             return data;
         } catch (error) {
             console.error('Error fetching organizations:', error);
@@ -27,22 +30,16 @@ export class OrganizationApi {
 
     async create(organizationData) {
         try {
-            // Enviar los campos que el backend espera incluyendo members
             const payload = {
                 name: organizationData.name,
                 description: organizationData.description,
                 status: organizationData.status || 'active',
-                members: organizationData.members || []
+                agronomistId: organizationData.agronomistId || null
             };
-
-            console.log('📤 Enviando al backend:', payload);
-            console.log('👥 Miembros incluidos:', payload.members);
             const { data } = await this.http.post(this.organizationsEndpoint, payload);
-            console.log('✅ Respuesta del backend:', data);
             return data;
         } catch (error) {
-            console.error('❌ Error creating organization:', error);
-            console.error('Error details:', error.response?.data);
+            console.error('❌ Error creating organization:', error.response?.data);
             throw error;
         }
     }
