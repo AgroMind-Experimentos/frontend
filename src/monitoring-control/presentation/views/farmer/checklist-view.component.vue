@@ -24,15 +24,10 @@ onMounted(async ()=>{
   const response = await checkListService.getChecklistByTaskId(taskId)
   if (response) {
     checklist.value = response
-    if (checklist.value.items && checklist.value.items.length > 0) {
-      checklist.value.items.forEach(item=>{
-        checkedItems.value[item.id] = false
-      })
-    }
-    if(task.value.status?.toLowerCase() === "completed"){
+    if (checklist.value.items?.length > 0) {
       checklist.value.items.forEach(item => {
-        checkedItems.value[item.id] = true;
-      });
+        checkedItems.value[item.id] = item.isCompleted
+      })
     }
   } else {
     console.warn('No se encontró checklist para esta tarea:', taskId)
@@ -56,6 +51,15 @@ async function completeTask(){
   } catch(error) {
     console.error(error)
     completeError.value = 'Error al completar la tarea. Intenta de nuevo.'
+  }
+}
+
+async function toggleItem(itemId, value) {
+  checkedItems.value[itemId] = value
+  try {
+    await checkListService.updateItemCompletion(itemId, value)
+  } catch {
+    checkedItems.value[itemId] = !value
   }
 }
 
@@ -84,7 +88,7 @@ const finishTask = ()=>{
           <label :for="`check-${item.id}`" class="checklist-name">{{ item.description }}</label>
         </template>
         <template v-else>
-          <pv-checkbox v-model="checkedItems[item.id]" :inputId="`check-${item.id}`" :binary="true" class="checkbox" :disabled="isAgronomist || task?.status === 'Completed'"></pv-checkbox>
+          <pv-checkbox :modelValue="checkedItems[item.id]" @update:modelValue="val => toggleItem(item.id, val)" :inputId="`check-${item.id}`" :binary="true" class="checkbox" :disabled="isAgronomist || task?.status === 'Completed'"></pv-checkbox>
           <label :for="`check-${item.id}`" class="checklist-name">{{ item.description }}</label>
         </template>
       </div>

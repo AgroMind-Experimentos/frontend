@@ -13,6 +13,10 @@ export class CheckListService{
         return await  this.checkListApi.registerNewChecklist(checklist)
     }
 
+    async updateItemCompletion(itemId, isCompleted) {
+        return await this.checkListApi.updateItemCompletion(itemId, isCompleted)
+    }
+
     async updateChecklist(checklistId, items) {
         return await this.checkListApi.updateChecklist(checklistId, items)
     }

@@ -24,6 +24,11 @@ export class CheckListApi{
         }
     }
 
+    async updateItemCompletion(itemId, isCompleted) {
+        const endpoint = `${this.baseUrl}${this.checklistsEndpoint}/items/${itemId}`
+        await axios.patch(endpoint, { IsCompleted: isCompleted })
+    }
+
     async updateChecklist(checklistId, items) {
         try {
             const endpoint = `${this.baseUrl}${this.checklistsEndpoint}/${checklistId}`;
