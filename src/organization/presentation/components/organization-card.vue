@@ -3,7 +3,10 @@ import Button from 'primevue/button';
 export default {
   name:'organization-card',
   components:{ Button },
-  props:{ org:{ type:Object, required:true }},
+  props:{
+    org:{ type:Object, required:true },
+    canDelete:{ type:Boolean, default:true }
+  },
   emits:['enter','delete'],
   methods: {
     formatDate(dateString) {
@@ -38,6 +41,7 @@ export default {
 
     <div class="right">
       <Button
+        v-if="canDelete"
         icon="pi pi-trash"
         severity="danger"
         text

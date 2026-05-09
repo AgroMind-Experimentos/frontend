@@ -144,6 +144,7 @@ const onDelete = async (org) => {
             v-for="org in organizations"
             :key="org.id"
             :org="org"
+            :can-delete="isAgronomist"
             @enter="onEnter(org)"
             @delete="onDelete(org)"
         />

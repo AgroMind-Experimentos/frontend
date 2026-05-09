@@ -160,7 +160,7 @@ const getMemberCount = (plot) => {
           </div>
         </div>
 
-        <div class="actions">
+        <div v-if="isAgronomist" class="actions">
           <Button
             :label="t('organization.createParcel')"
             icon="pi pi-plus"
@@ -255,10 +255,9 @@ const getMemberCount = (plot) => {
             </template>
           </Column>
 
-          <Column :header="t('organization.actions')">
+          <Column v-if="isAgronomist" :header="t('organization.actions')">
             <template #body="slotProps">
               <div class="action-buttons">
-
                 <Button
                   icon="pi pi-trash"
                   class="p-button-rounded p-button-text p-button-danger"
@@ -276,6 +275,7 @@ const getMemberCount = (plot) => {
         <h2 class="title">{{ t('organization.noParcels') }}</h2>
         <p>{{ t('organization.noParcelsDesc') }}</p>
         <Button
+          v-if="isAgronomist"
           :label="t('organization.createFirstParcel')"
           icon="pi pi-plus"
           @click="goCreateParcel"
