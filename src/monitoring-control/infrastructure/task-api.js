@@ -99,6 +99,21 @@ export class TaskApi{
         return response.data;
     }
 
+    async updateTask(taskId, data) {
+        const endpoint = `${this.baseUrl}${this.tasksEndpoint}/${taskId}`;
+        try {
+            await axios.put(endpoint, {
+                Title: data.title.trim(),
+                Description: data.description?.trim() || '',
+                ResponsibleId: Number(data.responsibleId)
+            });
+            return true;
+        } catch (error) {
+            console.error('Error actualizando tarea:', error);
+            throw error;
+        }
+    }
+
     async deleteTask(taskId) {
         const endpoint = `${this.baseUrl}${this.tasksEndpoint}/${taskId}`;
         try {

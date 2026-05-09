@@ -4,28 +4,46 @@ import {ref, computed, onMounted} from "vue"
 import {useRouter} from "vue-router"
 import { userStore } from '../../../../iam/application/user.store.js'
 import { organizationService } from '../../../../organization/application/organization.service.js'
+import { UserProfileApi } from '../../../../profile/infrastructure/user-profile-api.js'
 
 const taskService = new TaskService()
+const profileApi = new UserProfileApi()
 const tasks = ref([])
+const userMap = ref({})
 const loading = ref(true)
+const loadError = ref('')
 const router = useRouter()
 const isAgronomist = computed(() => userStore.state.user?.role === 'Agronomist')
+
+function userName(id) {
+  return userMap.value[id] || `#${id}`
+}
 
 function buildFilters() {
   if (!isAgronomist.value) {
     return { responsibleId: userStore.state.user?.id }
   }
   const orgIds = organizationService.state.organizations.map(o => o.id)
-  return orgIds.length === 1 ? { organizationId: orgIds[0] } : {}
+  if (orgIds.length === 0) return null
+  return { organizationId: orgIds[0] }
 }
 
 onMounted(async () => {
   try{
     if (isAgronomist.value && organizationService.state.organizations.length === 0)
       await organizationService.getAllOrganizations()
-    tasks.value = await taskService.getTasksCompleted(buildFilters())
+    const filters = buildFilters()
+    if (filters === null) { tasks.value = []; return }
+    const [taskList, allUsers] = await Promise.all([
+      taskService.getTasksCompleted(filters),
+      profileApi.getAllUsers()
+    ])
+    tasks.value = taskList
+    if (Array.isArray(allUsers))
+      allUsers.forEach(u => { userMap.value[u.id] = u.displayName || u.firstName || `#${u.id}` })
   } catch(error) {
     console.error('Error loading completed tasks:', error)
+    loadError.value = 'No se pudieron cargar las tareas. Intenta de nuevo.'
   } finally{
     loading.value = false
   }
@@ -63,6 +81,10 @@ function formatDate(dateString){
   <div class="container">
     <h3>Tareas Completadas</h3>
 
+    <div v-if="loadError" class="load-error">
+      <i class="pi pi-exclamation-triangle"></i> {{ loadError }}
+    </div>
+
     <div v-if="loading" class="loading-state">
       <i class="pi pi-spinner pi-spin"></i>
       <span>Cargando tareas...</span>
@@ -73,7 +95,7 @@ function formatDate(dateString){
         <div class="task-content">
           <div class="task-info">
             <h4 class="task-title">{{ task.title }}</h4>
-            <p class="task-meta">Responsable: {{ task.responsibleId }}</p>
+            <p class="task-meta">Responsable: {{ userName(task.responsibleId) }}</p>
             <p class="task-meta" v-if="task.completedAt">Completada: {{ formatDate(task.completedAt) }}</p>
             <div class="status-badge completed">
               <i class="pi pi-check"></i>
@@ -214,6 +236,18 @@ function formatDate(dateString){
 
 .icon-btn.details { background-color: #28a745; }
 .icon-btn.delete  { background-color: #dc3545; }
+
+.load-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #fee2e2;
+  color: #991b1b;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
 
 .empty-state {
   text-align: center;

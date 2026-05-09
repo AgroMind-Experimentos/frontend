@@ -96,6 +96,12 @@ async function submitForm() {
       .map(i => ({ description: i.description.trim() }))
       .filter(i => i.description)
 
+    if (checklist.value.items.length > 0 && validItems.length === 0) {
+      await taskService.deleteTask(taskData.id)
+      errorMsg.value = 'El checklist debe tener al menos un ítem con texto válido.'
+      return
+    }
+
     if (validItems.length > 0) {
       await checkListService.registerNewChecklist({
         taskId: taskData.id,

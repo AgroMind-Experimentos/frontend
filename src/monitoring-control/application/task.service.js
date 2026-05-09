@@ -38,6 +38,10 @@ export class TaskService {
         return await this.taskApi.registerNewTask(task);
     }
 
+    async updateTask(taskId, data) {
+        return await this.taskApi.updateTask(taskId, data);
+    }
+
     async deleteTask(taskId) {
         return await this.taskApi.deleteTask(taskId);
     }

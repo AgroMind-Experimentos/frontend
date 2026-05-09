@@ -5,6 +5,7 @@ export class TaskAssembler {
         return new Task({
             id: response.id,
             title: response.title,
+            description: response.description,
             organizationId: response.organizationId,
             responsibleId: response.responsibleId,
             status: response.status,
@@ -17,6 +18,7 @@ export class TaskAssembler {
         return new Task({
             id: resource.id || Date.now().toString(),
             title: resource.title,
+            description: resource.description,
             organizationId: resource.organizationId,
             responsibleId: resource.responsibleId,
             status: resource.status,
