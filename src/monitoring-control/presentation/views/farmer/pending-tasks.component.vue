@@ -1,22 +1,39 @@
 <script setup lang="js">
 import {TaskService} from '../../../application/task.service.js'
-import {ref, onMounted} from "vue"
+import {ref, computed, onMounted} from "vue"
 import {useRouter} from 'vue-router'
+import { userStore } from '../../../../iam/application/user.store.js'
+import { organizationService } from '../../../../organization/application/organization.service.js'
 
 const router = useRouter()
 const taskService = new TaskService()
 const tasks = ref([])
 const loading = ref(true)
+const isAgronomist = computed(() => userStore.state.user?.role === 'Agronomist')
+
+function buildFilters() {
+  if (!isAgronomist.value) {
+    return { responsibleId: userStore.state.user?.id }
+  }
+  const orgIds = organizationService.state.organizations.map(o => o.id)
+  return orgIds.length === 1 ? { organizationId: orgIds[0] } : {}
+}
 
 onMounted(async () => {
   try{
-    tasks.value = await taskService.getTasksPending()
+    if (isAgronomist.value && organizationService.state.organizations.length === 0)
+      await organizationService.getAllOrganizations()
+    tasks.value = await taskService.getTasksPending(buildFilters())
   } catch(error) {
     console.error('Error loading pending tasks:', error)
   } finally {
     loading.value = false
   }
 })
+
+function goToCheckList(taskId) {
+  router.push(`/tasks/in-progress/${taskId}/checklist`)
+}
 
 async function startTask(taskID){
   try{
@@ -31,6 +48,17 @@ async function startTask(taskID){
   }catch(error){
     console.error('Error starting monitoring-control:', error)
     alert("Error al iniciar la tarea")
+  }
+}
+
+async function deleteTask(task) {
+  if (!confirm(`¿Eliminar la tarea "${task.title}"? Esta acción no se puede deshacer.`)) return
+  try {
+    await taskService.deleteTask(task.id)
+    tasks.value = tasks.value.filter(t => t.id !== task.id)
+  } catch (error) {
+    console.error('Error al eliminar la tarea:', error)
+    alert('Error al eliminar la tarea. Intenta de nuevo.')
   }
 }
 </script>
@@ -56,13 +84,29 @@ async function startTask(taskID){
             </div>
           </div>
           <div class="task-actions">
-            <pv-button
-              class="start-button"
-              @click="startTask(task.id)"
-              icon="pi pi-play"
+            <button
+              class="icon-btn details"
+              title="Ver detalles"
+              @click="goToCheckList(task.id)"
             >
-              Iniciar
-            </pv-button>
+              <i class="pi pi-eye"></i>
+            </button>
+            <button
+              v-if="!isAgronomist"
+              class="icon-btn start"
+              title="Iniciar tarea"
+              @click="startTask(task.id)"
+            >
+              <i class="pi pi-play"></i>
+            </button>
+            <button
+              v-if="isAgronomist"
+              class="icon-btn delete"
+              title="Eliminar tarea"
+              @click="deleteTask(task)"
+            >
+              <i class="pi pi-trash"></i>
+            </button>
           </div>
         </div>
       </div>
@@ -160,17 +204,28 @@ async function startTask(taskID){
   gap: 0.5rem;
 }
 
-.start-button {
-  background-color: #007bff !important;
-  border: none !important;
-  border-radius: 8px;
-  color: white !important;
-  padding: 0.75rem 1.5rem;
+.icon-btn {
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  color: white;
+  transition: transform 0.15s ease, opacity 0.15s ease;
 }
 
-.start-button:hover {
-  background-color: #0056b3 !important;
+.icon-btn:hover {
+  transform: scale(1.12);
+  opacity: 0.9;
 }
+
+.icon-btn.details { background-color: #FF9900; }
+.icon-btn.start   { background-color: #007bff; }
+.icon-btn.delete  { background-color: #dc3545; }
 
 .empty-state {
   text-align: center;

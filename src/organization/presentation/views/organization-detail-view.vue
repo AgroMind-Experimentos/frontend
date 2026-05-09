@@ -249,12 +249,6 @@ const getMemberCount = (plot) => {
             </template>
           </Column>
 
-          <Column field="members" :header="t('organization.members')">
-            <template #body="slotProps">
-              <span class="members-count">{{ getMemberCount(slotProps.data) }}</span>
-            </template>
-          </Column>
-
           <Column v-if="isAgronomist" :header="t('organization.actions')">
             <template #body="slotProps">
               <div class="action-buttons">
