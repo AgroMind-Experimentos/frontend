@@ -19,6 +19,11 @@ function userName(id) {
   return userMap.value[id] || `#${id}`
 }
 
+function orgName(id) {
+  const org = organizationService.state.organizations.find(o => o.id === id)
+  return org?.name || null
+}
+
 function buildFilters() {
   if (!isAgronomist.value) {
     return { responsibleId: userStore.state.user?.id }
@@ -95,6 +100,9 @@ function formatDate(dateString){
         <div class="task-content">
           <div class="task-info">
             <h4 class="task-title">{{ task.title }}</h4>
+            <p class="task-meta" v-if="orgName(task.organizationId)">
+              <i class="pi pi-sitemap"></i> {{ orgName(task.organizationId) }}
+            </p>
             <p class="task-meta">Responsable: {{ userName(task.responsibleId) }}</p>
             <p class="task-meta" v-if="task.completedAt">Completada: {{ formatDate(task.completedAt) }}</p>
             <div class="status-badge completed">

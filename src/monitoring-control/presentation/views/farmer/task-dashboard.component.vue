@@ -47,20 +47,6 @@ const navigateToTab = (tab) => {
           <p>Administra y supervisa todas tus tareas agrícolas</p>
         </div>
 
-        <!-- Organization Card -->
-        <div class="organization-section">
-          <pv-card class="organization-card">
-            <template #content>
-              <div class="icon-and-text">
-                <span class="pi pi-sitemap icon-spacer"></span>
-                <div>
-                  <div class="organization-name">Organización</div>
-                  <div class="details">EcoTrack Farm</div>
-                </div>
-              </div>
-            </template>
-          </pv-card>
-        </div>
       </div>
 
       <!-- Navigation Tabs -->
@@ -195,6 +181,7 @@ const navigateToTab = (tab) => {
 @media (max-width: 768px) {
   .dashboard-header {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
 
   .tabs-navigation {

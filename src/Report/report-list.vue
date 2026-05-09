@@ -1,7 +1,9 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import AppLayout from '../shared/presentation/components/app-layout.vue'
 import { ReportsService } from './application/reports.service.js'
+import { organizationService } from '../organization/application/organization.service.js'
+import { UserProfileApi } from '../profile/infrastructure/user-profile-api.js'
 import Card from 'primevue/card'
 import Button from 'primevue/button'
 import Tag from 'primevue/tag'
@@ -10,12 +12,23 @@ import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 
 const reportsService = new ReportsService()
+const profileApi = new UserProfileApi()
 const reportsData = ref(null)
+const userMap = ref({})
 const loading = ref(true)
 const error = ref(null)
+const pdfError = ref(null)
 const downloadingPDF = ref(false)
 
+const orgId = computed(() => organizationService.state.organizations[0]?.id ?? null)
+
+function userName(id) {
+  return userMap.value[id] || `#${id}`
+}
+
 onMounted(async () => {
+  if (organizationService.state.organizations.length === 0)
+    await organizationService.getAllOrganizations()
   await loadReports()
 })
 
@@ -23,9 +36,19 @@ const loadReports = async () => {
   loading.value = true
   error.value = null
   try {
-    reportsData.value = await reportsService.getReports()
+    if (orgId.value == null) {
+      reportsData.value = { summary: { totalTasks: 0, completedTasks: 0, pendingTasks: 0, inProgressTasks: 0, completionRate: 0 }, tasks: [] }
+      return
+    }
+    const [data, allUsers] = await Promise.all([
+      reportsService.getReports(orgId.value),
+      profileApi.getAllUsers()
+    ])
+    reportsData.value = data
+    if (Array.isArray(allUsers))
+      allUsers.forEach(u => { userMap.value[u.id] = u.displayName || u.firstName || `#${u.id}` })
   } catch (err) {
-    error.value = err.message || 'Error al cargar los reportes'
+    error.value = err.message || 'No se pudo cargar el reporte. Intenta de nuevo.'
   } finally {
     loading.value = false
   }
@@ -33,10 +56,11 @@ const loadReports = async () => {
 
 const downloadPDF = async () => {
   downloadingPDF.value = true
+  pdfError.value = null
   try {
-    await reportsService.downloadPDF()
+    await reportsService.downloadPDF(orgId.value)
   } catch (err) {
-    error.value = 'Error al descargar el PDF'
+    pdfError.value = 'No se pudo generar el PDF. Verifica tu conexión e intenta de nuevo.'
   } finally {
     downloadingPDF.value = false
   }
@@ -101,6 +125,13 @@ const formatDate = (dateString) => {
         />
       </div>
 
+      <!-- Error al descargar PDF (US26-E2) -->
+      <div v-if="pdfError" class="pdf-error-banner">
+        <i class="pi pi-exclamation-triangle"></i>
+        {{ pdfError }}
+        <button class="dismiss-btn" @click="pdfError = null">✕</button>
+      </div>
+
       <!-- Mensaje de carga -->
       <div v-if="loading" class="loading-container">
         <i class="pi pi-spin pi-spinner" style="font-size: 3rem; color: #4CAF50"></i>
@@ -112,6 +143,13 @@ const formatDate = (dateString) => {
         <i class="pi pi-exclamation-triangle" style="font-size: 3rem; color: #dc3545"></i>
         <p>{{ error }}</p>
         <Button label="Reintentar" icon="pi pi-refresh" @click="loadReports" />
+      </div>
+
+      <!-- Sin datos (US25-E2) -->
+      <div v-else-if="reportsData && reportsData.summary.totalTasks === 0" class="empty-state">
+        <i class="pi pi-inbox empty-icon"></i>
+        <h3>Sin datos suficientes</h3>
+        <p>No existen tareas registradas en tu organización para generar métricas.</p>
       </div>
 
       <!-- Contenido principal -->
@@ -261,7 +299,7 @@ const formatDate = (dateString) => {
                 <template #body="slotProps">
                   <div class="responsible">
                     <i class="pi pi-user"></i>
-                    <span>Usuario {{ slotProps.data.responsibleId }}</span>
+                    <span>{{ userName(slotProps.data.responsibleId) }}</span>
                   </div>
                 </template>
               </Column>
@@ -669,6 +707,59 @@ const formatDate = (dateString) => {
   .progress-value {
     font-size: 1.5rem;
   }
+}
+
+.pdf-error-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #fee2e2;
+  color: #991b1b;
+  border-radius: 10px;
+  padding: 0.85rem 1.25rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.pdf-error-banner i {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.dismiss-btn {
+  margin-left: auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #991b1b;
+  font-size: 1rem;
+  padding: 0 0.25rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 5rem 2rem;
+  color: #666;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  color: #adb5bd;
+  display: block;
+  margin-bottom: 1.5rem;
+}
+
+.empty-state h3 {
+  color: #495057;
+  font-size: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.empty-state p {
+  font-size: 1rem;
+  color: #6c757d;
+  margin: 0;
 }
 
 /* Animaciones */

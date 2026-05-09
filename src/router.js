@@ -28,10 +28,10 @@ const router = createRouter({
 })
 
 router.beforeEach((to) => {
-    if (to.name === 'organization-create') {
-        const role = userStore.state.user?.role
-        if (role !== 'Agronomist') return { name: 'dashboard' }
-    }
+    const role = userStore.state.user?.role
+    const agronomistOnly = ['organization-create', 'reports']
+    if (agronomistOnly.includes(to.name) && role !== 'Agronomist')
+        return { name: 'dashboard' }
 })
 
 export default router
