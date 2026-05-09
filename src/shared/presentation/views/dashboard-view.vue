@@ -3,6 +3,7 @@ import { onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { organizationService } from '../../../organization/application/organization.service.js';
+import { userStore } from '../../../iam/application/user.store.js';
 import AppLayout from '../components/app-layout.vue';
 import OrganizationCard from '../../../organization/presentation/components/organization-card.vue';
 import Button from 'primevue/button';
@@ -10,6 +11,8 @@ import Button from 'primevue/button';
 const { t } = useI18n();
 
 const router = useRouter();
+
+const isAgronomist = computed(() => userStore.state.user?.role === 'Agronomist');
 
 // State reactivo del servicio
 const organizations = computed(() => organizationService.state.organizations);
@@ -48,7 +51,7 @@ const onDelete = async (org) => {
         <p>{{ t('dashboard.subtitle') }}</p>
       </div>
 
-      <div class="actions">
+      <div class="actions" v-if="isAgronomist">
         <Button
           :label="t('dashboard.createNew')"
           icon="pi pi-plus"
@@ -82,6 +85,7 @@ const onDelete = async (org) => {
         <h3>{{ t('dashboard.noOrganizations') }}</h3>
         <p>{{ t('dashboard.noOrganizationsDesc') }}</p>
         <Button
+          v-if="isAgronomist"
           :label="t('dashboard.createFirst')"
           icon="pi pi-plus"
           @click="goCreate"
