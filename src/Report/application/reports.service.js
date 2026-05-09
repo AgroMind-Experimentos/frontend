@@ -5,12 +5,12 @@ export class ReportsService {
         this.reportsApi = new ReportsApi()
     }
 
-    async getReports() {
-        return this.reportsApi.getReports()
+    async getReports(organizationId) {
+        return this.reportsApi.getReports(organizationId)
     }
 
-    async downloadPDF() {
-        const blob = await this.reportsApi.downloadPDF()
+    async downloadPDF(organizationId) {
+        const blob = await this.reportsApi.downloadPDF(organizationId)
         const url = window.URL.createObjectURL(blob)
         const link = document.createElement('a')
         link.href = url
