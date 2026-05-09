@@ -59,22 +59,17 @@ class UserStore {
         }
     }
 
-    async register({ name, email, password }) {
+    async register({ name, email, password, role }) {
         this.state.loading = true;
         this.state.errorKey = null;
         try {
-            const data = await this.#api.register(name, email, password);
-            this.state.user = this.#assembler.toUser(data.user);
-            this.state.tokens = this.#assembler.toTokens(data.tokens);
-
-            // Guardar en localStorage
-            this.#saveToStorage('user', this.state.user);
-            this.#saveToStorage('tokens', this.state.tokens);
-
+            await this.#api.register(name, email, password, role);
             return true;
         } catch (err) {
             this.state.errorKey = err?.response?.status === 409
                 ? 'auth.emailAlreadyExists'
+                : err?.response?.status === 400
+                ? 'auth.invalidData'
                 : 'common.unexpectedError';
             return false;
         } finally {

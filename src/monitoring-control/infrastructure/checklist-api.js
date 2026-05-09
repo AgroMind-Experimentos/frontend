@@ -24,6 +24,22 @@ export class CheckListApi{
         }
     }
 
+    async updateChecklist(checklistId, items) {
+        try {
+            const endpoint = `${this.baseUrl}${this.checklistsEndpoint}/${checklistId}`;
+            const payload = {
+                Items: items.map(item => ({
+                    Description: (item.description || item.Description || '').trim()
+                })).filter(i => i.Description)
+            };
+            await axios.put(endpoint, payload);
+            return true;
+        } catch (error) {
+            console.error('Error actualizando checklist:', error.response?.data || error.message);
+            throw error;
+        }
+    }
+
     async registerNewChecklist(resource) {
         try {
             const endpoint = `${this.baseUrl}${this.checklistsEndpoint}`;
