@@ -1,69 +1,26 @@
 import { Organization } from '../domain/organization.entity.js';
 
 export class OrganizationAssembler {
-    /**
-     * Transform API response to Organization entity
-     * @param {Object} dto - Data from API
-     * @param {Array} overrideMembers - Override members if backend doesn't return them
-     * @returns {Organization}
-     */
-    toOrganization(dto, overrideMembers = null) {
-        console.log('[OrganizationAssembler] Transformando DTO a Organization:', dto);
-        console.log('[OrganizationAssembler] overrideMembers:', overrideMembers);
-
-        // El backend puede devolver los datos en diferentes formatos
+    toOrganization(dto) {
         const data = dto?.data || dto;
+        const members = Array.isArray(data?.memberIds) ? data.memberIds : [];
 
-        // Si overrideMembers está presente, usarlo; sino, usar lo que venga del backend
-        let members = Array.isArray(data?.members) ? data.members : [];
-        if (overrideMembers !== null && Array.isArray(overrideMembers)) {
-            members = overrideMembers;
-            console.log('[OrganizationAssembler] 🔄 Usando members override:', members);
-        }
-
-        const organization = new Organization({
+        return new Organization({
             id: data?.id || data?._id || null,
             name: data?.name || '',
             description: data?.description || '',
             status: data?.status || 'active',
-            members: members,
+            members,
             createdAt: data?.createdAt || data?.created_at || new Date().toISOString(),
             location: data?.location || ''
         });
-
-        console.log('[OrganizationAssembler] Organization creada:', {
-            id: organization.id,
-            name: organization.name,
-            membersCount: organization.getMemberCount()
-        });
-
-        return organization;
     }
 
-    /**
-     * Transform array of API responses to Organization entities
-     * @param {Array} dtoList - Array of data from API
-     * @returns {Array<Organization>}
-     */
     toOrganizationArray(dtoList) {
-        console.log('[OrganizationAssembler] Transformando array de DTOs:', dtoList);
-
-        if (!Array.isArray(dtoList)) {
-            console.warn('[OrganizationAssembler] La respuesta no es un array:', dtoList);
-            return [];
-        }
-
-        const organizations = dtoList.map(dto => this.toOrganization(dto));
-        console.log(`[OrganizationAssembler] Total organizaciones transformadas: ${organizations.length}`);
-
-        return organizations;
+        if (!Array.isArray(dtoList)) return [];
+        return dtoList.map(dto => this.toOrganization(dto));
     }
 
-    /**
-     * Transform form data to API format
-     * @param {Object} formData - Data from form
-     * @returns {Object}
-     */
     fromFormData(formData) {
         return {
             name: formData.name,
@@ -73,4 +30,3 @@ export class OrganizationAssembler {
         };
     }
 }
-

@@ -5,9 +5,12 @@ export class OrganizationApi {
     organizationsEndpoint = import.meta.env.VITE_ORGANIZATIONS_ENDPOINT;
     http = axios.create({ baseURL: this.baseUrl });
 
-    async getAll() {
+    async getAll(profileId) {
         try {
-            const { data } = await this.http.get(this.organizationsEndpoint);
+            const url = profileId
+                ? `${this.organizationsEndpoint}?profileId=${profileId}`
+                : this.organizationsEndpoint;
+            const { data } = await this.http.get(url);
             return data;
         } catch (error) {
             console.error('Error fetching organizations:', error);

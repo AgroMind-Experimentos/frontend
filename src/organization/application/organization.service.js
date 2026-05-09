@@ -1,6 +1,7 @@
 import { reactive } from 'vue';
 import { OrganizationApi } from '../infrastructure/organization-api.js';
 import { OrganizationAssembler } from '../infrastructure/organization-assembler.js';
+import { userStore } from '../../iam/application/user.store.js';
 
 class OrganizationService {
     state = reactive({
@@ -18,38 +19,14 @@ class OrganizationService {
      * @returns {Promise<Array<Organization>>}
      */
     async getAllOrganizations() {
-        console.log('[OrganizationService] Obteniendo todas las organizaciones...');
         this.state.loading = true;
         this.state.error = null;
 
         try {
-            const data = await this.#api.getAll();
-            console.log('[OrganizationService] Data recibida del backend:', data);
-
-            // El backend puede devolver los datos en diferentes formatos
+            const profileId = userStore.state.user?.id;
+            const data = await this.#api.getAll(profileId);
             const organizationsData = data?.data || data?.organizations || data;
-            console.log('[OrganizationService] Organizaciones a transformar:', organizationsData);
-
             this.state.organizations = this.#assembler.toOrganizationArray(organizationsData);
-
-            // 💾 HARDCODED: Restaurar miembros desde localStorage
-            const memberCache = JSON.parse(localStorage.getItem('org_members_cache') || '{}');
-            console.log('[OrganizationService] 💾 Cache de miembros:', memberCache);
-
-            this.state.organizations.forEach(org => {
-                if (memberCache[org.id]) {
-                    org.members = memberCache[org.id];
-                    console.log(`[OrganizationService] ✅ Restaurados ${memberCache[org.id].length} miembros para "${org.name}"`);
-                }
-            });
-
-            console.log('[OrganizationService] Total organizaciones cargadas:', this.state.organizations.length);
-
-            // Log del conteo de miembros de cada organizacion
-            this.state.organizations.forEach(org => {
-                console.log(`[OrganizationService] "${org.name}" tiene ${org.getMemberCount()} miembro(s)`);
-            });
-
             return this.state.organizations;
         } catch (error) {
             this.state.error = 'Error al cargar las organizaciones';
@@ -71,13 +48,7 @@ class OrganizationService {
 
         try {
             const data = await this.#api.getById(id);
-
-            // 💾 HARDCODED: Restaurar miembros desde localStorage
-            const memberCache = JSON.parse(localStorage.getItem('org_members_cache') || '{}');
-            const cachedMembers = memberCache[id] || null;
-            console.log('[OrganizationService] 💾 Miembros en cache para org', id, ':', cachedMembers);
-
-            this.state.currentOrganization = this.#assembler.toOrganization(data, cachedMembers);
+            this.state.currentOrganization = this.#assembler.toOrganization(data);
             return this.state.currentOrganization;
         } catch (error) {
             this.state.error = 'Error al cargar la organización';

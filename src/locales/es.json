@@ -64,7 +64,7 @@
   },
   "invitation": {
     "panelTitle": "Invitar Farmer por Email",
-    "emailPlaceholder": "farmer@email.com",
+    "emailPlaceholder": "Ingresa el email del farmer",
     "sendButton": "Enviar Invitación",
     "successSent": "Invitación enviada exitosamente.",
     "errorEmptyEmail": "Por favor ingresa un correo electrónico.",
