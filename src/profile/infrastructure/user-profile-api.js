@@ -6,16 +6,6 @@ export class UserProfileApi {
         baseURL: this.baseUrl,
     });
 
-    async getFarmers() {
-        try {
-            const response = await this.http.get('/users?role=Farmer');
-            return response.data?.data || response.data?.users || response.data;
-        } catch (error) {
-            console.error('❌ Error fetching farmers:', error);
-            throw new Error('Failed to fetch farmers');
-        }
-    }
-
     async getAllUsers() {
         try {
             console.log('🔍 Llamando al endpoint:', `${this.baseUrl}/users`);

@@ -48,12 +48,13 @@ export class PlotAssembler {
             organizationId: response.organizationId,
             name: response.name,
             description: response.description,
-            area: response.area ?? parsedData.area ?? '',
+            // Usar los datos parseados de la descripción o los campos directos si existen
+            area: response.area || parsedData.area || '',
             location: response.location || parsedData.location || '',
-            crop: response.cultivation || response.crop || parsedData.crop || '',
+            crop: response.crop || parsedData.crop || '',
             createdAt: response.createdAt,
             status: response.status || 'active',
-            members: response.memberIds || response.members || []
+            members: response.members || []
         });
     }
 
@@ -82,11 +83,10 @@ export class PlotAssembler {
 
         const description = descriptionParts.join(' | ');
 
+        // Solo enviar los campos que el backend espera
         return {
             name: formData.name,
-            location: formData.location || '',
-            area: parseFloat(formData.area) || 0,
-            cultivation: formData.crop || '',
+            description: description,
             organizationId: parseInt(formData.organizationId)
         };
     }
