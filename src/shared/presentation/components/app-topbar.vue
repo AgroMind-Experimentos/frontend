@@ -11,7 +11,7 @@ const userName = computed(() => userStore.state.user?.name || 'Usuario');
   <header class="topbar">
     <div class="brand">
       <div class="logo">
-        <img src="https://files.catbox.moe/2ws3bu.png" alt="EcoTrack" />
+        <img src="/icon.ico" alt="EcoTrack" />
       </div>
       <h3 class="title">{{ $t('sharedExt.ecotrack') }}</h3>
     </div>

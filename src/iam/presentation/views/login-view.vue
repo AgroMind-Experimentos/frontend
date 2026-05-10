@@ -24,7 +24,7 @@ export default {
     const errorKey = computed(() => userStore.state.errorKey);
 
     // Logo desde Catbox (tu link)
-    const logoUrl = 'https://files.catbox.moe/2ws3bu.png';
+    const logoUrl = '/logo.png';
 
     // Actions
     const goRegister = () => router.push({ name: 'user-register' });
@@ -176,24 +176,12 @@ export default {
 .avatar-circle {
   width: 100px;
   height: 100px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #2E7D32, #4CAF50);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  box-shadow:
-    0 8px 25px rgba(46, 125, 50, 0.3),
-    0 4px 10px rgba(0, 0, 0, 0.1);
   border: 3px solid rgba(255, 255, 255, 0.9);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.avatar-circle:hover {
-  transform: translateY(-2px);
-  box-shadow:
-    0 12px 35px rgba(46, 125, 50, 0.4),
-    0 6px 15px rgba(0, 0, 0, 0.15);
 }
 
 .avatar-img {
