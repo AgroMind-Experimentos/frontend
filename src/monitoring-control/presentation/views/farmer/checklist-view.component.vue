@@ -76,7 +76,7 @@ const finishTask = ()=>{
 
 <template>
   <div class="container">
-    <h3>CheckList</h3>
+    <h3>{{ $t('tasksExt.checklist') }}</h3>
     <div v-if="checklist && checklist.items && checklist.items.length > 0">
       <div v-for="item in checklist.items" :key="item.id" class="checklist-item">
         <template v-if="task?.status?.toLowerCase() === 'pending'">
@@ -90,8 +90,8 @@ const finishTask = ()=>{
       </div>
     </div>
     <div v-else>
-      <p v-if="checklist === null">Cargando...</p>
-      <p v-else-if="task?.status?.toLowerCase() !== 'pending'" class="no-checklist">Esta tarea no tiene checklist.</p>
+      <p v-if="checklist === null">{{ $t('common.loading') }}</p>
+      <p v-else-if="task?.status?.toLowerCase() !== 'pending'" class="no-checklist">{{ $t('tasksExt.noChecklist') }}</p>
     </div>
 
     <p v-if="completeError" class="complete-error">{{ completeError }}</p>
@@ -101,7 +101,7 @@ const finishTask = ()=>{
       @click="finishTask"
       class="finish-btn"
       :disabled="task?.status === 'Completed'"
-    >Finalizar</pv-button>
+    >{{ $t('tasks.finish') }}</pv-button>
   </div>
 </template>
 

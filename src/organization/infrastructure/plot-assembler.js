@@ -4,7 +4,7 @@ export class PlotAssembler {
     /**
      * Parsea la descripción y extrae campos estructurados
      * Formato esperado: "Área: 5.2 ha | Ubicación: Norte | Cultivo: Maíz | Miembros: 3"
-     * @param {string} description - Descripción de la parcela
+     * @param {string} description - Descripción de la plota
      * @returns {Object} - Objeto con los campos parseados
      */
     static parseDescription(description) {
@@ -39,7 +39,7 @@ export class PlotAssembler {
         // Parsear la descripción para extraer los datos estructurados
         const parsedData = this.parseDescription(response.description);
 
-        console.log('📋 Parseando parcela:', response.name);
+        console.log('📋 Parseando plota:', response.name);
         console.log('   Descripción:', response.description);
         console.log('   ✅ Datos extraídos:', parsedData);
 

@@ -26,6 +26,7 @@ export default {
 
     const loading = computed(() => userStore.state.loading);
     const errorKey = computed(() => userStore.state.errorKey);
+    const successKey = computed(() => userStore.state.successKey);
 
     const goLogin = () => router.push({ name: 'user-login' });
 
@@ -51,13 +52,13 @@ export default {
       });
 
       if (ok) {
-        router.push({ name: 'user-login' });
+        setTimeout(() => router.push({ name: 'user-login' }), 2000);
       }
     };
 
     return {
       name, email, password, confirmPassword,
-      role, logoUrl, loading, errorKey, goLogin, submit
+      role, logoUrl, loading, errorKey, successKey, goLogin, submit
     };
   }
 };
@@ -81,8 +82,8 @@ export default {
         <!-- Título -->
         <template #title>
           <div class="title-section">
-            <h1 class="register-title">Crear Cuenta</h1>
-            <p class="register-subtitle">Únete a nuestra comunidad agrícola</p>
+            <h1 class="register-title">{{ $t('iam.createAccount') }}</h1>
+            <p class="register-subtitle">{{ $t('iam.joinCommunity') }}</p>
           </div>
         </template>
 
@@ -91,21 +92,21 @@ export default {
           <form @submit.prevent="submit" class="register-form">
             <!-- Campo de nombre -->
             <div class="form-field">
-              <label class="field-label">Nombre completo</label>
+              <label class="field-label">{{ $t('iam.fullName') }}</label>
               <InputText
                 v-model="name"
-                placeholder="Tu nombre completo"
+                :placeholder="$t('iam.fullNamePlaceholder')"
                 class="form-input"
               />
             </div>
 
             <!-- Campo de correo -->
             <div class="form-field">
-              <label class="field-label">Correo electrónico</label>
+              <label class="field-label">{{ $t('iam.email') }}</label>
               <InputText
                 v-model="email"
                 type="email"
-                placeholder="ejemplo@correo.com"
+                :placeholder="$t('iam.emailPlaceholder')"
                 class="form-input"
               />
             </div>
@@ -113,24 +114,24 @@ export default {
             <!-- Campos de contraseña en fila -->
             <div class="password-row">
               <div class="form-field password-field-half">
-                <label class="field-label">Contraseña</label>
+                <label class="field-label">{{ $t('iam.password') }}</label>
                 <Password
                   v-model="password"
                   :feedback="false"
                   toggleMask
-                  placeholder="Contraseña"
+                  :placeholder="$t('iam.password')"
                   inputClass="form-input-password"
                   class="password-field"
                 />
               </div>
 
               <div class="form-field password-field-half">
-                <label class="field-label">Confirmar</label>
+                <label class="field-label">{{ $t('iam.confirmPassword') }}</label>
                 <Password
                   v-model="confirmPassword"
                   :feedback="false"
                   toggleMask
-                  placeholder="Confirmar"
+                  :placeholder="$t('iam.confirmPassword')"
                   inputClass="form-input-password"
                   class="password-field"
                 />
@@ -139,7 +140,7 @@ export default {
 
             <!-- Selección de rol -->
             <div class="roles-section">
-              <label class="field-label">Tipo de usuario</label>
+              <label class="field-label">{{ $t('iam.userType') }}</label>
               <div class="roles-container">
                 <div class="role-option" :class="{ active: role === 'Agronomist' }">
                   <RadioButton
@@ -150,8 +151,8 @@ export default {
                   />
                   <label for="role-agronomo" class="role-label">
                     <i class="pi pi-user-edit"></i>
-                    <span>Agrónomo</span>
-                    <small>Especialista técnico</small>
+                    <span>{{ $t('iam.agronomist') }}</span>
+                    <small>{{ $t('iam.agronomistDesc') }}</small>
                   </label>
                 </div>
 
@@ -164,8 +165,8 @@ export default {
                   />
                   <label for="role-agricultor" class="role-label">
                     <i class="pi pi-home"></i>
-                    <span>Agricultor</span>
-                    <small>Productor agrícola</small>
+                    <span>{{ $t('iam.farmer') }}</span>
+                    <small>{{ $t('iam.farmerDesc') }}</small>
                   </label>
                 </div>
               </div>
@@ -174,13 +175,19 @@ export default {
             <!-- Mensaje de error -->
             <div v-if="errorKey" class="error-message">
               <i class="pi pi-exclamation-triangle"></i>
-              {{ $t ? $t(errorKey) : 'Error en el registro. Verifica los datos.' }}
+              {{ $t ? $t(errorKey) : $t('iam.registerError') }}
+            </div>
+
+            <!-- Mensaje de éxito -->
+            <div v-if="successKey" class="success-message">
+              <i class="pi pi-check-circle"></i>
+              {{ $t(successKey) }}
             </div>
 
             <!-- Botón de registro -->
             <Button
               type="submit"
-              label="Crear Cuenta"
+              :label="$t('iam.createAccount')"
               class="register-button"
               :loading="loading"
               :disabled="!name || !email || !password || !confirmPassword || !role"
@@ -188,14 +195,14 @@ export default {
 
             <!-- Divider -->
             <div class="divider">
-              <span>o</span>
+              <span>{{ $t('iam.or') }}</span>
             </div>
 
             <!-- Enlace a login -->
             <div class="login-link">
-              <span class="text-secondary">¿Ya tienes cuenta?</span>
+              <span class="text-secondary">{{ $t('iam.alreadyHaveAccount') }}</span>
               <Button
-                label="Iniciar sesión"
+                :label="$t('iam.login')"
                 class="p-button-link login-button"
                 @click="goLogin"
               />
@@ -571,5 +578,20 @@ export default {
     align-items: flex-start;
     text-align: left;
   }
+}
+</style>
+<style scoped>
+.success-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: #d1fae5;
+  color: #065f46;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+  animation: fadeIn 0.3s ease-out;
 }
 </style>

@@ -12,7 +12,7 @@ import InputText from 'primevue/inputtext';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 const route = useRoute();
 const router = useRouter();
@@ -69,16 +69,16 @@ onMounted(async () => {
   }
 });
 
-const goCreateParcel = () => {
-  router.push({ name: 'parcel-create', query: { orgId } });
+const goCreatePlot = () => {
+  router.push({ name: 'plot-create', query: { orgId } });
 };
 
 const editPlot = (plot) => {
-  router.push({ name: 'parcel-edit', params: { id: plot.id } });
+  router.push({ name: 'plot-edit', params: { id: plot.id } });
 };
 
 const deletePlot = async (plot) => {
-  if (confirm(`${t('organization.deleteParcelConfirm')} "${plot.name}"?`)) {
+  if (confirm(`${t('organization.deletePlotConfirm')} "${plot.name}"?`)) {
     try {
       await plotService.deletePlot(plot.id);
     } catch (err) {
@@ -91,7 +91,8 @@ const deletePlot = async (plot) => {
 const formatDate = (dateString) => {
   if (!dateString) return '';
   const date = new Date(dateString);
-  return date.toLocaleDateString('es-ES', {
+  const currentLocale = locale.value === 'en' ? 'en-US' : 'es-ES';
+  return date.toLocaleDateString(currentLocale, {
     year: 'numeric',
     month: 'long',
     day: 'numeric'
@@ -162,9 +163,9 @@ const getMemberCount = (plot) => {
 
         <div v-if="isAgronomist" class="actions">
           <Button
-            :label="t('organization.createParcel')"
+            :label="t('organization.createPlot')"
             icon="pi pi-plus"
-            @click="goCreateParcel"
+            @click="goCreatePlot"
             class="p-button-success"
             :disabled="loading"
           />
@@ -201,7 +202,7 @@ const getMemberCount = (plot) => {
 
       <div v-if="loading" class="loading-state">
         <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
-        <p>{{ t('organization.loadingParcels') }}</p>
+        <p>{{ t('organization.loadingPlots') }}</p>
       </div>
 
       <div v-else-if="error" class="error-state">
@@ -216,7 +217,7 @@ const getMemberCount = (plot) => {
       </div>
 
       <div v-else-if="plots.length > 0" class="plots-section">
-        <h2>{{ t('organization.parcelsTitle') }}</h2>
+        <h2>{{ t('organization.plotsTitle') }}</h2>
 
         <DataTable :value="plots" responsiveLayout="scroll" class="plots-table">
           <Column field="name" :header="t('organization.name')" :sortable="true">
@@ -256,7 +257,7 @@ const getMemberCount = (plot) => {
                   icon="pi pi-trash"
                   class="p-button-rounded p-button-text p-button-danger"
                   @click="deletePlot(slotProps.data)"
-                  :title="t('organization.deleteParcel')"
+                  :title="t('organization.deletePlot')"
                 />
               </div>
             </template>
@@ -266,13 +267,13 @@ const getMemberCount = (plot) => {
 
       <div v-else class="empty-state">
         <i class="pi pi-map box-icon"></i>
-        <h2 class="title">{{ t('organization.noParcels') }}</h2>
-        <p>{{ t('organization.noParcelsDesc') }}</p>
+        <h2 class="title">{{ t('organization.noPlots') }}</h2>
+        <p>{{ t('organization.noPlotsDesc') }}</p>
         <Button
           v-if="isAgronomist"
-          :label="t('organization.createFirstParcel')"
+          :label="t('organization.createFirstPlot')"
           icon="pi pi-plus"
-          @click="goCreateParcel"
+          @click="goCreatePlot"
           class="p-button-success"
         />
       </div>

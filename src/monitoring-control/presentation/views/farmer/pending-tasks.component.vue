@@ -83,7 +83,7 @@ async function deleteTask(task) {
 
 <template>
   <div class="container">
-    <h3>Tareas Pendientes</h3>
+    <h3>{{ $t('tasks.pendingTasks') }}</h3>
 
     <div v-if="loadError" class="load-error">
       <i class="pi pi-exclamation-triangle"></i> {{ loadError }}
@@ -91,7 +91,7 @@ async function deleteTask(task) {
 
     <div v-if="loading" class="loading-state">
       <i class="pi pi-spinner pi-spin"></i>
-      <span>Cargando tareas...</span>
+      <span>{{ $t('tasksExt.loadingTasks') }}</span>
     </div>
 
     <div v-else-if="tasks.length > 0" class="tasks">
@@ -99,10 +99,10 @@ async function deleteTask(task) {
         <div class="task-content">
           <div class="task-info">
             <h4 class="task-title">{{ task.title }}</h4>
-            <p class="task-meta">Responsable: {{ userName(task.responsibleId) }}</p>
+            <p class="task-meta">{{ $t('tasks.responsible') }}: {{ userName(task.responsibleId) }}</p>
             <div class="status-badge pending">
               <i class="pi pi-clock"></i>
-              Pendiente
+              {{ $t('tasks.pending') }}
             </div>
           </div>
           <div class="task-actions">
@@ -144,8 +144,8 @@ async function deleteTask(task) {
 
     <div v-else class="empty-state">
       <i class="pi pi-clock empty-icon"></i>
-      <h3>No hay tareas pendientes</h3>
-      <p>Todas las tareas están en progreso o completadas</p>
+      <h3>{{ $t('tasksExt.noPending') }}</h3>
+      <p>{{ $t('tasksExt.allInProgressOrCompleted') }}</p>
     </div>
   </div>
 </template>

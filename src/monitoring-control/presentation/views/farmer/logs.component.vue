@@ -18,15 +18,15 @@ onMounted(async () => {
 
 <template>
   <div class="container">
-    <h3>Logs:</h3>
+    <h3>{{ $t('logs.title') }}</h3>
     <table v-if="logsList.length > 0">
       <thead>
         <tr>
-          <th>Actividad</th>
-          <th>Fecha</th>
-          <th>Duracion</th>
-          <th>Volumen</th>
-          <th>Evidencia</th>
+          <th>{{ $t('logs.activity') }}</th>
+          <th>{{ $t('logs.date') }}</th>
+          <th>{{ $t('logs.duration') }}</th>
+          <th>{{ $t('logs.volume') }}</th>
+          <th>{{ $t('logs.evidence') }}</th>
         </tr>
       </thead>
       <tbody>

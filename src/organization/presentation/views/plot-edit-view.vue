@@ -67,9 +67,9 @@ function removeMember(id) {
   selected.value = selected.value.filter(x => x !== id);
 }
 
-async function updateParcel() {
+async function updatePlot() {
   if (!name.value.trim()) {
-    alert('Ingresa el nombre de la parcela');
+    alert('Ingresa el nombre de la plota');
     return;
   }
 
@@ -93,16 +93,16 @@ async function updateParcel() {
       members: selected.value.map(id => String(id))
     };
 
-    console.log('🚀 Actualizando parcela con datos:', plotData);
+    console.log('🚀 Actualizando plota con datos:', plotData);
     await plotService.updatePlot(plotId, plotData);
-    console.log('✅ Parcela actualizada exitosamente');
+    console.log('✅ Plota actualizada exitosamente');
 
-    alert('Parcela actualizada exitosamente!');
+    alert('Plota actualizada exitosamente!');
     // Redirigir al detalle de la organización
     router.push({ name: 'organization-detail', params: { id: currentPlot.value.organizationId } });
   } catch (err) {
     console.error('❌ Error updating plot:', err);
-    alert(`Error al actualizar la parcela: ${err.message || 'Error desconocido'}`);
+    alert(`Error al actualizar la plota: ${err.message || 'Error desconocido'}`);
   }
 }
 
@@ -118,12 +118,12 @@ function goBack() {
 <template>
   <AppLayout>
     <div class="wrap">
-      <h2 class="page-title">Editar Parcela</h2>
+      <h2 class="page-title">{{ $t('organizationExt.editPlot') }}</h2>
 
       <!-- Estado de carga -->
       <div v-if="loading" class="loading-state">
         <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
-        <p>Cargando datos de la parcela...</p>
+        <p>{{ $t('organizationExt.loadingPlot') }}</p>
       </div>
 
       <!-- Estado de error -->
@@ -131,7 +131,7 @@ function goBack() {
         <i class="pi pi-exclamation-triangle" style="font-size: 2rem; color: #e74c3c"></i>
         <p>{{ error }}</p>
         <Button
-          label="Volver"
+          :label="$t('common.back')"
           icon="pi pi-arrow-left"
           @click="goBack"
           class="p-button-outlined"
@@ -145,22 +145,22 @@ function goBack() {
           <template #title>
             <div class="panel-title">
               <i class="pi pi-pencil mr-2 text-orange-500"></i>
-              <span>Datos de la Parcela:</span>
+              <span>{{ $t('organizationExt.plotData') }}</span>
             </div>
           </template>
           <template #content>
             <div class="p-fluid">
-              <label class="label">Nombre</label>
-              <InputText v-model="name" placeholder="Nombre" class="mb-3" />
+              <label class="label">{{ $t('organization.name') }}</label>
+              <InputText v-model="name" :placeholder="$t('organization.name')" class="mb-3" />
 
-              <label class="label">Área</label>
-              <InputText v-model="area" placeholder="Área (ej: 5.2 ha)" class="mb-3" />
+              <label class="label">{{ $t('organization.area') }}</label>
+              <InputText v-model="area" :placeholder="$t('organization.areaPlaceholder')" class="mb-3" />
 
-              <label class="label">Ubicación</label>
-              <InputText v-model="locationTxt" placeholder="Ubicación" class="mb-3" />
+              <label class="label">{{ $t('organization.location') }}</label>
+              <InputText v-model="locationTxt" :placeholder="$t('organization.location')" class="mb-3" />
 
-              <label class="label">Cultivo</label>
-              <InputText v-model="crop" placeholder="Cultivo" />
+              <label class="label">{{ $t('organization.crop') }}</label>
+              <InputText v-model="crop" :placeholder="$t('organization.crop')" />
             </div>
           </template>
         </Card>
@@ -170,13 +170,13 @@ function goBack() {
           <template #title>
             <div class="panel-title">
               <i class="pi pi-users mr-2 text-orange-500"></i>
-              <span>Miembros Asignados:</span>
+              <span>{{ $t('organization.assignedMembers') }}</span>
             </div>
           </template>
           <template #content>
             <div class="search-box mb-3">
               <i class="pi pi-search"></i>
-              <InputText v-model="search" placeholder="Buscar miembros" class="w-full" />
+              <InputText v-model="search" :placeholder="$t('organization.searchMembersPlaceholder')" class="w-full" />
             </div>
 
             <div class="member-list">
@@ -197,14 +197,14 @@ function goBack() {
 
       <div class="actions" v-if="currentPlot">
         <Button
-          label="Cancelar"
+          :label="$t('common.cancel')"
           class="p-button-outlined btn-cancel"
           @click="goBack"
         />
         <Button
-          label="Actualizar"
+          :label="$t('reports.update')"
           class="btn-primary"
-          @click="updateParcel"
+          @click="updatePlot"
           :loading="loading"
         />
       </div>

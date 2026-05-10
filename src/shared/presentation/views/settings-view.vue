@@ -32,25 +32,25 @@ function cancelPlan() { alert('Cancelar plan (WIP)'); }
         <!-- Panel izquierdo -->
         <Card class="left-card">
           <template #title>
-            <div class="card-title">Configuración</div>
+            <div class="card-title">{{ $t('sharedExt.settingsTitle') }}</div>
           </template>
           <template #content>
             <div class="stack">
               <Button
-                  label="Suscripción"
+                  :label="$t('settings.subscription')"
                   class="w-full"
                   :severity="activePanel === 'subscription' ? undefined : 'secondary'"
                   @click="activePanel = 'subscription'"
               />
               <Button
-                  label="Cambiar idioma"
+                  :label="$t('settings.changeLanguage')"
                   class="w-full"
                   :severity="activePanel === 'language' ? undefined : 'secondary'"
                   @click="activePanel = 'language'"
               />
 
               <div class="notif">
-                <span>Notificaciones</span>
+                <span>{{ $t('settings.notifications') }}</span>
                 <InputSwitch v-model="notifications" />
               </div>
             </div>
@@ -61,44 +61,44 @@ function cancelPlan() { alert('Cancelar plan (WIP)'); }
         <Card class="right-card">
           <!-- Suscripción -->
           <template v-if="activePanel === 'subscription'" #title>
-            <div class="card-title">Plan Actual:</div>
+            <div class="card-title">{{ $t('settings.currentPlan') }}</div>
           </template>
           <template v-if="activePanel === 'subscription'" #content>
             <div class="subgrid">
               <div class="row">
-                <div class="label">Plan</div>
-                <div class="value">Plan</div>
+                <div class="label">{{ $t('settings.plan') }}</div>
+                <div class="value">{{ $t('settings.plan') }}</div>
               </div>
               <div class="row">
-                <div class="label">Fecha de Pago:</div>
-                <div class="value">DD/MM</div>
+                <div class="label">{{ $t('settings.paymentDate') }}</div>
+                <div class="value">{{ $t('settings.ddmm') }}</div>
               </div>
 
               <div class="actions">
-                <Button label="Cambiar plan" severity="warning" @click="changePlan" />
-                <Button label="Cancelar plan" severity="secondary" disabled @click="cancelPlan" />
+                <Button :label="$t('settings.changePlan')" severity="warning" @click="changePlan" />
+                <Button :label="$t('settings.cancelPlan')" severity="secondary" disabled @click="cancelPlan" />
               </div>
             </div>
           </template>
 
           <!-- Idioma -->
           <template v-if="activePanel === 'language'" #title>
-            <div class="card-title">Seleccionar Idioma</div>
+            <div class="card-title">{{ $t('settings.selectLanguage') }}</div>
           </template>
           <template v-if="activePanel === 'language'" #content>
             <div class="lang">
               <Button
-                  label="Español"
+                  :label="$t('settings.spanish')"
                   :severity="locale === 'es' ? 'warning' : 'secondary'"
                   @click="applyLanguage('es')"
               />
               <Button
-                  label="Inglés"
+                  :label="$t('settings.english')"
                   :severity="locale === 'en' ? 'warning' : 'secondary'"
                   @click="applyLanguage('en')"
               />
             </div>
-            <small class="hint">Se aplica inmediatamente.</small>
+            <small class="hint">{{ $t('settings.appliesImmediately') }}</small>
           </template>
         </Card>
       </div>

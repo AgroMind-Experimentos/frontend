@@ -9,7 +9,7 @@ import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 import Avatar from 'primevue/avatar';
 
-// Id de organización (obligatorio para crear parcela)
+// Id de organización (obligatorio para crear plota)
 const route = useRoute();
 const router = useRouter();
 const orgId = route.query.orgId ?? null;
@@ -50,9 +50,9 @@ function removeMember(id) {
   selected.value = selected.value.filter(x => x !== id);
 }
 
-async function createParcel() {
+async function createPlot() {
   if (!name.value.trim()) {
-    alert('Ingresa el nombre de la parcela');
+    alert('Ingresa el nombre de la plota');
     return;
   }
 
@@ -81,16 +81,16 @@ async function createParcel() {
       members: selected.value.map(id => String(id))
     };
 
-    console.log('🚀 Creando parcela con datos:', plotData);
+    console.log('🚀 Creando plota con datos:', plotData);
     await plotService.createPlot(plotData);
-    console.log('✅ Parcela creada exitosamente');
+    console.log('✅ Plota creada exitosamente');
 
-    alert('Parcela creada exitosamente!');
+    alert('Plota creada exitosamente!');
     // Redirigir al detalle de la organización
     router.push({ name: 'organization-detail', params: { id: orgId } });
   } catch (err) {
     console.error('❌ Error creating plot:', err);
-    alert(`Error al crear la parcela: ${err.message || 'Error desconocido'}`);
+    alert(`Error al crear la plota: ${err.message || 'Error desconocido'}`);
   }
 }
 
@@ -106,7 +106,7 @@ function goBack() {
 <template>
   <AppLayout>
     <div class="wrap">
-      <h2 class="page-title">Crear Parcela</h2>
+      <h2 class="page-title">{{ $t('organizationExt.createPlot') }}</h2>
 
       <div class="grid">
         <!-- Panel: Datos -->
@@ -114,22 +114,22 @@ function goBack() {
           <template #title>
             <div class="panel-title">
               <i class="pi pi-user mr-2 text-orange-500"></i>
-              <span>Datos:</span>
+              <span>{{ $t('organizationExt.data') }}</span>
             </div>
           </template>
           <template #content>
             <div class="p-fluid">
-              <label class="label">Nombre</label>
-              <InputText v-model="name" placeholder="Nombre" class="mb-3" />
+              <label class="label">{{ $t('organization.name') }}</label>
+              <InputText v-model="name" :placeholder="$t('organization.name')" class="mb-3" />
 
-              <label class="label">Área</label>
-              <InputText v-model="area" placeholder="Área" class="mb-3" />
+              <label class="label">{{ $t('organization.area') }}</label>
+              <InputText v-model="area" :placeholder="$t('organization.area')" class="mb-3" />
 
-              <label class="label">Ubicacion</label>
-              <InputText v-model="locationTxt" placeholder="Ubicacion" class="mb-3" />
+              <label class="label">{{ $t('organization.location') }}</label>
+              <InputText v-model="locationTxt" :placeholder="$t('organization.location')" class="mb-3" />
 
-              <label class="label">Cultivo</label>
-              <InputText v-model="crop" placeholder="Cultivo" />
+              <label class="label">{{ $t('organization.crop') }}</label>
+              <InputText v-model="crop" :placeholder="$t('organization.crop')" />
             </div>
           </template>
         </Card>
@@ -138,7 +138,7 @@ function goBack() {
       </div>
 
       <div class="actions">
-        <Button label="Crear" class="btn-primary" @click="createParcel" />
+        <Button :label="$t('common.create')" class="btn-primary" @click="createPlot" />
       </div>
     </div>
   </AppLayout>

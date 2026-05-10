@@ -60,8 +60,8 @@ export default {
         <!-- Título mejorado -->
         <template #title>
           <div class="title-section">
-            <h1 class="login-title">Iniciar Sesión</h1>
-            <p class="login-subtitle">¡Bienvenido de vuelta!</p>
+            <h1 class="login-title">{{ $t('iam.loginTitle') }}</h1>
+            <p class="login-subtitle">{{ $t('iam.welcomeBack') }}</p>
           </div>
         </template>
 
@@ -70,10 +70,10 @@ export default {
           <form @submit.prevent="submit" class="login-form">
             <!-- Campo de correo -->
             <div class="form-field">
-              <label class="field-label">Correo electrónico</label>
+              <label class="field-label">{{ $t('iam.email') }}</label>
               <InputText
                 v-model="email"
-                placeholder="ejemplo@correo.com"
+                :placeholder="$t('iam.emailPlaceholder')"
                 type="email"
                 class="form-input"
                 :class="{ 'p-invalid': errorKey }"
@@ -82,12 +82,12 @@ export default {
 
             <!-- Campo de contraseña -->
             <div class="form-field">
-              <label class="field-label">Contraseña</label>
+              <label class="field-label">{{ $t('iam.password') }}</label>
               <Password
                 v-model="password"
                 :feedback="false"
                 toggleMask
-                placeholder="Ingresa tu contraseña"
+                :placeholder="$t('iam.passwordPlaceholder')"
                 inputClass="form-input-password"
                 class="password-field"
                 :class="{ 'p-invalid': errorKey }"
@@ -97,13 +97,13 @@ export default {
             <!-- Mensaje de error -->
             <div v-if="errorKey" class="error-message">
               <i class="pi pi-exclamation-triangle"></i>
-              {{ $t ? $t(errorKey) : 'Credenciales inválidas. Verifica tus datos.' }}
+              {{ $t ? $t(errorKey) : $t('iam.loginError') }}
             </div>
 
             <!-- Botón principal -->
             <Button
               type="submit"
-              label="Iniciar Sesión"
+              :label="$t('iam.loginTitle')"
               class="login-button"
               :loading="loading"
               :disabled="!email || !password"
@@ -111,14 +111,14 @@ export default {
 
             <!-- Divider -->
             <div class="divider">
-              <span>o</span>
+              <span>{{ $t('iam.or') }}</span>
             </div>
 
             <!-- Enlace a registro -->
             <div class="register-link">
-              <span class="text-secondary">¿No tienes cuenta?</span>
+              <span class="text-secondary">{{ $t('iam.noAccount') }}</span>
               <Button
-                label="Crear cuenta"
+                :label="$t('iam.createAccountBtn')"
                 class="p-button-link register-button"
                 @click="goRegister"
               />

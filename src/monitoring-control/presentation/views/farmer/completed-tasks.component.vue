@@ -79,7 +79,7 @@ function formatDate(dateString){
 
 <template>
   <div class="container">
-    <h3>Tareas Completadas</h3>
+    <h3>{{ $t('tasks.completedTasks') }}</h3>
 
     <div v-if="loadError" class="load-error">
       <i class="pi pi-exclamation-triangle"></i> {{ loadError }}
@@ -87,7 +87,7 @@ function formatDate(dateString){
 
     <div v-if="loading" class="loading-state">
       <i class="pi pi-spinner pi-spin"></i>
-      <span>Cargando tareas...</span>
+      <span>{{ $t('tasksExt.loadingTasks') }}</span>
     </div>
 
     <div v-else-if="tasks.length > 0" class="tasks">
@@ -95,11 +95,11 @@ function formatDate(dateString){
         <div class="task-content">
           <div class="task-info">
             <h4 class="task-title">{{ task.title }}</h4>
-            <p class="task-meta">Responsable: {{ userName(task.responsibleId) }}</p>
-            <p class="task-meta" v-if="task.completedAt">Completada: {{ formatDate(task.completedAt) }}</p>
+            <p class="task-meta">{{ $t('tasks.responsible') }}: {{ userName(task.responsibleId) }}</p>
+            <p class="task-meta" v-if="task.completedAt">{{ $t('tasks.completedOn') }}: {{ formatDate(task.completedAt) }}</p>
             <div class="status-badge completed">
               <i class="pi pi-check"></i>
-              Completada
+              {{ $t('tasks.completed') }}
             </div>
           </div>
           <div class="task-actions">
@@ -125,8 +125,8 @@ function formatDate(dateString){
 
     <div v-else class="empty-state">
       <i class="pi pi-check-circle empty-icon"></i>
-      <h3>No hay tareas completadas</h3>
-      <p>Completa algunas tareas para verlas aquí</p>
+      <h3>{{ $t('tasksExt.noCompletedTasks') }}</h3>
+      <p>{{ $t('tasksExt.completeToSee') }}</p>
     </div>
   </div>
 </template>

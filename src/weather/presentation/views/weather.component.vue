@@ -149,8 +149,8 @@ const agriculturalInfo = computed(() => {
   <AppLayout>
     <div class="weather-container">
       <div class="header">
-        <h1>Información del Clima</h1>
-        <p>Datos meteorológicos actuales para la gestión agrícola</p>
+        <h1>{{ $t('weather.title') }}</h1>
+        <p>{{ $t('weather.desc') }}</p>
       </div>
 
       <!-- Buscador de ubicación -->
@@ -162,18 +162,18 @@ const agriculturalInfo = computed(() => {
                 <i class="pi pi-map-marker"></i>
               </div>
               <div class="search-input-group">
-                <label for="location-input" class="search-label">Ubicación</label>
+                <label for="location-input" class="search-label">{{ $t('weather.location') }}</label>
                 <div class="input-with-button">
                   <InputText
                       id="location-input"
                       v-model="locationInput"
-                      placeholder="Ej: Lima, Puno"
+                      :placeholder="$t('weather.egCity')"
                       @keypress="handleKeyPress"
                       class="location-input"
                       :disabled="loading"
                   />
                   <Button
-                      label="Buscar"
+                      :label="$t('common.search')"
                       icon="pi pi-search"
                       @click="searchLocation"
                       :loading="loading"
@@ -182,7 +182,7 @@ const agriculturalInfo = computed(() => {
                 </div>
                 <small class="search-hint">
                   <i class="pi pi-info-circle"></i>
-                  Ingresa ciudad, región
+                  {{ $t('weather.placeholder') }}
                 </small>
               </div>
             </div>
@@ -192,7 +192,7 @@ const agriculturalInfo = computed(() => {
 
       <div class="actions">
         <Button
-          label="Actualizar"
+          :label="$t('reports.update')"
           icon="pi pi-refresh"
           @click="refreshWeather"
           :loading="loading"
@@ -203,7 +203,7 @@ const agriculturalInfo = computed(() => {
       <!-- Estado de carga -->
       <div v-if="loading" class="loading-state">
         <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
-        <p>Cargando información del clima...</p>
+        <p>{{ $t('weather.loadingWeather') }}</p>
       </div>
 
       <!-- Estado de error -->
@@ -211,7 +211,7 @@ const agriculturalInfo = computed(() => {
         <i class="pi pi-exclamation-triangle" style="font-size: 2rem; color: #e74c3c"></i>
         <p>{{ error }}</p>
         <Button
-          label="Reintentar"
+          :label="$t('common.retry')"
           icon="pi pi-refresh"
           @click="refreshWeather"
           class="p-button-outlined"
@@ -224,7 +224,7 @@ const agriculturalInfo = computed(() => {
           <template #header>
             <div class="weather-header">
               <i class="pi pi-sun weather-icon"></i>
-              <h2>Condiciones Actuales</h2>
+              <h2>{{ $t('weather.currentConditions') }}</h2>
             </div>
           </template>
           <template #content>
@@ -239,11 +239,11 @@ const agriculturalInfo = computed(() => {
               <div class="weather-details" v-if="weatherData.humidity || weatherData.windSpeed">
                 <div class="detail-item" v-if="weatherData.humidity">
                   <i class="pi pi-tint"></i>
-                  <span>Humedad: {{ weatherData.humidity }}%</span>
+                  <span>{{ $t('weather.humidity') }}: {{ weatherData.humidity }}%</span>
                 </div>
                 <div class="detail-item" v-if="weatherData.windSpeed">
                   <i class="pi pi-flag"></i>
-                  <span>Viento: {{ weatherData.windSpeed }} km/h</span>
+                  <span>{{ $t('weather.wind') }}: {{ weatherData.windSpeed }} km/h</span>
                 </div>
                 <div class="detail-item" v-if="weatherData.location">
                   <i class="pi pi-map-marker"></i>

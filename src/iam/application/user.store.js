@@ -48,11 +48,8 @@ class UserStore {
 
             return true;
         } catch (err) {
-            this.state.errorKey = err?.response?.status === 401
-                ? 'auth.invalidCredentials'
-                : err?.response?.status === 503
-                ? 'common.serviceUnavailable'
-                : 'common.unexpectedError';
+            const msg = err?.response?.data?.message;
+            this.state.errorKey = msg ? `auth.${msg}` : 'common.unexpectedError';
             return false;
         } finally {
             this.state.loading = false;
@@ -66,23 +63,27 @@ class UserStore {
             await this.#api.register(name, email, password, role);
             return true;
         } catch (err) {
-            this.state.errorKey = err?.response?.status === 409
-                ? 'auth.emailAlreadyExists'
-                : err?.response?.status === 400
-                ? 'auth.invalidData'
-                : 'common.unexpectedError';
+            const msg = err?.response?.data?.message;
+            this.state.errorKey = msg ? `auth.${msg}` : 'common.unexpectedError';
             return false;
         } finally {
             this.state.loading = false;
         }
     }
 
-    logout() {
-        this.state.user = null;
-        this.state.tokens = null;
-        // Limpiar localStorage
-        this.#saveToStorage('user', null);
-        this.#saveToStorage('tokens', null);
+    async logout() {
+        try {
+            await this.#api.logout();
+        } catch (err) {
+            const msg = err?.response?.data?.message;
+            if (msg) this.state.errorKey = `auth.${msg}`;
+        } finally {
+            this.state.user = null;
+            this.state.tokens = null;
+            // Limpiar localStorage
+            this.#saveToStorage('user', null);
+            this.#saveToStorage('tokens', null);
+        }
     }
 }
 

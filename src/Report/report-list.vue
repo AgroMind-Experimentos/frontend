@@ -78,21 +78,21 @@ const formatDate = (dateString) => {
   <AppLayout>
     <div class="reports-container">
       <div class="header">
-        <h1>📊 Panel de Reportes</h1>
-        <p>Análisis completo de tareas y gestión de cultivos</p>
+        <h1>{{ $t('reports.panelTitle') }}</h1>
+        <p>{{ $t('reports.dashboardDesc') }}</p>
       </div>
 
       <!-- Acciones principales -->
       <div class="actions-bar">
         <Button
-          label="Actualizar"
+          :label="$t('reports.update')"
           icon="pi pi-refresh"
           @click="loadReports"
           :loading="loading"
           class="p-button-outlined"
         />
         <Button
-          label="Descargar PDF"
+          :label="$t('reports.downloadPDF')"
           icon="pi pi-file-pdf"
           @click="downloadPDF"
           :loading="downloadingPDF"
@@ -104,14 +104,14 @@ const formatDate = (dateString) => {
       <!-- Mensaje de carga -->
       <div v-if="loading" class="loading-container">
         <i class="pi pi-spin pi-spinner" style="font-size: 3rem; color: #4CAF50"></i>
-        <p>Cargando reportes...</p>
+        <p>{{ $t('reports.loading') }}</p>
       </div>
 
       <!-- Mensaje de error -->
       <div v-else-if="error" class="error-container">
         <i class="pi pi-exclamation-triangle" style="font-size: 3rem; color: #dc3545"></i>
         <p>{{ error }}</p>
-        <Button label="Reintentar" icon="pi pi-refresh" @click="loadReports" />
+        <Button :label="$t('common.retry')" icon="pi pi-refresh" @click="loadReports" />
       </div>
 
       <!-- Contenido principal -->
@@ -124,7 +124,7 @@ const formatDate = (dateString) => {
               <div class="meta-info">
                 <i class="pi pi-calendar"></i>
                 <div>
-                  <span class="meta-label">Generado el:</span>
+                  <span class="meta-label">{{ $t('reports.generatedAt') }}</span>
                   <span class="meta-value">{{ formatDate(reportsData.generatedAt) }}</span>
                 </div>
               </div>
@@ -142,7 +142,7 @@ const formatDate = (dateString) => {
                 </div>
                 <div class="card-info">
                   <h3>{{ reportsData.summary.totalTasks }}</h3>
-                  <p>Total de Tareas</p>
+                  <p>{{ $t('reports.totalTasks') }}</p>
                 </div>
               </div>
             </template>
@@ -156,7 +156,7 @@ const formatDate = (dateString) => {
                 </div>
                 <div class="card-info">
                   <h3>{{ reportsData.summary.completedTasks }}</h3>
-                  <p>Completadas</p>
+                  <p>{{ $t('reports.completed') }}</p>
                 </div>
               </div>
             </template>
@@ -170,7 +170,7 @@ const formatDate = (dateString) => {
                 </div>
                 <div class="card-info">
                   <h3>{{ reportsData.summary.inProgressTasks }}</h3>
-                  <p>En Progreso</p>
+                  <p>{{ $t('reports.inProgress') }}</p>
                 </div>
               </div>
             </template>
@@ -184,7 +184,7 @@ const formatDate = (dateString) => {
                 </div>
                 <div class="card-info">
                   <h3>{{ reportsData.summary.pendingTasks }}</h3>
-                  <p>Pendientes</p>
+                  <p>{{ $t('reports.pending') }}</p>
                 </div>
               </div>
             </template>
@@ -204,7 +204,7 @@ const formatDate = (dateString) => {
           <template #content>
             <div class="completion-content">
               <div class="progress-info">
-                <span class="progress-label">Progreso General</span>
+                <span class="progress-label">{{ $t('reports.overallProgress') }}</span>
                 <span class="progress-value">{{ reportsData.summary.completionRate }}%</span>
               </div>
               <ProgressBar
@@ -261,7 +261,7 @@ const formatDate = (dateString) => {
                 <template #body="slotProps">
                   <div class="responsible">
                     <i class="pi pi-user"></i>
-                    <span>Usuario {{ slotProps.data.responsibleId }}</span>
+                    <span>{{ $t('reports.user') }} {{ slotProps.data.responsibleId }}</span>
                   </div>
                 </template>
               </Column>

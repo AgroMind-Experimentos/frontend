@@ -1,6 +1,8 @@
 <script setup>
 import { ref } from 'vue';
 import AppLayout from '../components/app-layout.vue';
+import { useI18n } from 'vue-i18n';
+import { computed } from 'vue';
 import { userStore } from '../../../iam/application/user.store.js';
 
 // PrimeVue
@@ -17,10 +19,11 @@ const apellidos = ref('');
 const correo = ref(current.email || '');
 const password = ref(''); // por seguridad, se deja vacío
 const rol = ref(null);
-const roles = [
-  { label: 'Agrónomo', value: 'agronomo' },
-  { label: 'Agricultor', value: 'agricultor' }
-];
+const { t } = useI18n();
+const roles = computed(() => [
+  { label: t('iam.agronomist'), value: 'agronomo' },
+  { label: t('iam.farmer'), value: 'agricultor' }
+]);
 
 // Avatar
 const defaultAvatar = 'https://files.catbox.moe/7kr0f6.png';
@@ -52,7 +55,7 @@ function saveProfile() {
       <div class="avatar-box">
         <img :src="avatarUrl" alt="Avatar" class="avatar" />
         <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="onPhotoSelected" />
-        <Button label="Editar foto" class="btn-edit" @click="pickPhoto" />
+        <Button :label="$t('sharedExt.editPhoto')" class="btn-edit" @click="pickPhoto" />
       </div>
 
       <!-- Card con formulario -->
@@ -60,28 +63,28 @@ function saveProfile() {
         <template #content>
           <div class="form-grid">
             <div class="field">
-              <label class="lbl">Nombres:</label>
-              <InputText v-model="nombres" placeholder="Nombre" class="w-full" />
+              <label class="lbl">{{ $t('sharedExt.names') }}</label>
+              <InputText v-model="nombres" :placeholder="$t('organization.name')" class="w-full" />
             </div>
 
             <div class="field">
-              <label class="lbl">Contraseña:</label>
+              <label class="lbl">{{ $t('sharedExt.password') }}</label>
               <Password v-model="password" :feedback="false" toggleMask inputClass="w-full" class="w-full" placeholder="********" />
             </div>
 
             <div class="field">
-              <label class="lbl">Apellidos:</label>
-              <InputText v-model="apellidos" placeholder="Apellido" class="w-full" />
+              <label class="lbl">{{ $t('sharedExt.lastName') }}</label>
+              <InputText v-model="apellidos" :placeholder="$t('sharedExt.lastName')" class="w-full" />
             </div>
 
             <div class="field">
-              <label class="lbl">Rol:</label>
-              <Dropdown v-model="rol" :options="roles" optionLabel="label" optionValue="value" placeholder="Rol" class="w-full" />
+              <label class="lbl">{{ $t('sharedExt.role') }}</label>
+              <Dropdown v-model="rol" :options="roles" optionLabel="label" optionValue="value" :placeholder="$t('sharedExt.role')" class="w-full" />
             </div>
 
             <div class="field span-2">
-              <label class="lbl">Correo:</label>
-              <InputText v-model="correo" placeholder="Correo" class="w-full" />
+              <label class="lbl">{{ $t('sharedExt.email') }}</label>
+              <InputText v-model="correo" :placeholder="$t('sharedExt.email')" class="w-full" />
             </div>
           </div>
         </template>
@@ -89,7 +92,7 @@ function saveProfile() {
 
       <!-- Guardar -->
       <div class="actions">
-        <Button label="Guardar" class="btn-save" @click="saveProfile" />
+        <Button :label="$t('common.save')" class="btn-save" @click="saveProfile" />
       </div>
     </div>
   </AppLayout>

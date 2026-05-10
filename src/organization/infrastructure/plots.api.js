@@ -25,9 +25,9 @@ export class PlotsApi {
 
     async getById(id) {
         try {
-            console.log('📥 GET parcela por ID:', id);
+            console.log('📥 GET plota por ID:', id);
             const { data } = await this.http.get(`${this.cropsEndpoint}/${id}`);
-            console.log('✅ Parcela recibida:', data);
+            console.log('✅ Plota recibida:', data);
             return PlotAssembler.toEntityFromResponse(data);
         } catch (error) {
             console.error(`❌ Error fetching plot ${id}:`, error);
@@ -50,9 +50,9 @@ export class PlotsApi {
     async create(plotData) {
         try {
             const payload = PlotAssembler.fromFormData(plotData);
-            console.log('📤 POST crear parcela/crop:', payload);
+            console.log('📤 POST crear plota/crop:', payload);
             const { data } = await this.http.post(this.cropsEndpoint, payload);
-            console.log('✅ Parcela creada:', data);
+            console.log('✅ Plota creada:', data);
             return PlotAssembler.toEntityFromResponse(data);
         } catch (error) {
             console.error('Error creating plot:', error);
@@ -64,9 +64,9 @@ export class PlotsApi {
     async update(id, plotData) {
         try {
             const payload = PlotAssembler.fromFormData(plotData);
-            console.log('📤 PUT actualizar parcela/crop:', payload);
+            console.log('📤 PUT actualizar plota/crop:', payload);
             const { data } = await this.http.put(`${this.cropsEndpoint}/${id}`, payload);
-            console.log('✅ Parcela actualizada:', data);
+            console.log('✅ Plota actualizada:', data);
             return PlotAssembler.toEntityFromResponse(data);
         } catch (error) {
             console.error(`Error updating plot ${id}:`, error);
@@ -77,9 +77,9 @@ export class PlotsApi {
 
     async delete(id) {
         try {
-            console.log('🗑️ DELETE parcela/crop:', id);
+            console.log('🗑️ DELETE plota/crop:', id);
             await this.http.delete(`${this.cropsEndpoint}/${id}`);
-            console.log('✅ Parcela eliminada exitosamente');
+            console.log('✅ Plota eliminada exitosamente');
             return true;
         } catch (error) {
             console.error('❌ Error deleting plot:', error);

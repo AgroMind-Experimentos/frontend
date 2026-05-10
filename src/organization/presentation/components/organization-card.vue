@@ -12,7 +12,8 @@ export default {
     formatDate(dateString) {
       if (!dateString) return '';
       const date = new Date(dateString);
-      return date.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+      const locale = this.$i18n ? (this.$i18n.locale === 'en' ? 'en-US' : 'es-ES') : 'es-ES';
+      return date.toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' });
     }
   }
 };
@@ -26,7 +27,7 @@ export default {
       <div class="meta">
         <div class="meta-item">
           <i class="pi pi-users"></i>
-          <span>{{ org.getMemberCount() }} miembro{{ org.getMemberCount() !== 1 ? 's' : '' }}</span>
+          <span>{{ org.getMemberCount() }} {{ $t('organization.memberCount') }}</span>
         </div>
         <div class="meta-item" v-if="org.location">
           <i class="pi pi-map-marker"></i>
@@ -34,7 +35,7 @@ export default {
         </div>
         <div class="meta-item" v-if="org.createdAt">
           <i class="pi pi-calendar"></i>
-          <span>Creada: {{ formatDate(org.createdAt) }}</span>
+          <span>{{ $t('organization.createdAt') }}: {{ formatDate(org.createdAt) }}</span>
         </div>
       </div>
     </div>
@@ -50,7 +51,7 @@ export default {
         title="Eliminar organización"
       />
       <Button
-        label="Entrar"
+        :label="$t('organizationExt.enter')"
         severity="success"
         @click="$emit('enter', org)"
       />

@@ -43,8 +43,8 @@ const navigateToTab = (tab) => {
       <!-- Header Section -->
       <div class="dashboard-header">
         <div class="title-section">
-          <h1>Gestión de Tareas</h1>
-          <p>Administra y supervisa todas tus tareas agrícolas</p>
+          <h1>{{ $t('tasksExt.taskDashboardTitle') }}</h1>
+          <p>{{ $t('tasksExt.taskDashboardDesc') }}</p>
         </div>
 
         <!-- Organization Card -->
@@ -54,8 +54,8 @@ const navigateToTab = (tab) => {
               <div class="icon-and-text">
                 <span class="pi pi-sitemap icon-spacer"></span>
                 <div>
-                  <div class="organization-name">Organización</div>
-                  <div class="details">EcoTrack Farm</div>
+                  <div class="organization-name">{{ $t('tasksExt.org') }}</div>
+                  <div class="details">{{ $t('tasksExt.ecotrackFarm') }}</div>
                 </div>
               </div>
             </template>
@@ -70,21 +70,21 @@ const navigateToTab = (tab) => {
           @click="navigateToTab('completed')"
         >
           <i class="pi pi-check-circle"></i>
-          Completadas
+          {{ $t('tasks.completedTasks') }}
         </button>
         <button
           :class="['tab-button', { active: activeTab === 'in-progress' }]"
           @click="navigateToTab('in-progress')"
         >
           <i class="pi pi-clock"></i>
-          En Progreso
+          {{ $t('tasks.inProgressTasks') }}
         </button>
         <button
           :class="['tab-button', { active: activeTab === 'pending' }]"
           @click="navigateToTab('pending')"
         >
           <i class="pi pi-pause"></i>
-          Pendientes
+          {{ $t('tasks.pendingTasks') }}
         </button>
         <button
             v-if="isAgronomist"
@@ -92,7 +92,7 @@ const navigateToTab = (tab) => {
             @click="navigateToTab('new-task')"
         >
           <i class="pi pi-plus"></i>
-          Nueva Tarea
+          {{ $t('tasks.newTask') }}
         </button>
       </div>
 

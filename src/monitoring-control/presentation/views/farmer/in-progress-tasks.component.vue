@@ -83,7 +83,7 @@ function formatDate(dateString){
 
 <template>
   <div class="container">
-    <h3>Tareas en Progreso</h3>
+    <h3>{{ $t('tasks.inProgressTasks') }}</h3>
 
     <div v-if="loadError" class="load-error">
       <i class="pi pi-exclamation-triangle"></i> {{ loadError }}
@@ -91,7 +91,7 @@ function formatDate(dateString){
 
     <div v-if="loading" class="loading-state">
       <i class="pi pi-spinner pi-spin"></i>
-      <span>Cargando tareas...</span>
+      <span>{{ $t('tasksExt.loadingTasks') }}</span>
     </div>
 
     <div v-else-if="tasks.length > 0" class="tasks">
@@ -99,8 +99,8 @@ function formatDate(dateString){
         <div class="task-content">
           <div class="task-info">
             <h4 class="task-title">{{ task.title }}</h4>
-            <p class="task-meta">Responsable: {{ userName(task.responsibleId) }}</p>
-            <p class="task-meta" v-if="task.startedAt">Iniciada: {{ formatDate(task.startedAt) }}</p>
+            <p class="task-meta">{{ $t('tasks.responsible') }}: {{ userName(task.responsibleId) }}</p>
+            <p class="task-meta" v-if="task.startedAt">{{ $t('tasks.started') }}: {{ formatDate(task.startedAt) }}</p>
           </div>
           <div class="task-actions">
             <button
@@ -125,8 +125,8 @@ function formatDate(dateString){
 
     <div v-else class="empty-state">
       <i class="pi pi-inbox empty-icon"></i>
-      <h3>No tienes tareas en progreso</h3>
-      <p>Todas las tareas están completadas o pendientes</p>
+      <h3>{{ $t('tasksExt.noInProgress') }}</h3>
+      <p>{{ $t('tasksExt.allCompletedOrPending') }}</p>
     </div>
   </div>
 </template>

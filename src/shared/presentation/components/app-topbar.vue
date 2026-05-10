@@ -13,7 +13,7 @@ const userName = computed(() => userStore.state.user?.name || 'Usuario');
       <div class="logo">
         <img src="https://files.catbox.moe/2ws3bu.png" alt="EcoTrack" />
       </div>
-      <h3 class="title">EcoTrack</h3>
+      <h3 class="title">{{ $t('sharedExt.ecotrack') }}</h3>
     </div>
 
     <div class="right">
