@@ -2,8 +2,10 @@ import axios from 'axios';
 
 export class UserProfileApi {
     #profilesEndpoint = import.meta.env.VITE_PROFILES_ENDPOINT;
+    #settingsEndpoint = import.meta.env.VITE_SETTINGS_ENDPOINT;
     http = axios.create({
         baseURL: import.meta.env.VITE_API_BASE_URL,
+        withCredentials: true,
     });
 
     async getFarmers() {
@@ -47,13 +49,26 @@ export class UserProfileApi {
         }
     }
 
-    async updateMe(payload) {
+    async updateById(id, payload) {
         try {
-            const { data } = await this.http.put(`${this.#profilesEndpoint}/me`, payload);
+            const { data } = await this.http.patch(`${this.#profilesEndpoint}/${id}`, payload);
             return data;
         } catch (error) {
             console.error('Error updating profile:', error);
             throw new Error('Failed to update profile');
+        }
+    }
+
+    async changePassword(currentPassword, newPassword) {
+        try {
+            const { data } = await this.http.post(`${this.#settingsEndpoint}/password`, {
+                currentPassword,
+                newPassword,
+            });
+            return data;
+        } catch (error) {
+            console.error('Error changing password:', error);
+            throw error;
         }
     }
 }
