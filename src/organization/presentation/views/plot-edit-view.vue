@@ -1,6 +1,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { useToast } from 'primevue/usetoast';
 import { plotService } from '../../application/plot.service.js';
 import AppLayout from '../../../shared/presentation/components/app-layout.vue';
 
@@ -9,6 +11,8 @@ import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 import Avatar from 'primevue/avatar';
 
+const { t } = useI18n();
+const toast = useToast();
 const route = useRoute();
 const router = useRouter();
 const plotId = route.params.id;
@@ -69,12 +73,11 @@ function removeMember(id) {
 
 async function updatePlot() {
   if (!name.value.trim()) {
-    alert('Ingresa el nombre de la plota');
+    toast.add({ severity: 'warn', summary: t('organization.plotNameRequired'), life: 3000 });
     return;
   }
 
   try {
-    // Construir la descripción con toda la información
     const description = [
       area.value.trim() ? `Área: ${area.value.trim()}` : '',
       locationTxt.value.trim() ? `Ubicación: ${locationTxt.value.trim()}` : '',
@@ -86,23 +89,18 @@ async function updatePlot() {
       organizationId: currentPlot.value.organizationId,
       name: name.value.trim(),
       description: description,
-      // Campos adicionales para el estado local
       area: area.value.trim(),
       location: locationTxt.value.trim(),
       crop: crop.value.trim(),
       members: selected.value.map(id => String(id))
     };
 
-    console.log('🚀 Actualizando plota con datos:', plotData);
     await plotService.updatePlot(plotId, plotData);
-    console.log('✅ Plota actualizada exitosamente');
-
-    alert('Plota actualizada exitosamente!');
-    // Redirigir al detalle de la organización
+    toast.add({ severity: 'success', summary: t('organization.plotUpdateSuccess'), life: 3000 });
     router.push({ name: 'organization-detail', params: { id: currentPlot.value.organizationId } });
   } catch (err) {
     console.error('❌ Error updating plot:', err);
-    alert(`Error al actualizar la plota: ${err.message || 'Error desconocido'}`);
+    toast.add({ severity: 'error', summary: t('organization.plotUpdateError'), life: 3000 });
   }
 }
 

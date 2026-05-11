@@ -1,6 +1,8 @@
 <script>
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { useToast } from 'primevue/usetoast';
 import { userStore } from '../../application/user.store.js';
 
 // PrimeVue
@@ -15,6 +17,8 @@ export default {
   components: { InputText, Password, RadioButton, Button, Card },
   setup() {
     const router = useRouter();
+    const { t } = useI18n();
+    const toast = useToast();
 
     const name = ref('');
     const email = ref('');
@@ -32,15 +36,15 @@ export default {
 
     const submit = async () => {
       if (!name.value || !email.value || !password.value || !confirmPassword.value) {
-        alert('Completa todos los campos.');
+        toast.add({ severity: 'warn', summary: t('auth.fieldsRequired'), life: 3000 });
         return;
       }
       if (password.value !== confirmPassword.value) {
-        alert('Las contraseñas no coinciden.');
+        toast.add({ severity: 'warn', summary: t('auth.passwordMismatch'), life: 3000 });
         return;
       }
       if (!role.value) {
-        alert('Selecciona un rol.');
+        toast.add({ severity: 'warn', summary: t('iam.roleRequired'), life: 3000 });
         return;
       }
 

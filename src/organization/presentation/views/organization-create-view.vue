@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { useToast } from 'primevue/usetoast';
 import { organizationService } from '../../application/organization.service.js';
 import { userStore } from '../../../iam/application/user.store.js';
 import AppLayout from '../../../shared/presentation/components/app-layout.vue';
@@ -10,6 +11,7 @@ import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 
 const { t } = useI18n();
+const toast = useToast();
 const router = useRouter();
 
 const name = ref('');
@@ -20,7 +22,7 @@ const loading = computed(() => organizationService.state.loading);
 
 async function createOrg() {
   if (!name.value.trim()) {
-    alert(t('organization.nameRequired'));
+    toast.add({ severity: 'warn', summary: t('organization.nameRequired'), life: 3000 });
     return;
   }
 
@@ -37,7 +39,7 @@ async function createOrg() {
 
     router.push({ name: 'dashboard' });
   } catch (err) {
-    alert(`Error: ${err.message || t('common.unexpectedError')}`);
+    toast.add({ severity: 'error', summary: t('common.unexpectedError'), life: 3000 });
   }
 }
 </script>

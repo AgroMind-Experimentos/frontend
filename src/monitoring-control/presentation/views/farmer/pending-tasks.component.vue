@@ -2,10 +2,15 @@
 import {TaskService} from '../../../application/task.service.js'
 import {ref, computed, onMounted} from "vue"
 import {useRouter} from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import { useToast } from 'primevue/usetoast'
 import { userStore } from '../../../../iam/application/user.store.js'
 import { organizationService } from '../../../../organization/application/organization.service.js'
 import { UserProfileApi } from '../../../../profile/infrastructure/user-profile-api.js'
+import ConfirmationModal from '../../../../shared/presentation/components/confirmation-modal.vue'
 
+const { t } = useI18n()
+const toast = useToast()
 const router = useRouter()
 const taskService = new TaskService()
 const profileApi = new UserProfileApi()
@@ -14,6 +19,8 @@ const userMap = ref({})
 const loading = ref(true)
 const loadError = ref('')
 const isAgronomist = computed(() => userStore.state.user?.role === 'Agronomist')
+const showDeleteConfirm = ref(false)
+const pendingDeleteTask = ref(null)
 
 function userName(id) {
   return userMap.value[id] || `#${id}`
@@ -55,28 +62,33 @@ function goToCheckList(taskId) {
 
 async function startTask(taskID){
   try{
-    console.log(taskID)
     const numericID = Number(taskID)
-    const now = new Date();
     const startedAt = new Date()
     await taskService.updateStartedDate(numericID, startedAt);
     await taskService.updateStatus(numericID, 'InProgress')
-    alert("Tarea iniciada exitosamente")
+    toast.add({ severity: 'success', summary: t('tasks.taskStartedSuccessfully'), life: 3000 })
     tasks.value = tasks.value.filter(task => Number(task.id) !== numericID)
   }catch(error){
     console.error('Error starting monitoring-control:', error)
-    alert("Error al iniciar la tarea")
+    toast.add({ severity: 'error', summary: t('tasks.errorStartingTask'), life: 3000 })
   }
 }
 
-async function deleteTask(task) {
-  if (!confirm(`¿Eliminar la tarea "${task.title}"? Esta acción no se puede deshacer.`)) return
+function deleteTask(task) {
+  pendingDeleteTask.value = task
+  showDeleteConfirm.value = true
+}
+
+async function handleDeleteConfirm() {
+  const task = pendingDeleteTask.value
   try {
     await taskService.deleteTask(task.id)
     tasks.value = tasks.value.filter(t => t.id !== task.id)
   } catch (error) {
     console.error('Error al eliminar la tarea:', error)
-    alert('Error al eliminar la tarea. Intenta de nuevo.')
+    loadError.value = t('tasks.deleteError')
+  } finally {
+    pendingDeleteTask.value = null
   }
 }
 </script>
@@ -147,6 +159,12 @@ async function deleteTask(task) {
       <h3>{{ $t('tasksExt.noPending') }}</h3>
       <p>{{ $t('tasksExt.allInProgressOrCompleted') }}</p>
     </div>
+
+    <ConfirmationModal
+      v-model:visible="showDeleteConfirm"
+      messageKey="tasks.deleteConfirm"
+      @confirm="handleDeleteConfirm"
+    />
   </div>
 </template>
 

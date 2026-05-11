@@ -1,6 +1,8 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { useToast } from 'primevue/usetoast';
 import { plotService } from '../../application/plot.service.js';
 import AppLayout from '../../../shared/presentation/components/app-layout.vue';
 
@@ -9,7 +11,8 @@ import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 import Avatar from 'primevue/avatar';
 
-// Id de organización (obligatorio para crear plota)
+const { t } = useI18n();
+const toast = useToast();
 const route = useRoute();
 const router = useRouter();
 const orgId = route.query.orgId ?? null;
@@ -52,17 +55,16 @@ function removeMember(id) {
 
 async function createPlot() {
   if (!name.value.trim()) {
-    alert('Ingresa el nombre de la plota');
+    toast.add({ severity: 'warn', summary: t('organization.plotNameRequired'), life: 3000 });
     return;
   }
 
   if (!orgId) {
-    alert('ID de organización requerido');
+    toast.add({ severity: 'warn', summary: t('organization.orgIdRequired'), life: 3000 });
     return;
   }
 
   try {
-    // Construir la descripción con toda la información
     const description = [
       area.value.trim() ? `Área: ${area.value.trim()}` : '',
       locationTxt.value.trim() ? `Ubicación: ${locationTxt.value.trim()}` : '',
@@ -74,23 +76,18 @@ async function createPlot() {
       organizationId: orgId,
       name: name.value.trim(),
       description: description,
-      // Campos adicionales para el estado local (no se envían al backend)
       area: area.value.trim(),
       location: locationTxt.value.trim(),
       crop: crop.value.trim(),
       members: selected.value.map(id => String(id))
     };
 
-    console.log('🚀 Creando plota con datos:', plotData);
     await plotService.createPlot(plotData);
-    console.log('✅ Plota creada exitosamente');
-
-    alert('Plota creada exitosamente!');
-    // Redirigir al detalle de la organización
+    toast.add({ severity: 'success', summary: t('organization.plotCreateSuccess'), life: 3000 });
     router.push({ name: 'organization-detail', params: { id: orgId } });
   } catch (err) {
     console.error('❌ Error creating plot:', err);
-    alert(`Error al crear la plota: ${err.message || 'Error desconocido'}`);
+    toast.add({ severity: 'error', summary: t('organization.plotCreateError'), life: 3000 });
   }
 }
 

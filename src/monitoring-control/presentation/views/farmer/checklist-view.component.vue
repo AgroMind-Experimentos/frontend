@@ -3,8 +3,10 @@ import {CheckListService} from '../../../application/checklist.service.js'
 import {TaskService} from '../../../application/task.service.js'
 import {onMounted, ref, computed} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { userStore } from '../../../../iam/application/user.store.js'
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const checklist = ref(null)
@@ -60,15 +62,15 @@ async function completeTask(){
 }
 
 const finishTask = ()=>{
+  completeError.value = ''
   if(task.value?.status === "Completed"){
-    alert("This monitoring-control is already completed")
+    completeError.value = t('tasks.taskAlreadyCompleted')
     return
   }
   const allChecked = Object.values(checkedItems.value).every(val => val === true)
   if(!allChecked){
-    alert("Complete all tasks")
+    completeError.value = t('tasks.completeAllTasks')
   }else{
-    alert("Task Completed")
     completeTask()
   }
 }

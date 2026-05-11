@@ -2,6 +2,7 @@
 import { onMounted, computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { useToast } from 'primevue/usetoast';
 import { organizationService } from '../../application/organization.service.js';
 import { plotService } from '../../application/plot.service.js';
 import { invitationService } from '../../application/invitation.service.js';
@@ -11,12 +12,17 @@ import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
+import ConfirmationModal from '../../../shared/presentation/components/confirmation-modal.vue';
 
 const { t, locale } = useI18n();
 
 const route = useRoute();
 const router = useRouter();
+const toast = useToast();
 const orgId = route.params.id;
+
+const showDeletePlotConfirm = ref(false);
+const pendingDeletePlot = ref(null);
 
 const isAgronomist = computed(() => userStore.state.user?.role === 'Agronomist');
 const organization = computed(() => organizationService.state.currentOrganization);
@@ -77,14 +83,20 @@ const editPlot = (plot) => {
   router.push({ name: 'plot-edit', params: { id: plot.id } });
 };
 
-const deletePlot = async (plot) => {
-  if (confirm(`${t('organization.deletePlotConfirm')} "${plot.name}"?`)) {
-    try {
-      await plotService.deletePlot(plot.id);
-    } catch (err) {
-      alert(t('common.unexpectedError'));
-      console.error('Error deleting plot:', err);
-    }
+const deletePlot = (plot) => {
+  pendingDeletePlot.value = plot;
+  showDeletePlotConfirm.value = true;
+};
+
+const handleDeletePlotConfirm = async () => {
+  const plot = pendingDeletePlot.value;
+  try {
+    await plotService.deletePlot(plot.id);
+  } catch (err) {
+    console.error('Error deleting plot:', err);
+    toast.add({ severity: 'error', summary: t('organization.deletePlotError'), life: 3000 });
+  } finally {
+    pendingDeletePlot.value = null;
   }
 };
 
@@ -279,6 +291,12 @@ const getMemberCount = (plot) => {
       </div>
     </div>
   </AppLayout>
+
+  <ConfirmationModal
+    v-model:visible="showDeletePlotConfirm"
+    messageKey="organization.deletePlotConfirmFull"
+    @confirm="handleDeletePlotConfirm"
+  />
 </template>
 
 <style scoped>
