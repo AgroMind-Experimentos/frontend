@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import AppLayout from '../components/app-layout.vue';
 import { UserProfileApi } from '../../../profile/infrastructure/user-profile-api.js';
 import { userStore } from '../../../iam/application/user.store.js';
@@ -9,6 +10,7 @@ import InputText from 'primevue/inputtext';
 import Password from 'primevue/password';
 import Button from 'primevue/button';
 
+const { t } = useI18n();
 const api = new UserProfileApi();
 
 const name        = ref('');
@@ -32,7 +34,7 @@ onMounted(async () => {
     name.value  = profile.displayName || profile.name || '';
     email.value = profile.email ?? '';
   } catch {
-    profileError.value = 'No se pudo cargar el perfil.';
+    profileError.value = t('profile.loadError');
   } finally {
     loading.value = false;
   }
@@ -41,16 +43,16 @@ onMounted(async () => {
 async function saveProfile() {
   profileError.value = '';
   profileSuccess.value = '';
-  if (!name.value.trim()) { profileError.value = 'El nombre es obligatorio.'; return; }
+  if (!name.value.trim()) { profileError.value = t('profile.nameRequired'); return; }
   saving.value = true;
   try {
     await api.updateById(userStore.state.user?.id, {
       displayName: name.value.trim(),
       email: email.value.trim(),
     });
-    profileSuccess.value = 'Perfil actualizado correctamente.';
+    profileSuccess.value = t('profile.updatedSuccess');
   } catch {
-    profileError.value = 'Error al guardar el perfil.';
+    profileError.value = t('profile.updateError');
   } finally {
     saving.value = false;
   }
@@ -60,20 +62,20 @@ async function changePassword() {
   pwdError.value = '';
   pwdSuccess.value = '';
   if (!currentPassword.value || !newPassword.value) {
-    pwdError.value = 'Completa todos los campos.'; return;
+    pwdError.value = t('profile.fieldsRequired'); return;
   }
   if (newPassword.value !== confirmNew.value) {
-    pwdError.value = 'Las contraseñas no coinciden.'; return;
+    pwdError.value = t('profile.passwordMismatch'); return;
   }
   savingPwd.value = true;
   try {
     await api.changePassword(currentPassword.value, newPassword.value);
-    pwdSuccess.value = 'Contraseña actualizada correctamente.';
+    pwdSuccess.value = t('profile.passwordChangedSuccess');
     currentPassword.value = '';
     newPassword.value = '';
     confirmNew.value = '';
   } catch (err) {
-    pwdError.value = err?.response?.data?.message || 'Error al cambiar la contraseña.';
+    pwdError.value = err?.response?.data?.message || t('profile.passwordChangeError');
   } finally {
     savingPwd.value = false;
   }
@@ -88,13 +90,13 @@ async function changePassword() {
       </div>
 
       <div v-if="loading" class="loading-msg">
-        <i class="pi pi-spin pi-spinner"></i> Cargando perfil…
+        <i class="pi pi-spin pi-spinner"></i> {{ t('profile.loading') }}
       </div>
 
       <template v-else>
         <!-- Sección: datos de perfil -->
         <Card class="profile-card">
-          <template #title><span class="section-title">Información personal</span></template>
+          <template #title><span class="section-title">{{ t('profile.personalInfo') }}</span></template>
           <template #content>
             <div class="form-grid">
               <div class="field">
@@ -111,25 +113,25 @@ async function changePassword() {
           </template>
         </Card>
         <div class="actions">
-          <Button label="Guardar perfil" class="btn-save" :loading="saving" @click="saveProfile" />
+          <Button :label="t('profile.saveProfile')" class="btn-save" :loading="saving" @click="saveProfile" />
         </div>
 
         <!-- Sección: cambio de contraseña -->
         <Card class="profile-card">
-          <template #title><span class="section-title">Cambiar contraseña</span></template>
+          <template #title><span class="section-title">{{ t('profile.changePassword') }}</span></template>
           <template #content>
             <div class="form-grid">
               <div class="field">
-                <label class="lbl">Contraseña actual</label>
-                <Password v-model="currentPassword" :feedback="false" toggleMask inputClass="w-full" class="w-full" placeholder="Contraseña actual" />
+                <label class="lbl">{{ t('profile.currentPassword') }}</label>
+                <Password v-model="currentPassword" :feedback="false" toggleMask inputClass="w-full" class="w-full" :placeholder="t('profile.currentPassword')" />
               </div>
               <div class="field">
-                <label class="lbl">Nueva contraseña</label>
-                <Password v-model="newPassword" :feedback="false" toggleMask inputClass="w-full" class="w-full" placeholder="Nueva contraseña" />
+                <label class="lbl">{{ t('profile.newPassword') }}</label>
+                <Password v-model="newPassword" :feedback="false" toggleMask inputClass="w-full" class="w-full" :placeholder="t('profile.newPassword')" />
               </div>
               <div class="field">
-                <label class="lbl">Confirmar nueva contraseña</label>
-                <Password v-model="confirmNew" :feedback="false" toggleMask inputClass="w-full" class="w-full" placeholder="Confirmar contraseña" />
+                <label class="lbl">{{ t('profile.confirmNewPassword') }}</label>
+                <Password v-model="confirmNew" :feedback="false" toggleMask inputClass="w-full" class="w-full" :placeholder="t('profile.confirmNewPassword')" />
               </div>
             </div>
             <div v-if="pwdError"   class="msg error">  <i class="pi pi-exclamation-circle"></i> {{ pwdError }}</div>
@@ -137,7 +139,7 @@ async function changePassword() {
           </template>
         </Card>
         <div class="actions">
-          <Button label="Cambiar contraseña" class="btn-save" :loading="savingPwd" @click="changePassword" />
+          <Button :label="t('profile.changePassword')" class="btn-save" :loading="savingPwd" @click="changePassword" />
         </div>
       </template>
     </div>

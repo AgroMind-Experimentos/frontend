@@ -2,6 +2,7 @@
 import { onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { useToast } from 'primevue/usetoast';
 import { organizationService } from '../../../organization/application/organization.service.js';
 import { invitationService } from '../../../organization/application/invitation.service.js';
 import { userStore } from '../../../iam/application/user.store.js';
@@ -10,7 +11,7 @@ import OrganizationCard from '../../../organization/presentation/components/orga
 import Button from 'primevue/button';
 
 const { t } = useI18n();
-
+const toast = useToast();
 const router = useRouter();
 
 const isAgronomist = computed(() => userStore.state.user?.role === 'Agronomist');
@@ -18,12 +19,22 @@ const isFarmer = computed(() => userStore.state.user?.role === 'Farmer');
 const pendingInvitations = computed(() => invitationService.state.invitations);
 
 async function acceptInvitation(inv) {
-  await invitationService.accept(inv.id, userStore.state.user.id);
-  await organizationService.getAllOrganizations();
+  try {
+    await invitationService.accept(inv.id, userStore.state.user.id);
+    await organizationService.getAllOrganizations();
+    toast.add({ severity: 'success', summary: t('invitation.acceptedSummary'), detail: t('invitation.acceptedDetail'), life: 4000 });
+  } catch {
+    toast.add({ severity: 'error', summary: t('invitation.errorSummary'), detail: t('invitation.errorAcceptDetail'), life: 4000 });
+  }
 }
 
 async function rejectInvitation(inv) {
-  await invitationService.reject(inv.id, userStore.state.user.id);
+  try {
+    await invitationService.reject(inv.id, userStore.state.user.id);
+    toast.add({ severity: 'info', summary: t('invitation.rejectedSummary'), detail: t('invitation.rejectedDetail'), life: 4000 });
+  } catch {
+    toast.add({ severity: 'error', summary: t('invitation.errorSummary'), detail: t('invitation.errorRejectDetail'), life: 4000 });
+  }
 }
 
 // State reactivo del servicio

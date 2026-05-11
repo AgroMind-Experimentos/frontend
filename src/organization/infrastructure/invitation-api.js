@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 export class InvitationApi {
-    #http = axios.create({ baseURL: import.meta.env.VITE_API_BASE_URL });
+    #http = axios.create({ baseURL: import.meta.env.VITE_API_BASE_URL, withCredentials: true });
     #orgsEndpoint = import.meta.env.VITE_ORGANIZATIONS_ENDPOINT;
     #invitationsEndpoint = import.meta.env.VITE_INVITATIONS_ENDPOINT;
 

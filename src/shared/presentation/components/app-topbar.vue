@@ -1,9 +1,9 @@
 <script setup>
 import { computed } from 'vue';
 import { userStore } from '../../../iam/application/user.store.js';
-import LanguagueSwitcher from "./languague-switcher.vue";
+import LanguagueSwitcher from './languague-switcher.vue';
+import InvitationBell from './invitation-bell.vue';
 
-// Obtener información del usuario de forma reactiva
 const userName = computed(() => userStore.state.user?.name || 'Usuario');
 </script>
 
@@ -20,7 +20,8 @@ const userName = computed(() => userStore.state.user?.name || 'Usuario');
       <div class="user-info">
         <span class="user-name">{{ userName }}</span>
       </div>
-      <languague-switcher></languague-switcher>
+      <InvitationBell />
+      <languague-switcher />
     </div>
   </header>
 </template>
@@ -38,6 +39,4 @@ const userName = computed(() => userStore.state.user?.name || 'Usuario');
 .right{display:flex;align-items:center;gap:12px}
 .user-info{display:flex;align-items:center;gap:8px}
 .user-name{color:#2c5530;font-weight:600;font-size:0.9rem}
-.icon{color:#111;cursor:pointer}
-.icon:hover{color:#2c5530}
 </style>
