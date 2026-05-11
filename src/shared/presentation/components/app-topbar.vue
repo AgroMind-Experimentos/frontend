@@ -21,8 +21,6 @@ const userName = computed(() => userStore.state.user?.name || 'Usuario');
         <span class="user-name">{{ userName }}</span>
       </div>
       <languague-switcher></languague-switcher>
-      <i class="pi pi-envelope icon"></i>
-      <i class="pi pi-bell icon"></i>
     </div>
   </header>
 </template>

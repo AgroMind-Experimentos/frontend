@@ -48,16 +48,16 @@ watch(selectedOrg, async (org) => {
   if (!org) return
   loadingOrg.value = true
   try {
-    const [allFarmers, plots] = await Promise.all([
+    const [allFarmers, orgPlots] = await Promise.all([
       profileApi.getAllUsers(),
       plotService.getPlotsByOrganizationId(org.id)
     ])
 
-    const memberIds = new Set(org.members)
+    const memberIds = new Set(org.members?.map(m => (typeof m === 'object' ? m.id : m)))
     farmers.value = (Array.isArray(allFarmers) ? allFarmers : [])
       .filter(u => memberIds.has(u.id) && u.role?.toLowerCase() === 'farmer')
 
-    plots.value = plots || []
+    plots.value = orgPlots || []
   } catch (e) {
     errorMsg.value = 'Error al cargar datos de la organización.'
   } finally {

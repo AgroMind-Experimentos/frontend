@@ -218,6 +218,7 @@ export default {
 .register-container {
   background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 50%, #388E3C 100%);
   min-height: 100vh;
+  overflow-y: auto;
   position: relative;
 }
 
@@ -234,8 +235,10 @@ export default {
 }
 
 .card-wrapper {
-  padding-top: 3rem !important;
-  padding-bottom: 3rem !important;
+  padding-top: 2rem !important;
+  padding-bottom: 2rem !important;
+  overflow-y: auto;
+  align-items: flex-start !important;
 }
 
 .register-card {
@@ -509,11 +512,6 @@ export default {
 
 .login-button:hover {
   color: #1B5E20 !important;
-  .card-wrapper {
-    padding-top: 2rem !important;
-    padding-bottom: 2rem !important;
-  }
-
   text-decoration: underline !important;
 }
 
