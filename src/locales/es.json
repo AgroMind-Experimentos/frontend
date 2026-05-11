@@ -39,7 +39,9 @@
     "deleteConfirm": "¿Estás seguro de que quieres eliminar",
     "pendingInvitations": "Invitaciones Pendientes",
     "invitationFromOrg": "Invitación a organización",
-    "invitationPending": "Has sido invitado a unirte a esta organización"
+    "invitationPending": "Has sido invitado a unirte a esta organización",
+    "deletedSummary": "Organización eliminada",
+    "deletedDetail": "fue eliminada correctamente."
   },
   "organization": {
     "create": "Crear Organización",

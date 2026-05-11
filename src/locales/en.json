@@ -39,7 +39,9 @@
     "deleteConfirm": "Are you sure you want to delete",
     "pendingInvitations": "Pending Invitations",
     "invitationFromOrg": "Organization invitation",
-    "invitationPending": "You have been invited to join this organization"
+    "invitationPending": "You have been invited to join this organization",
+    "deletedSummary": "Organization deleted",
+    "deletedDetail": "was deleted successfully."
   },
   "organization": {
     "create": "Create Organization",

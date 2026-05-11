@@ -62,8 +62,9 @@ const onDelete = async (org) => {
   if (confirm(`${t('dashboard.deleteConfirm')} "${org.name}"?`)) {
     try {
       await organizationService.deleteOrganization(org.id);
-    } catch (err) {
-      alert(t('common.unexpectedError'));
+      toast.add({ severity: 'success', summary: t('dashboard.deletedSummary'), detail: `"${org.name}" ${t('dashboard.deletedDetail')}`, life: 4000 });
+    } catch {
+      toast.add({ severity: 'error', summary: t('invitation.errorSummary'), detail: t('common.unexpectedError'), life: 4000 });
     }
   }
 };
