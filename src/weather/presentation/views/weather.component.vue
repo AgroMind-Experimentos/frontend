@@ -48,19 +48,20 @@ const handleKeyPress = (event) => {
   }
 }
 
-// Información agrícola dinámica según temperatura
+// Información agrícola dinámica según temperatura (solo retorna claves i18n e íconos)
 const agriculturalInfo = computed(() => {
   if (!weatherData.value || weatherData.value.temperature === undefined) {
     return {
       gradient: 'linear-gradient(135deg, #6c757d, #868e96)',
       icon: 'pi-info-circle',
       iconColor: '#6c757d',
-      title: 'Información Agrícola',
+      title: 'weather.agriInfo.loading.title',
       tips: [
-        { icon: 'pi-info-circle', color: '#17a2b8', text: 'Esperando datos del clima...' }
+        { icon: 'pi-info-circle', color: '#17a2b8', text: 'weather.agriInfo.loading.tip' }
       ]
     }
   }
+  
   console.log("WEATHER_BASE_URL:", import.meta.env.VITE_WEATHER_API_BASE_URL);
   const temp = weatherData.value.temperature
 
@@ -70,12 +71,12 @@ const agriculturalInfo = computed(() => {
       gradient: 'linear-gradient(135deg, #6495ED, #87CEEB)',
       icon: 'pi-bolt',
       iconColor: '#4169E1',
-      title: 'Alerta: Temperaturas Muy Bajas',
+      title: 'weather.agriInfo.veryCold.title',
       tips: [
-        { icon: 'pi-exclamation-triangle', color: '#dc3545', text: 'Riesgo de heladas. Protege cultivos sensibles con coberturas' },
-        { icon: 'pi-times-circle', color: '#dc3545', text: 'No realizar riegos, el agua puede congelarse' },
-        { icon: 'pi-shield', color: '#ffc107', text: 'Considera usar mantas térmicas o sistemas de calefacción' },
-        { icon: 'pi-eye', color: '#17a2b8', text: 'Monitorea cultivos de raíces y tubérculos constantemente' }
+        { icon: 'pi-exclamation-triangle', color: '#dc3545', text: 'weather.agriInfo.veryCold.tip1' },
+        { icon: 'pi-times-circle', color: '#dc3545', text: 'weather.agriInfo.veryCold.tip2' },
+        { icon: 'pi-shield', color: '#ffc107', text: 'weather.agriInfo.veryCold.tip3' },
+        { icon: 'pi-eye', color: '#17a2b8', text: 'weather.agriInfo.veryCold.tip4' }
       ]
     }
   }
@@ -86,12 +87,12 @@ const agriculturalInfo = computed(() => {
       gradient: 'linear-gradient(135deg, #4FC3F7, #81D4FA)',
       icon: 'pi-cloud',
       iconColor: '#0288D1',
-      title: 'Temperatura Fresca',
+      title: 'weather.agriInfo.cold.title',
       tips: [
-        { icon: 'pi-check-circle', color: '#28a745', text: 'Condiciones óptimas para cultivos de clima frío (lechugas, espinacas)' },
-        { icon: 'pi-calendar', color: '#17a2b8', text: 'Buen momento para plantar brócoli, coliflor y coles' },
-        { icon: 'pi-times-circle', color: '#dc3545', text: 'Evita plantar cultivos tropicales' },
-        { icon: 'pi-sun', color: '#ffc107', text: 'Asegura que los cultivos reciban suficiente luz solar' }
+        { icon: 'pi-check-circle', color: '#28a745', text: 'weather.agriInfo.cold.tip1' },
+        { icon: 'pi-calendar', color: '#17a2b8', text: 'weather.agriInfo.cold.tip2' },
+        { icon: 'pi-times-circle', color: '#dc3545', text: 'weather.agriInfo.cold.tip3' },
+        { icon: 'pi-sun', color: '#ffc107', text: 'weather.agriInfo.cold.tip4' }
       ]
     }
   }
@@ -102,12 +103,12 @@ const agriculturalInfo = computed(() => {
       gradient: 'linear-gradient(135deg, #4CAF50, #66BB6A)',
       icon: 'pi-check-circle',
       iconColor: '#2E7D32',
-      title: 'Condiciones Ideales',
+      title: 'weather.agriInfo.temperate.title',
       tips: [
-        { icon: 'pi-thumbs-up', color: '#28a745', text: 'Temperatura perfecta para la mayoría de cultivos' },
-        { icon: 'pi-calendar-plus', color: '#28a745', text: 'Excelente para siembra y trasplantes' },
-        { icon: 'pi-leaf', color: '#28a745', text: 'Condiciones óptimas para crecimiento vegetativo' },
-        { icon: 'pi-sun', color: '#ffc107', text: 'Ideal para aplicar fertilizantes y tratamientos foliares' }
+        { icon: 'pi-thumbs-up', color: '#28a745', text: 'weather.agriInfo.temperate.tip1' },
+        { icon: 'pi-calendar-plus', color: '#28a745', text: 'weather.agriInfo.temperate.tip2' },
+        { icon: 'pi-leaf', color: '#28a745', text: 'weather.agriInfo.temperate.tip3' },
+        { icon: 'pi-sun', color: '#ffc107', text: 'weather.agriInfo.temperate.tip4' }
       ]
     }
   }
@@ -118,12 +119,12 @@ const agriculturalInfo = computed(() => {
       gradient: 'linear-gradient(135deg, #FF9800, #FFB74D)',
       icon: 'pi-sun',
       iconColor: '#F57C00',
-      title: 'Temperatura Cálida',
+      title: 'weather.agriInfo.warm.title',
       tips: [
-        { icon: 'pi-check-circle', color: '#28a745', text: 'Ideal para cultivos de verano (tomates, pimientos, sandías)' },
-        { icon: 'pi-tint', color: '#17a2b8', text: 'Aumenta la frecuencia de riego, especialmente por la mañana' },
-        { icon: 'pi-calendar', color: '#ffc107', text: 'Considera aplicar mulch para retener humedad del suelo' },
-        { icon: 'pi-eye', color: '#17a2b8', text: 'Monitorea signos de estrés hídrico en las plantas' }
+        { icon: 'pi-check-circle', color: '#28a745', text: 'weather.agriInfo.warm.tip1' },
+        { icon: 'pi-tint', color: '#17a2b8', text: 'weather.agriInfo.warm.tip2' },
+        { icon: 'pi-calendar', color: '#ffc107', text: 'weather.agriInfo.warm.tip3' },
+        { icon: 'pi-eye', color: '#17a2b8', text: 'weather.agriInfo.warm.tip4' }
       ]
     }
   }
@@ -133,13 +134,13 @@ const agriculturalInfo = computed(() => {
     gradient: 'linear-gradient(135deg, #FF5722, #FF7043)',
     icon: 'pi-exclamation-triangle',
     iconColor: '#D84315',
-    title: 'Alerta: Temperaturas Muy Altas',
+    title: 'weather.agriInfo.veryHot.title',
     tips: [
-      { icon: 'pi-exclamation-triangle', color: '#dc3545', text: 'Riesgo de estrés térmico en plantas. Aumenta sombreado' },
-      { icon: 'pi-tint', color: '#dc3545', text: 'Riega temprano en la mañana o al atardecer, nunca a mediodía' },
-      { icon: 'pi-times-circle', color: '#dc3545', text: 'Evita trasplantes y podas durante las horas más calurosas' },
-      { icon: 'pi-shield', color: '#ffc107', text: 'Protege cultivos sensibles con mallas de sombra (30-50%)' },
-      { icon: 'pi-eye', color: '#17a2b8', text: 'Vigila plagas, se reproducen más rápido con el calor' }
+      { icon: 'pi-exclamation-triangle', color: '#dc3545', text: 'weather.agriInfo.veryHot.tip1' },
+      { icon: 'pi-tint', color: '#dc3545', text: 'weather.agriInfo.veryHot.tip2' },
+      { icon: 'pi-times-circle', color: '#dc3545', text: 'weather.agriInfo.veryHot.tip3' },
+      { icon: 'pi-shield', color: '#ffc107', text: 'weather.agriInfo.veryHot.tip4' },
+      { icon: 'pi-eye', color: '#17a2b8', text: 'weather.agriInfo.veryHot.tip5' }
     ]
   }
 })
@@ -259,7 +260,8 @@ const agriculturalInfo = computed(() => {
           <template #header>
             <div class="info-header">
               <i class="pi" :class="agriculturalInfo.icon" :style="{ color: agriculturalInfo.iconColor }"></i>
-              <h3>{{ agriculturalInfo.title }}</h3>
+              <!-- Uso de $t para traducir la clave dinámica -->
+              <h3>{{ $t(agriculturalInfo.title) }}</h3>
             </div>
           </template>
           <template #content>
@@ -270,15 +272,14 @@ const agriculturalInfo = computed(() => {
                 class="tip-item"
               >
                 <i class="pi" :class="tip.icon" :style="{ color: tip.color }"></i>
-                <span>{{ tip.text }}</span>
+                <!-- Uso de $t para traducir la clave dinámica -->
+                <span>{{ $t(tip.text) }}</span>
               </div>
             </div>
           </template>
         </Card>
       </div>
     </div>
-
-
   </AppLayout>
 </template>
 

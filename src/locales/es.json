@@ -287,7 +287,49 @@
     "loadingWeather": "Cargando información del clima...",
     "currentConditions": "Condiciones Actuales",
     "humidity": "Humedad",
-    "wind": "Viento"
+    "wind": "Viento",
+    "agriInfo": {
+      "loading": {
+        "title": "Información Agrícola",
+        "tip": "Esperando datos del clima..."
+      },
+      "veryCold": {
+        "title": "Alerta: Temperaturas Muy Bajas",
+        "tip1": "Riesgo de heladas. Protege cultivos sensibles con coberturas",
+        "tip2": "No realizar riegos, el agua puede congelarse",
+        "tip3": "Considera usar mantas térmicas o sistemas de calefacción",
+        "tip4": "Monitorea cultivos de raíces y tubérculos constantemente"
+      },
+      "cold": {
+        "title": "Temperatura Fresca",
+        "tip1": "Condiciones óptimas para cultivos de clima frío (lechugas, espinacas)",
+        "tip2": "Buen momento para plantar brócoli, coliflor y coles",
+        "tip3": "Evita plantar cultivos tropicales",
+        "tip4": "Asegura que los cultivos reciban suficiente luz solar"
+      },
+      "temperate": {
+        "title": "Condiciones Ideales",
+        "tip1": "Temperatura perfecta para la mayoría de cultivos",
+        "tip2": "Excelente para siembra y trasplantes",
+        "tip3": "Condiciones óptimas para crecimiento vegetativo",
+        "tip4": "Ideal para aplicar fertilizantes y tratamientos foliares"
+      },
+      "warm": {
+        "title": "Temperatura Cálida",
+        "tip1": "Ideal para cultivos de verano (tomates, pimientos, sandías)",
+        "tip2": "Aumenta la frecuencia de riego, especialmente por la mañana",
+        "tip3": "Considera aplicar mulch para retener humedad del suelo",
+        "tip4": "Monitorea signos de estrés hídrico en las plantas"
+      },
+      "veryHot": {
+        "title": "Alerta: Temperaturas Muy Altas",
+        "tip1": "Riesgo de estrés térmico en plantas. Aumenta sombreado",
+        "tip2": "Riega temprano en la mañana o al atardecer, nunca a mediodía",
+        "tip3": "Evita trasplantes y podas durante las horas más calurosas",
+        "tip4": "Protege cultivos sensibles con mallas de sombra (30-50%)",
+        "tip5": "Vigila plagas, se reproducen más rápido con el calor"
+      }
+    }
   },
   "iam": {
     "createAccount": "Crear Cuenta",

@@ -2,7 +2,7 @@ import OrganizationListView from './views/organization-list-view.vue';
 import OrganizationCreateView from './views/organization-create-view.vue';
 import OrganizationDetailView from './views/organization-detail-view.vue';
 
-export default [
+const organizationRoutes = [
     {
         path: '/organizations',
         name: 'organization-list',
@@ -20,3 +20,5 @@ export default [
         props: true
     }
 ];
+
+export default organizationRoutes;
