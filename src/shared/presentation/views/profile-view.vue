@@ -9,9 +9,11 @@ import Card from 'primevue/card';
 import InputText from 'primevue/inputtext';
 import Password from 'primevue/password';
 import Button from 'primevue/button';
+import {AuthApi} from "../../../iam/infrastructure/auth-api.js";
 
 const { t } = useI18n();
 const api = new UserProfileApi();
+const authApi = new AuthApi();
 
 const name        = ref('');
 const email       = ref('');
@@ -62,20 +64,20 @@ async function changePassword() {
   pwdError.value = '';
   pwdSuccess.value = '';
   if (!currentPassword.value || !newPassword.value) {
-    pwdError.value = t('profile.fieldsRequired'); return;
+    pwdError.value = 'fieldsRequired'; return;
   }
   if (newPassword.value !== confirmNew.value) {
-    pwdError.value = t('profile.passwordMismatch'); return;
+    pwdError.value = 'passwordMismatch'; return;
   }
   savingPwd.value = true;
   try {
-    await api.changePassword(currentPassword.value, newPassword.value);
-    pwdSuccess.value = t('profile.passwordChangedSuccess');
+    const response = await authApi.changePassword(currentPassword.value.trim(), newPassword.value.trim());
+    pwdSuccess.value = response.message;
     currentPassword.value = '';
     newPassword.value = '';
     confirmNew.value = '';
   } catch (err) {
-    pwdError.value = err?.response?.data?.message || t('profile.passwordChangeError');
+    pwdError.value = err?.response?.data?.message || 'passwordChangeError';
   } finally {
     savingPwd.value = false;
   }
@@ -134,8 +136,8 @@ async function changePassword() {
                 <Password v-model="confirmNew" :feedback="false" toggleMask inputClass="w-full" class="w-full" :placeholder="t('profile.confirmNewPassword')" />
               </div>
             </div>
-            <div v-if="pwdError"   class="msg error">  <i class="pi pi-exclamation-circle"></i> {{ pwdError }}</div>
-            <div v-if="pwdSuccess" class="msg success"><i class="pi pi-check-circle"></i>       {{ pwdSuccess }}</div>
+            <div v-if="pwdError"   class="msg error">  <i class="pi pi-exclamation-circle"></i> {{ $t('auth.' + pwdError) }}</div>
+            <div v-if="pwdSuccess" class="msg success"><i class="pi pi-check-circle"></i>       {{ $t('auth.' + pwdSuccess) }}</div>
           </template>
         </Card>
         <div class="actions">

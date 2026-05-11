@@ -5,6 +5,7 @@ export class AuthApi {
     loginEndpoint = import.meta.env.VITE_LOGIN_ENDPOINT;
     registerEndpoint = import.meta.env.VITE_REGISTER_ENDPOINT;
     logoutEndpoint = import.meta.env.VITE_LOGOUT_ENDPOINT;
+    updatePasswordEndpoint = import.meta.env.VITE_UPDATE_PASSWORD_ENDPOINT;
 
     http = axios.create({
         baseURL: this.baseUrl,
@@ -90,6 +91,30 @@ export class AuthApi {
             }
             console.error('Logout failed:', error);
             throw error;
+        }
+    }
+
+    async changePassword(currentPassword, newPassword) {
+        try {
+            const { data } = await this.http.post(this.updatePasswordEndpoint, {
+                currentPassword,
+                newPassword
+            }, {
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            return data;
+        } catch (error) {
+            const message = error.response?.data?.message || 'Password update failed';
+
+            const err = new Error(message);
+            err.response = error.response;
+
+            if (error.response?.status === 401) {
+                console.error('Session expired or unauthorized');
+            }
+
+            throw err;
         }
     }
 }

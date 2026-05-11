@@ -4,13 +4,18 @@
     "emailAlreadyExists": "Email already exists",
     "registrationSuccess": "Registration successful",
     "logout": "Logout",
-    "emailAlreadyInUse": "El correo ya está en uso",
+    "emailAlreadyInUse": "Email already in use",
     "insecurePassword": "Password must contain at least 8 characters, an uppercase letter, a lowercase letter and a number",
-    "badRequest": "Datos de formulario inválidos",
-    "activeSessionNotFound": "No se encontró una sesión activa o la sesión expiró",
-    "Password must contain at least 8 characters, an uppercase letter, a lowercase letter and a number.": "Password must contain at least 8 characters, an uppercase letter, a lowercase letter and a number.",
+    "badRequest": "Invalid form data",
+    "activeSessionNotFound": "Active session not found or expired",
     "registerSuccess": "Registration successful",
-    "logoutSuccess": "Logged out successfully"
+    "logoutSuccess": "Logged out successfully",
+    "updateSuccess": "Update successful",
+    "invalidCurrentPassword": "The current password provided is incorrect",
+    "profileNotFound": "User profile not found",
+    "passwordChangeError": "Error changing the password",
+    "fieldsRequired": "Please fill in all fields",
+    "passwordMismatch": "Passwords do not match"
   },
   "common": {
     "unexpectedError": "Unexpected error occurred",
@@ -113,9 +118,7 @@
     "updatedSuccess": "Profile updated successfully.",
     "updateError": "Error saving the profile.",
     "fieldsRequired": "Please fill in all fields.",
-    "passwordMismatch": "Passwords do not match.",
-    "passwordChangedSuccess": "Password updated successfully.",
-    "passwordChangeError": "Error changing the password."
+    "passwordMismatch": "Passwords do not match."
   },
   "notFound": {
     "title": "404",
