@@ -23,6 +23,7 @@
     "loading": "Loading...",
     "retry": "Retry",
     "create": "Create",
+    "confirm": "Confirm",
     "accept": "Accept",
     "reject": "Reject",
     "edit": "Edit",
@@ -336,6 +337,7 @@
     }
   },
   "iam": {
+    "registerSuccess": "Registration successful",
     "createAccount": "Create Account",
     "joinCommunity": "Join our agricultural community",
     "fullName": "Full name",

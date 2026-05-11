@@ -23,6 +23,7 @@
     "loading": "Cargando...",
     "retry": "Reintentar",
     "create": "Crear",
+    "confirm": "Confirmar",
     "accept": "Aceptar",
     "reject": "Rechazar",
     "edit": "Editar",
@@ -336,6 +337,7 @@
     }
   },
   "iam": {
+    "registerSuccess": "Registro exitoso",
     "createAccount": "Crear Cuenta",
     "joinCommunity": "Únete a nuestra comunidad agrícola",
     "fullName": "Nombre completo",

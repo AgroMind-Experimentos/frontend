@@ -5,7 +5,7 @@ import router from './router.js'
 import i18n from './i18n.js'
 import PrimeVue from 'primevue/config'
 import Lara from '@primeuix/themes/lara';
-import {Button, FloatLabel, Card, Checkbox, InputText, DatePicker, Toolbar, SelectButton} from 'primevue'
+import {Button, FloatLabel, Card, Checkbox, InputText, DatePicker, Toolbar, SelectButton, Dialog} from 'primevue'
 import ToastService from 'primevue/toastservice'
 import 'primeicons/primeicons.css'
 
@@ -21,6 +21,7 @@ createApp(App)
     .component('pv-datepicker', DatePicker)
     .component('pv-input-text', InputText)
     .component('pv-select-button', SelectButton)
+    .component('pv-dialog', Dialog)
     .use(router)
     .use(i18n)
     .mount('#app')
