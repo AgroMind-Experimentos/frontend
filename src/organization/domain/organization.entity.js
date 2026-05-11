@@ -15,7 +15,7 @@ export class Organization {
         this._id = organization.id;
         this._name = organization.name;
         this._description = organization.description;
-        this._status = organization.status;
+        this._location = organization.location;
         this._members = organization.members || [];
         this._createdAt = organization.createdAt;
         this._location = organization.location;

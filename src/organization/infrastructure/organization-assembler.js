@@ -4,15 +4,14 @@ export class OrganizationAssembler {
     toOrganization(dto) {
         const data = dto?.data || dto;
         const members = Array.isArray(data?.memberIds) ? data.memberIds : [];
-
+        console.log(data)
         return new Organization({
             id: data?.id || data?._id || null,
             name: data?.name || '',
             description: data?.description || '',
-            status: data?.status || 'active',
+            location: data?.location || '',
             members,
-            createdAt: data?.createdAt || data?.created_at || new Date().toISOString(),
-            location: data?.location || ''
+            createdAt: data?.createdAt || data?.created_at || new Date().toISOString()
         });
     }
 
@@ -25,7 +24,7 @@ export class OrganizationAssembler {
         return {
             name: formData.name,
             description: formData.description || '',
-            status: formData.status || 'active',
+            location: formData.location,
             agronomistId: formData.agronomistId || null
         };
     }

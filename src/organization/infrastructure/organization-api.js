@@ -33,7 +33,7 @@ export class OrganizationApi {
             const payload = {
                 name: organizationData.name,
                 description: organizationData.description,
-                status: organizationData.status || 'active',
+                location: organizationData.location,
                 agronomistId: organizationData.agronomistId || null
             };
             const { data } = await this.http.post(this.organizationsEndpoint, payload);
