@@ -258,7 +258,49 @@
     "loadingWeather": "Loading weather information...",
     "currentConditions": "Current Conditions",
     "humidity": "Humidity",
-    "wind": "Wind"
+    "wind": "Wind",
+    "agriInfo": {
+      "loading": {
+        "title": "Agricultural Information",
+        "tip": "Waiting for weather data..."
+      },
+      "veryCold": {
+        "title": "Alert: Very Low Temperatures",
+        "tip1": "Frost risk. Protect sensitive crops with covers",
+        "tip2": "Do not water, water may freeze",
+        "tip3": "Consider using thermal blankets or heating systems",
+        "tip4": "Constantly monitor root and tuber crops"
+      },
+      "cold": {
+        "title": "Cool Temperature",
+        "tip1": "Optimal conditions for cold-weather crops (lettuce, spinach)",
+        "tip2": "Good time to plant broccoli, cauliflower, and cabbage",
+        "tip3": "Avoid planting tropical crops",
+        "tip4": "Ensure crops receive enough sunlight"
+      },
+      "temperate": {
+        "title": "Ideal Conditions",
+        "tip1": "Perfect temperature for most crops",
+        "tip2": "Excellent for sowing and transplanting",
+        "tip3": "Optimal conditions for vegetative growth",
+        "tip4": "Ideal for applying fertilizers and foliar treatments"
+      },
+      "warm": {
+        "title": "Warm Temperature",
+        "tip1": "Ideal for summer crops (tomatoes, peppers, watermelons)",
+        "tip2": "Increase irrigation frequency, especially in the morning",
+        "tip3": "Consider applying mulch to retain soil moisture",
+        "tip4": "Monitor for signs of water stress in plants"
+      },
+      "veryHot": {
+        "title": "Alert: Very High Temperatures",
+        "tip1": "Risk of heat stress in plants. Increase shading",
+        "tip2": "Water early in the morning or at sunset, never at noon",
+        "tip3": "Avoid transplanting and pruning during the hottest hours",
+        "tip4": "Protect sensitive crops with shade nets (30-50%)",
+        "tip5": "Watch for pests; they reproduce faster with heat"
+      }
+    }
   },
   "iam": {
     "createAccount": "Create Account",
