@@ -82,12 +82,15 @@ async function createPlot() {
       members: selected.value.map(id => String(id))
     };
 
-    await plotService.createPlot(plotData);
-    toast.add({ severity: 'success', summary: t('organization.plotCreateSuccess'), life: 3000 });
+    const newPlot = await plotService.createPlot(plotData);
+    const successKey = newPlot.messageKey ? `auth.${newPlot.messageKey}` : 'organization.plotCreateSuccess';
+    toast.add({ severity: 'success', summary: t(successKey), life: 3000 });
     router.push({ name: 'organization-detail', params: { id: orgId } });
   } catch (err) {
     console.error('❌ Error creating plot:', err);
-    toast.add({ severity: 'error', summary: t('organization.plotCreateError'), life: 3000 });
+    const msgKey = err?.response?.data?.message;
+    const summary = msgKey ? t(`auth.${msgKey}`) : t('organization.plotCreateError');
+    toast.add({ severity: 'error', summary, life: 3000 });
   }
 }
 

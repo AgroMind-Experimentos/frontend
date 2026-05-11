@@ -53,7 +53,9 @@ export class PlotsApi {
             console.log('📤 POST crear plota/crop:', payload);
             const { data } = await this.http.post(this.cropsEndpoint, payload);
             console.log('✅ Plota creada:', data);
-            return PlotAssembler.toEntityFromResponse(data);
+            const entity = PlotAssembler.toEntityFromResponse(data);
+            if (data.message) entity.messageKey = data.message;
+            return entity;
         } catch (error) {
             console.error('Error creating plot:', error);
             console.error('Error details:', error.response?.data);

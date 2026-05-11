@@ -15,7 +15,10 @@
     "profileNotFound": "User profile not found",
     "passwordChangeError": "Error changing the password",
     "fieldsRequired": "Please fill in all fields",
-    "passwordMismatch": "Passwords do not match"
+    "passwordMismatch": "Passwords do not match",
+    "organizationNotFound": "Organization not found",
+    "profileNotInOrganization": "The user is not part of this organization",
+    "invalidPlotData": "Invalid plot data provided"
   },
   "common": {
     "unexpectedError": "Unexpected error occurred",
