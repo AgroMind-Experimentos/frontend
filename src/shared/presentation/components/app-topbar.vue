@@ -1,10 +1,6 @@
-<script setup>
-import { computed } from 'vue';
-import { userStore } from '../../../iam/application/user.store.js';
-import LanguagueSwitcher from './languague-switcher.vue';
-import InvitationBell from './invitation-bell.vue';
 
-const userName = computed(() => userStore.state.user?.name || 'Usuario');
+<script setup>
+import InvitationBell from './invitation-bell.vue';
 </script>
 
 <template>
@@ -17,11 +13,7 @@ const userName = computed(() => userStore.state.user?.name || 'Usuario');
     </div>
 
     <div class="right">
-      <div class="user-info">
-        <span class="user-name">{{ userName }}</span>
-      </div>
       <InvitationBell />
-      <languague-switcher />
     </div>
   </header>
 </template>
