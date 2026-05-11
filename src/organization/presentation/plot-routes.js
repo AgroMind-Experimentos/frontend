@@ -1,7 +1,7 @@
 import PlotCreateView from './views/plot-create-view.vue';
 import PlotEditView from './views/plot-edit-view.vue';
 
-export default [
+const plotRoutes = [
     {
         path: '/plots/create',
         name: 'plot-create',
@@ -14,3 +14,5 @@ export default [
         props: true
     }
 ];
+
+export default plotRoutes;

@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import AppLayout from '../shared/presentation/components/app-layout.vue'
-import { ReportsService } from './application/reports.service.js'
+import { ReportsService } from '../application/reports.service.js'
+import AppLayout from '../../shared/presentation/components/app-layout.vue'
 import Card from 'primevue/card'
 import Button from 'primevue/button'
 import Tag from 'primevue/tag'
