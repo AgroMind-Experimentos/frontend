@@ -272,8 +272,7 @@
   "sharedExt": {
     "ecotrack": "EcoTrack",
     "dashboardWip": "Dashboard (WIP)",
-    "names": "Names:",
-    "lastName": "Last Names:",
+    "names": "Display names:",
     "role": "Role:",
     "email": "Email:",
     "editPhoto": "Edit photo",
