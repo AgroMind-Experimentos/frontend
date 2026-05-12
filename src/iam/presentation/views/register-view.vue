@@ -11,10 +11,11 @@ import Password from 'primevue/password';
 import RadioButton from 'primevue/radiobutton';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
+import Dialog from 'primevue/dialog';
 
 export default {
   name: 'register-view',
-  components: { InputText, Password, RadioButton, Button, Card },
+  components: { InputText, Password, RadioButton, Button, Card, Dialog },
   setup() {
     const router = useRouter();
     const { t } = useI18n();
@@ -26,6 +27,7 @@ export default {
     const confirmPassword = ref('');
     const role = ref('');
     const consentChecked = ref(false);
+    const showPolicyModal = ref(false);
 
     const logoUrl = '/logo.png';
 
@@ -67,7 +69,7 @@ export default {
 
     return {
       name, email, password, confirmPassword,
-      role, consentChecked, logoUrl, loading, errorKey, successKey, goLogin, submit
+      role, consentChecked, showPolicyModal, logoUrl, loading, errorKey, successKey, goLogin, submit
     };
   }
 };
@@ -190,9 +192,36 @@ export default {
                 class="consent-checkbox"
               />
               <label for="consent-check" class="consent-label">
-                {{ $t('iam.consentLabel') }}
+                {{ $t('iam.consentLabelStart') }}
+                <button type="button" class="policy-link" @click.stop="showPolicyModal = true">
+                  {{ $t('iam.privacyPolicyLink') }}
+                </button>{{ $t('iam.consentLabelEnd') }}
               </label>
             </div>
+
+            <!-- Modal política de privacidad -->
+            <Dialog
+              v-model:visible="showPolicyModal"
+              :header="$t('iam.policyModalTitle')"
+              :modal="true"
+              :closable="true"
+              :draggable="false"
+              style="width: 540px; max-width: 95vw"
+            >
+              <div class="policy-body">
+                <p>{{ $t('iam.policyP1') }}</p>
+                <p>{{ $t('iam.policyP2') }}</p>
+                <p>{{ $t('iam.policyP3') }}</p>
+                <p>{{ $t('iam.policyP4') }}</p>
+              </div>
+              <template #footer>
+                <Button
+                  :label="$t('common.accept')"
+                  class="p-button-success"
+                  @click="showPolicyModal = false"
+                />
+              </template>
+            </Dialog>
 
             <!-- Mensaje de error -->
             <div v-if="errorKey" class="error-message">
@@ -470,6 +499,32 @@ export default {
   color: #555;
   cursor: pointer;
   line-height: 1.4;
+}
+
+.policy-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  color: #2E7D32;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  line-height: inherit;
+}
+
+.policy-link:hover {
+  color: #1B5E20;
+}
+
+.policy-body {
+  line-height: 1.7;
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.policy-body p {
+  margin: 0 0 1rem 0;
 }
 
 .error-message {
