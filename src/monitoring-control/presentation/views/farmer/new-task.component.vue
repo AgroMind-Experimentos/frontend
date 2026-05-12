@@ -86,7 +86,7 @@ async function submitForm() {
       title: title.value,
       description: description.value,
       organizationId: selectedOrg.value.id,
-      cropId: selectedPlot.value.id,
+      plotId: selectedPlot.value.id,
       responsibleId: selectedFarmer.value.id,
     })
 

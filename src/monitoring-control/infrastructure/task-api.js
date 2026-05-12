@@ -92,7 +92,7 @@ export class TaskApi{
             Title: resource.title.trim(),
             Description: resource.description?.trim() || '',
             OrganizationId: Number(resource.organizationId),
-            CropId: Number(resource.cropId),
+            PlotId: Number(resource.plotId),
             ResponsibleId: Number(resource.responsibleId),
         };
         const response = await axios.post(endpoint, payload);
