@@ -9,7 +9,6 @@ import AppLayout from '../../../shared/presentation/components/app-layout.vue';
 import Card from 'primevue/card';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
-import Avatar from 'primevue/avatar';
 
 const { t } = useI18n();
 const toast = useToast();
@@ -27,23 +26,7 @@ const name = ref('');
 const area = ref('');
 const locationTxt = ref('');
 const crop = ref('');
-
-// ---- Miembros (mock) ----
-const allMembers = ref([
-  { id: 1, name: 'Miembro 1', avatar: 'https://i.pravatar.cc/100?img=12' },
-  { id: 2, name: 'Miembro 2', avatar: 'https://i.pravatar.cc/100?img=32' },
-  { id: 3, name: 'Ana Torres', avatar: 'https://i.pravatar.cc/100?img=21' },
-  { id: 4, name: 'Luis Paredes', avatar: 'https://i.pravatar.cc/100?img=41' }
-]);
-
-const search = ref('');
-const selected = ref([]);
-
-const filtered = computed(() => {
-  const q = search.value.trim().toLowerCase();
-  if (!q) return allMembers.value;
-  return allMembers.value.filter(m => m.name.toLowerCase().includes(q));
-});
+const orgId = ref(null);
 
 onMounted(async () => {
   try {
@@ -51,25 +34,15 @@ onMounted(async () => {
     // Llenar el formulario con los datos actuales
     if (currentPlot.value) {
       name.value = currentPlot.value.name;
-      area.value = currentPlot.value.area;
+      area.value = String(currentPlot.value.area);
       locationTxt.value = currentPlot.value.location;
       crop.value = currentPlot.value.crop;
-      selected.value = currentPlot.value.members.map(id => parseInt(id));
+      orgId.value = currentPlot.value.organizationId;
     }
   } catch (err) {
-    console.error('Error loading plot:', err);
+    console.error('Error loading plot data:', err);
   }
 });
-
-function toggleMember(id) {
-  const i = selected.value.indexOf(id);
-  if (i >= 0) selected.value.splice(i, 1);
-  else selected.value.push(id);
-}
-
-function removeMember(id) {
-  selected.value = selected.value.filter(x => x !== id);
-}
 
 async function updatePlot() {
   if (!name.value.trim()) {
@@ -77,36 +50,46 @@ async function updatePlot() {
     return;
   }
 
+  if (!orgId.value) {
+    console.error('❌ Missing organizationId for plot');
+    return;
+  }
+
   try {
     const description = [
       area.value.trim() ? `Área: ${area.value.trim()}` : '',
       locationTxt.value.trim() ? `Ubicación: ${locationTxt.value.trim()}` : '',
-      crop.value.trim() ? `Cultivo: ${crop.value.trim()}` : '',
-      selected.value.length > 0 ? `Miembros: ${selected.value.length}` : ''
+      crop.value.trim() ? `Cultivo: ${crop.value.trim()}` : ''
     ].filter(Boolean).join(' | ');
 
     const plotData = {
-      organizationId: currentPlot.value.organizationId,
+      organizationId: orgId.value,
       name: name.value.trim(),
       description: description,
       area: area.value.trim(),
       location: locationTxt.value.trim(),
-      crop: crop.value.trim(),
-      members: selected.value.map(id => String(id))
+      crop: crop.value.trim()
     };
 
-    await plotService.updatePlot(plotId, plotData);
-    toast.add({ severity: 'success', summary: t('organization.plotUpdateSuccess'), life: 3000 });
-    router.push({ name: 'organization-detail', params: { id: currentPlot.value.organizationId } });
+    const updatedPlot = await plotService.updatePlot(plotId, plotData);
+    
+    // Only redirect if updatePlot was successful (didn't throw)
+    const successKey = updatedPlot.messageKey ? `auth.${updatedPlot.messageKey}` : 'organization.plotUpdateSuccess';
+    toast.add({ severity: 'success', summary: t(successKey), life: 3000 });
+    
+    router.push({ name: 'organization-detail', params: { id: orgId.value } });
   } catch (err) {
     console.error('❌ Error updating plot:', err);
-    toast.add({ severity: 'error', summary: t('organization.plotUpdateError'), life: 3000 });
+    const msgKey = err?.response?.data?.message;
+    const summary = msgKey ? t(`auth.${msgKey}`) : t('organization.plotUpdateError');
+    toast.add({ severity: 'error', summary, life: 3000 });
+    plotService.clearError();
   }
 }
 
 function goBack() {
-  if (currentPlot.value) {
-    router.push({ name: 'organization-detail', params: { id: currentPlot.value.organizationId } });
+  if (orgId.value) {
+    router.push({ name: 'organization-detail', params: { id: orgId.value } });
   } else {
     router.push({ name: 'dashboard' });
   }
@@ -125,7 +108,7 @@ function goBack() {
       </div>
 
       <!-- Estado de error -->
-      <div v-else-if="error" class="error-state">
+      <div v-else-if="error && !currentPlot" class="error-state">
         <i class="pi pi-exclamation-triangle" style="font-size: 2rem; color: #e74c3c"></i>
         <p>{{ error }}</p>
         <Button
@@ -137,7 +120,7 @@ function goBack() {
       </div>
 
       <!-- Formulario de edición -->
-      <div v-else-if="currentPlot" class="grid">
+      <div v-if="currentPlot && !loading" class="form-container">
         <!-- Panel: Datos -->
         <Card class="panel">
           <template #title>
@@ -159,35 +142,6 @@ function goBack() {
 
               <label class="label">{{ $t('organization.crop') }}</label>
               <InputText v-model="crop" :placeholder="$t('organization.crop')" />
-            </div>
-          </template>
-        </Card>
-
-        <!-- Panel: Miembros -->
-        <Card class="panel">
-          <template #title>
-            <div class="panel-title">
-              <i class="pi pi-users mr-2 text-orange-500"></i>
-              <span>{{ $t('organization.assignedMembers') }}</span>
-            </div>
-          </template>
-          <template #content>
-            <div class="search-box mb-3">
-              <i class="pi pi-search"></i>
-              <InputText v-model="search" :placeholder="$t('organization.searchMembersPlaceholder')" class="w-full" />
-            </div>
-
-            <div class="member-list">
-              <div v-for="m in filtered" :key="m.id" class="member-row">
-                <div class="left" @click="toggleMember(m.id)">
-                  <Avatar :image="m.avatar" shape="circle" class="mr-2" />
-                  <span class="member-name">{{ m.name }}</span>
-                </div>
-                <div class="right">
-                  <i v-if="selected.includes(m.id)" class="pi pi-check-circle selected" @click="toggleMember(m.id)" />
-                  <i class="pi pi-trash del" @click="removeMember(m.id)" />
-                </div>
-              </div>
             </div>
           </template>
         </Card>
@@ -222,25 +176,20 @@ function goBack() {
 :deep(.p-inputtext){ background:#fff !important; color:#111 !important; border-color:#d1d5db; }
 :deep(.p-inputtext::placeholder){ color:#9ca3af; }
 
-.search-box{position:relative}
-.search-box i{position:absolute;right:10px;top:50%;transform:translateY(-50%);color:#94a3b8}
-
-.member-list{display:flex;flex-direction:column;gap:10px;max-height:320px;overflow:auto;padding-right:6px}
-.member-row{
-  background:#fff;border:1px solid #e5e7eb;border-radius:10px;
-  padding:10px 12px;display:flex;align-items:center;justify-content:space-between;color:#111
-}
-.member-row .left{display:flex;align-items:center;gap:10px;cursor:pointer}
-.member-name{color:#111}
-.member-row .right{display:flex;align-items:center;gap:12px}
-.selected{color:#16a34a;font-size:1.25rem;cursor:pointer}
-.del{color:#111;font-size:1.1rem;cursor:pointer}
-
 .actions{display:flex;justify-content:center;gap:1rem;margin-top:28px}
 .btn-primary{min-width:160px}
 .btn-cancel{min-width:120px}
 
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.form-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.panel {
+  width: 100%;
+  max-width: 600px;
+}
 
 .loading-state, .error-state {
   display: flex;

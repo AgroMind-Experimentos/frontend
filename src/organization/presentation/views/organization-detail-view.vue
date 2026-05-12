@@ -266,6 +266,12 @@ const getMemberCount = (plot) => {
             <template #body="slotProps">
               <div class="action-buttons">
                 <Button
+                  icon="pi pi-pencil"
+                  class="p-button-rounded p-button-text p-button-info"
+                  @click="editPlot(slotProps.data)"
+                  :title="t('organization.editPlot')"
+                />
+                <Button
                   icon="pi pi-trash"
                   class="p-button-rounded p-button-text p-button-danger"
                   @click="deletePlot(slotProps.data)"

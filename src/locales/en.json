@@ -18,7 +18,8 @@
     "passwordMismatch": "Passwords do not match",
     "organizationNotFound": "Organization not found",
     "profileNotInOrganization": "The user is not part of this organization",
-    "invalidPlotData": "Invalid plot data provided"
+    "invalidPlotData": "Invalid plot data provided",
+    "plotNotFound": "The plot was not found"
   },
   "common": {
     "unexpectedError": "Unexpected error occurred",

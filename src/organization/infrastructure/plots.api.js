@@ -66,10 +66,12 @@ export class PlotsApi {
     async update(id, plotData) {
         try {
             const payload = PlotAssembler.fromFormData(plotData);
-            console.log('📤 PUT actualizar plota/crop:', payload);
-            const { data } = await this.http.put(`${this.cropsEndpoint}/${id}`, payload);
+            console.log('📤 PATCH actualizar plota/crop:', payload);
+            const { data } = await this.http.patch(`${this.cropsEndpoint}/${id}`, payload);
             console.log('✅ Plota actualizada:', data);
-            return PlotAssembler.toEntityFromResponse(data);
+            const entity = PlotAssembler.toEntityFromResponse(data);
+            if (data.message) entity.messageKey = data.message;
+            return entity;
         } catch (error) {
             console.error(`Error updating plot ${id}:`, error);
             console.error('Error details:', error.response?.data);

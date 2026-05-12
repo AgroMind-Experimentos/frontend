@@ -18,7 +18,8 @@
     "passwordMismatch": "Las contraseñas no coinciden",
     "organizationNotFound": "Organización no encontrada",
     "profileNotInOrganization": "El usuario no forma parte de esta organización",
-    "invalidPlotData": "Datos de la parcela inválidos"
+    "invalidPlotData": "Datos de la parcela inválidos",
+    "plotNotFound": "La parcela no fue encontrada"
   },
   "common": {
     "unexpectedError": "Ocurrió un error inesperado",
