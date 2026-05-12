@@ -19,7 +19,8 @@
     "organizationNotFound": "Organización no encontrada",
     "profileNotInOrganization": "El usuario no forma parte de esta organización",
     "invalidPlotData": "Datos de la parcela inválidos",
-    "plotNotFound": "La parcela no fue encontrada"
+    "plotNotFound": "La parcela no fue encontrada",
+    "invalidOrganizationData": "Datos de la organización inválidos"
   },
   "common": {
     "unexpectedError": "Ocurrió un error inesperado",
@@ -103,7 +104,9 @@
     "statusActive": "Activa",
     "statusInactive": "Inactiva",
     "updateSuccess": "Organización actualizada exitosamente",
-    "updateError": "Error al actualizar la organización"
+    "updateError": "Error al actualizar la organización",
+    "createSuccess": "Organización creada exitosamente",
+    "createError": "Error al crear la organización"
   },
   "invitation": {
     "panelTitle": "Invitar Farmer por Email",

@@ -29,7 +29,7 @@ async function createOrg() {
   try {
     const agronomistId = userStore.state.user?.id;
 
-    await organizationService.createOrganization({
+    const newOrg = await organizationService.createOrganization({
       name: name.value.trim(),
       description: description.value.trim(),
       location: locationTxt.value.trim(),
@@ -37,9 +37,15 @@ async function createOrg() {
       agronomistId
     });
 
+    const successKey = newOrg.messageKey ? `auth.${newOrg.messageKey}` : 'organization.createSuccess';
+    toast.add({ severity: 'success', summary: t(successKey), life: 3000 });
     router.push({ name: 'dashboard' });
   } catch (err) {
-    toast.add({ severity: 'error', summary: t('common.unexpectedError'), life: 3000 });
+    console.error('❌ Error creating organization:', err);
+    const msgKey = err?.response?.data?.message;
+    const summary = msgKey ? t(`auth.${msgKey}`) : t('organization.createError');
+    toast.add({ severity: 'error', summary, life: 3000 });
+    organizationService.clearError();
   }
 }
 </script>

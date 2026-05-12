@@ -24,9 +24,7 @@ class OrganizationService {
 
         try {
             const profileId = userStore.state.user?.id;
-            const data = await this.#api.getAll(profileId);
-            const organizationsData = data?.data || data?.organizations || data;
-            this.state.organizations = this.#assembler.toOrganizationArray(organizationsData);
+            this.state.organizations = await this.#api.getAll(profileId);
             return this.state.organizations;
         } catch (error) {
             this.state.error = 'Error al cargar las organizaciones';
@@ -47,8 +45,7 @@ class OrganizationService {
         this.state.error = null;
 
         try {
-            const data = await this.#api.getById(id);
-            this.state.currentOrganization = this.#assembler.toOrganization(data);
+            this.state.currentOrganization = await this.#api.getById(id);
             return this.state.currentOrganization;
         } catch (error) {
             this.state.error = 'Error al cargar la organización';
@@ -69,8 +66,7 @@ class OrganizationService {
         this.state.error = null;
         try {
             const apiData = this.#assembler.fromFormData(organizationData);
-            const createdData = await this.#api.create(apiData);
-            const newOrganization = this.#assembler.toOrganization(createdData);
+            const newOrganization = await this.#api.create(apiData);
             this.state.organizations.push(newOrganization);
             return newOrganization;
         } catch (error) {
@@ -91,8 +87,7 @@ class OrganizationService {
         this.state.loading = true;
         this.state.error = null;
         try {
-            const updatedData = await this.#api.patch(id, patchData);
-            const updatedOrg = this.#assembler.toOrganization(updatedData);
+            const updatedOrg = await this.#api.patch(id, patchData);
             const index = this.state.organizations.findIndex(o => o.id === id);
             if (index !== -1) this.state.organizations[index] = updatedOrg;
             if (this.state.currentOrganization?.id === id) this.state.currentOrganization = updatedOrg;
@@ -117,8 +112,7 @@ class OrganizationService {
 
         try {
             const apiData = this.#assembler.fromFormData(organizationData);
-            const updatedData = await this.#api.update(id, apiData);
-            const updatedOrganization = this.#assembler.toOrganization(updatedData);
+            const updatedOrganization = await this.#api.update(id, apiData);
 
             // Update in local state
             const index = this.state.organizations.findIndex(org => org.id === id);
@@ -180,8 +174,7 @@ class OrganizationService {
         this.state.error = null;
 
         try {
-            const updatedData = await this.#api.addMember(organizationId, memberId);
-            const updatedOrganization = this.#assembler.toOrganization(updatedData);
+            const updatedOrganization = await this.#api.addMember(organizationId, memberId);
 
             // Update in local state
             const index = this.state.organizations.findIndex(org => org.id === organizationId);
@@ -214,8 +207,7 @@ class OrganizationService {
         this.state.error = null;
 
         try {
-            const updatedData = await this.#api.removeMember(organizationId, memberId);
-            const updatedOrganization = this.#assembler.toOrganization(updatedData);
+            const updatedOrganization = await this.#api.removeMember(organizationId, memberId);
 
             // Update in local state
             const index = this.state.organizations.findIndex(org => org.id === organizationId);

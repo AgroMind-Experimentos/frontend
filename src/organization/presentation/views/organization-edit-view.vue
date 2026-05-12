@@ -42,15 +42,21 @@ async function saveChanges() {
     : [];
 
   try {
-    await organizationService.patchOrganization(orgId, {
+    const updatedOrg = await organizationService.patchOrganization(orgId, {
       name: name.value.trim(),
       description: description.value.trim(),
       memberIds
     });
-    toast.add({ severity: 'success', summary: t('organization.updateSuccess'), life: 3000 });
+    
+    const successKey = updatedOrg.messageKey ? `auth.${updatedOrg.messageKey}` : 'organization.updateSuccess';
+    toast.add({ severity: 'success', summary: t(successKey), life: 3000 });
     router.push({ name: 'organization-detail', params: { id: orgId } });
-  } catch {
-    toast.add({ severity: 'error', summary: t('organization.updateError'), life: 3000 });
+  } catch (err) {
+    console.error('❌ Error updating organization:', err);
+    const msgKey = err?.response?.data?.message;
+    const summary = msgKey ? t(`auth.${msgKey}`) : t('organization.updateError');
+    toast.add({ severity: 'error', summary, life: 3000 });
+    organizationService.clearError();
   }
 }
 

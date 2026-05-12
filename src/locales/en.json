@@ -19,7 +19,8 @@
     "organizationNotFound": "Organization not found",
     "profileNotInOrganization": "The user is not part of this organization",
     "invalidPlotData": "Invalid plot data provided",
-    "plotNotFound": "The plot was not found"
+    "plotNotFound": "The plot was not found",
+    "invalidOrganizationData": "Invalid organization data"
   },
   "common": {
     "unexpectedError": "Unexpected error occurred",
@@ -103,7 +104,9 @@
     "statusActive": "Active",
     "statusInactive": "Inactive",
     "updateSuccess": "Organization updated successfully",
-    "updateError": "Error updating the organization"
+    "updateError": "Error updating the organization",
+    "createSuccess": "Organization created successfully",
+    "createError": "Error creating the organization"
   },
   "invitation": {
     "panelTitle": "Invite Farmer by Email",
