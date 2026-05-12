@@ -60,27 +60,71 @@ export default {
 </template>
 
 <style scoped>
-.org-card{
-  background:#fff;border-radius:16px;display:grid;grid-template-columns:1fr auto;
-  align-items:center;padding:24px 18px;margin:0 auto 18px auto;
-  box-shadow:0 6px 18px rgba(0,0,0,.06);width:100%;max-width:900px; /* ← más ancha */
+.org-card {
+  background: #fff;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.07);
+  border: 1px solid #e9ecef;
+  width: 100%;
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
 }
-.left{padding-right:12px}
-.title{margin:0 0 8px 0;color:#111}     /* ← texto negro */
+
+.org-card:hover {
+  box-shadow: 0 6px 20px rgba(0,0,0,.1);
+  transform: translateY(-1px);
+}
+
+.left {
+  flex: 1;
+  min-width: 0;
+  padding-right: 1.5rem;
+}
+
+.title {
+  margin: 0 0 4px 0;
+  color: #1a1a1a;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
 .description {
-  margin: 0 0 12px 0;
-  color: #333;
-  font-size: 1rem;
+  margin: 0 0 10px 0;
+  color: #6b7280;
+  font-size: 0.9rem;
   line-height: 1.5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.meta{display:flex;align-items:center;gap:.5rem;color:#111} /* ← texto negro */
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
 .meta-item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
+  color: #555;
+  font-size: 0.85rem;
 }
-.right{
-  display:flex;align-items:center;gap:10px;background:#2a7c3e;
-  padding:18px;border-radius:12px
+
+.meta-item i {
+  color: #2c5530;
+  font-size: 0.9rem;
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
 </style>
