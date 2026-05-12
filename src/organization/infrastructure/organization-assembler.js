@@ -11,6 +11,7 @@ export class OrganizationAssembler {
             description: data?.description || '',
             location: data?.location || '',
             members,
+            agronomistId: data?.agronomistId || data?.agronomistOwnerId || null,
             createdAt: data?.createdAt || data?.created_at || new Date().toISOString()
         });
     }

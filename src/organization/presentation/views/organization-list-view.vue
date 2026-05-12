@@ -36,6 +36,7 @@
           v-for="org in organizations"
           :key="org.id"
           :org="org"
+          :canDelete="isOwner(org)"
           @enter="goToDetail"
           @delete="deleteOrganization"
         />
@@ -110,6 +111,13 @@ function goToCreate() {
 function goToDetail(org) {
   router.push({ name: 'organization-detail', params: { id: org.id } });
 }
+
+function isOwner(org) {
+  const user = userStore.state.user;
+  return user && org && Number(org.agronomistId) === Number(userId.value);
+}
+
+const userId = computed(() => userStore.state.user?.id);
 
 function deleteOrganization(org) {
   pendingDeleteOrg.value = org;

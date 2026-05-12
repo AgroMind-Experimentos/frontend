@@ -106,7 +106,8 @@
     "updateSuccess": "Organization updated successfully",
     "updateError": "Error updating the organization",
     "createSuccess": "Organization created successfully",
-    "createError": "Error creating the organization"
+    "createError": "Error creating the organization",
+    "notAuthorized": "You do not have permission to perform this action"
   },
   "invitation": {
     "panelTitle": "Invite Farmer by Email",

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { OrganizationAssembler } from './organization-assembler.js';
+import { userStore } from '../../iam/application/user.store.js';
 
 export class OrganizationApi {
     baseUrl = import.meta.env.VITE_API_BASE_URL;
@@ -36,7 +37,7 @@ export class OrganizationApi {
                 name: organizationData.name,
                 description: organizationData.description,
                 location: organizationData.location,
-                agronomistId: organizationData.agronomistId || null
+                agronomistId: organizationData.agronomistId || userStore.state.user?.id || null
             };
             const { data } = await this.http.post(this.organizationsEndpoint, payload);
             const entity = new OrganizationAssembler().toOrganization(data);

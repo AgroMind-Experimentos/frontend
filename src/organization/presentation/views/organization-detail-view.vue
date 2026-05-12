@@ -27,6 +27,11 @@ const pendingDeletePlot = ref(null);
 
 const isAgronomist = computed(() => userStore.state.user?.role === 'Agronomist');
 const organization = computed(() => organizationService.state.currentOrganization);
+const isOwner = computed(() => {
+  const user = userStore.state.user;
+  const org = organization.value;
+  return user && org && Number(org.agronomistId) === Number(user.id);
+});
 const plots = computed(() => plotService.state.plots);
 const loading = computed(() => plotService.state.loading || organizationService.state.loading);
 const error = computed(() => plotService.state.error || organizationService.state.error);
@@ -190,7 +195,7 @@ const getMemberCount = (plot) => {
           </div>
         </div>
 
-        <div v-if="isAgronomist" class="actions">
+        <div v-if="isOwner" class="actions">
           <Button
             :label="t('common.edit')"
             icon="pi pi-pencil"
@@ -209,7 +214,7 @@ const getMemberCount = (plot) => {
       </div>
 
       <!-- Panel: Invitar farmer por email (solo Agrónomo) -->
-      <div v-if="isAgronomist" class="invite-panel">
+      <div v-if="isOwner" class="invite-panel">
         <h2 class="invite-title">
           <i class="pi pi-envelope"></i>
           {{ t('invitation.panelTitle') }}
@@ -286,7 +291,7 @@ const getMemberCount = (plot) => {
             </template>
           </Column>
 
-          <Column v-if="isAgronomist" :header="t('organization.actions')">
+          <Column v-if="isOwner" :header="t('organization.actions')">
             <template #body="slotProps">
               <div class="action-buttons">
                 <Button
@@ -312,7 +317,7 @@ const getMemberCount = (plot) => {
         <h2 class="title">{{ t('organization.noPlots') }}</h2>
         <p>{{ t('organization.noPlotsDesc') }}</p>
         <Button
-          v-if="isAgronomist"
+          v-if="isOwner"
           :label="t('organization.createFirstPlot')"
           icon="pi pi-plus"
           @click="goCreatePlot"

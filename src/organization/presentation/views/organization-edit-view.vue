@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useToast } from 'primevue/usetoast';
 import { organizationService } from '../../application/organization.service.js';
+import { userStore } from '../../../iam/application/user.store.js';
 import AppLayout from '../../../shared/presentation/components/app-layout.vue';
 import Card from 'primevue/card';
 import InputText from 'primevue/inputtext';
@@ -24,11 +25,21 @@ const locationTxt = ref('');
 onMounted(async () => {
   try {
     const org = await organizationService.getOrganizationById(orgId);
+    
+    // Validar propiedad
+    const userId = userStore.state.user?.id;
+    if (Number(org.agronomistId) !== Number(userId)) {
+      toast.add({ severity: 'error', summary: t('organization.notAuthorized'), life: 3000 });
+      router.push({ name: 'dashboard' });
+      return;
+    }
+
     name.value = org.name;
     description.value = org.description;
     locationTxt.value = org.location;
   } catch {
     toast.add({ severity: 'error', summary: t('common.unexpectedError'), life: 3000 });
+    router.push({ name: 'dashboard' });
   }
 });
 
