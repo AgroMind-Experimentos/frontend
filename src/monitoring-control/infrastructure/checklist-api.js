@@ -40,6 +40,17 @@ export class CheckListApi{
         }
     }
 
+    async markItemCompleted(itemId, isCompleted) {
+        try {
+            const endpoint = `${this.baseUrl}${this.checklistsEndpoint}/items/${itemId}`;
+            await axios.patch(endpoint, { isCompleted });
+            return true;
+        } catch (error) {
+            console.error('Error marcando ítem:', error.response?.data || error.message);
+            throw error;
+        }
+    }
+
     async registerNewChecklist(resource) {
         try {
             const endpoint = `${this.baseUrl}${this.checklistsEndpoint}`;

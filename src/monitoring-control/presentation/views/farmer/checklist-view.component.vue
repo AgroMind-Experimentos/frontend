@@ -11,6 +11,7 @@ const route = useRoute()
 const router = useRouter()
 const checklist = ref(null)
 const checkedItems = ref({})
+const togglingItem = ref(null)
 const checkListService = new CheckListService()
 const taskId = route.params.id
 const taskService = new TaskService()
@@ -28,19 +29,26 @@ onMounted(async ()=>{
     checklist.value = response
     if (checklist.value.items && checklist.value.items.length > 0) {
       checklist.value.items.forEach(item=>{
-        checkedItems.value[item.id] = false
+        checkedItems.value[item.id] = item.isCompleted
       })
-    }
-    if(task.value.status?.toLowerCase() === "completed"){
-      checklist.value.items.forEach(item => {
-        checkedItems.value[item.id] = true;
-      });
     }
   } else {
     console.warn('No se encontró checklist para esta tarea:', taskId)
     checklist.value = {}
   }
 })
+
+async function toggleItem(itemId, newValue) {
+  togglingItem.value = itemId
+  try {
+    await checkListService.markItemCompleted(itemId, newValue)
+    checkedItems.value[itemId] = newValue
+  } catch {
+    checkedItems.value[itemId] = !newValue
+  } finally {
+    togglingItem.value = null
+  }
+}
 
 async function completeTask(){
   try{
@@ -81,14 +89,17 @@ const finishTask = ()=>{
     <h3>{{ $t('tasksExt.checklist') }}</h3>
     <div v-if="checklist && checklist.items && checklist.items.length > 0">
       <div v-for="item in checklist.items" :key="item.id" class="checklist-item">
-        <template v-if="task?.status?.toLowerCase() === 'pending'">
-          <pv-checkbox :modelValue="false" :inputId="`check-${item.id}`" :binary="true" class="checkbox" :disabled="true"></pv-checkbox>
-          <label :for="`check-${item.id}`" class="checklist-name">{{ item.description }}</label>
-        </template>
-        <template v-else>
-          <pv-checkbox v-model="checkedItems[item.id]" :inputId="`check-${item.id}`" :binary="true" class="checkbox" :disabled="isAgronomist || task?.status === 'Completed'"></pv-checkbox>
-          <label :for="`check-${item.id}`" class="checklist-name">{{ item.description }}</label>
-        </template>
+        <pv-checkbox
+          :modelValue="checkedItems[item.id]"
+          :inputId="`check-${item.id}`"
+          :binary="true"
+          class="checkbox"
+          :disabled="isAgronomist || task?.status?.toLowerCase() === 'pending' || task?.status === 'Completed' || togglingItem === item.id"
+          @update:modelValue="(val) => toggleItem(item.id, val)"
+        />
+        <label :for="`check-${item.id}`" class="checklist-name" :class="{ 'item-done': checkedItems[item.id] }">
+          {{ item.description }}
+        </label>
       </div>
     </div>
     <div v-else>
@@ -155,6 +166,12 @@ const finishTask = ()=>{
 .checklist-name {
   font-size: 1.1rem;
   color: #444;
+  transition: color 0.2s, text-decoration 0.2s;
+}
+
+.item-done {
+  color: #9ca3af;
+  text-decoration: line-through;
 }
 
 /* Checkbox personalizado PrimeVue */

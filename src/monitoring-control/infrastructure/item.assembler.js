@@ -4,13 +4,15 @@ export class ItemAssembler{
     static toEntityFromResponse(response){
         return new Items({
             id: response.id,
-            description: response.description
+            description: response.description,
+            isCompleted: response.isCompleted ?? false
         })
     }
     static toEntityFromResource(resource){
         return new Items({
             id: null,
             description: resource.description,
+            isCompleted: false
         })
     }
 }
