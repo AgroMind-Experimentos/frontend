@@ -28,9 +28,9 @@ export class CheckListApi{
         try {
             const endpoint = `${this.baseUrl}${this.checklistsEndpoint}/${checklistId}`;
             const payload = {
-                Items: items.map(item => ({
-                    Description: (item.description || item.Description || '').trim()
-                })).filter(i => i.Description)
+                items: items.map(item => ({
+                    description: (item.description || item.Description || '').trim()
+                })).filter(i => i.description)
             };
             await axios.put(endpoint, payload);
             return true;
