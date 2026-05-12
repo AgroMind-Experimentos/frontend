@@ -5,6 +5,7 @@ const logs = ()=> import('./views/farmer/logs.component.vue')
 const checkList = ()=> import('./views/farmer/checklist-view.component.vue')
 const taskDashboard = ()=> import('./views/farmer/task-dashboard.component.vue')
 const newTask = ()=> import('./views/farmer/new-task.component.vue')
+const taskForm = ()=> import('./view/task-form.vue')
 
 const tasksRoutes = [
     {
@@ -35,6 +36,10 @@ const tasksRoutes = [
             {
                 path: "new-task",
                 components: {"task-dashboard": newTask},
+            },
+            {
+                path: ":id/edit",
+                components: {"task-dashboard": taskForm},
             }
         ]
     }
