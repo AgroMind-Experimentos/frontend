@@ -19,12 +19,14 @@ const loading = computed(() => organizationService.state.loading);
 
 const name = ref('');
 const description = ref('');
+const locationTxt = ref('');
 
 onMounted(async () => {
   try {
     const org = await organizationService.getOrganizationById(orgId);
     name.value = org.name;
     description.value = org.description;
+    locationTxt.value = org.location;
   } catch {
     toast.add({ severity: 'error', summary: t('common.unexpectedError'), life: 3000 });
   }
@@ -45,6 +47,7 @@ async function saveChanges() {
     const updatedOrg = await organizationService.patchOrganization(orgId, {
       name: name.value.trim(),
       description: description.value.trim(),
+      location: locationTxt.value.trim(),
       memberIds
     });
     
@@ -85,6 +88,8 @@ function goBack() {
             <label class="label">{{ t('organization.description') }}</label>
             <InputText v-model="description" :placeholder="t('organization.description')" class="mb-3" />
 
+            <label class="label">{{ t('organization.location') }}</label>
+            <InputText v-model="locationTxt" :placeholder="t('organization.location')" class="mb-3" />
           </div>
         </template>
       </Card>
