@@ -6,7 +6,8 @@ export class AuthAssembler {
         return new User({
             id: dto?.id || null,
             name: dto?.displayName || dto?.name || '',
-            email: dto?.email || ''
+            email: dto?.email || '',
+            role: dto?.role || ''
         });
     }
 
