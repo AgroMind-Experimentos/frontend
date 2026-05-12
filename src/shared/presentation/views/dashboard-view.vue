@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, computed } from 'vue';
+import { onMounted, computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useToast } from 'primevue/usetoast';
@@ -8,6 +8,7 @@ import { invitationService } from '../../../organization/application/invitation.
 import { userStore } from '../../../iam/application/user.store.js';
 import AppLayout from '../components/app-layout.vue';
 import OrganizationCard from '../../../organization/presentation/components/organization-card.vue';
+import ConfirmationModal from '../components/confirmation-modal.vue';
 import Button from 'primevue/button';
 
 const { t } = useI18n();
@@ -54,18 +55,27 @@ onMounted(async () => {
   }
 });
 
+const showDeleteConfirm = ref(false);
+const pendingDeleteOrg = ref(null);
+
 const goCreate = () => router.push({ name: 'organization-create' });
 
 const onEnter = (org) => router.push({ name:'organization-detail', params:{ id: org.id }});
 
-const onDelete = async (org) => {
-  if (confirm(`${t('dashboard.deleteConfirm')} "${org.name}"?`)) {
-    try {
-      await organizationService.deleteOrganization(org.id);
-      toast.add({ severity: 'success', summary: t('dashboard.deletedSummary'), detail: `"${org.name}" ${t('dashboard.deletedDetail')}`, life: 4000 });
-    } catch {
-      toast.add({ severity: 'error', summary: t('invitation.errorSummary'), detail: t('common.unexpectedError'), life: 4000 });
-    }
+const onDelete = (org) => {
+  pendingDeleteOrg.value = org;
+  showDeleteConfirm.value = true;
+};
+
+const handleDeleteConfirm = async () => {
+  const org = pendingDeleteOrg.value;
+  try {
+    await organizationService.deleteOrganization(org.id);
+    toast.add({ severity: 'success', summary: t('dashboard.deletedSummary'), detail: `"${org.name}" ${t('dashboard.deletedDetail')}`, life: 4000 });
+  } catch {
+    toast.add({ severity: 'error', summary: t('invitation.errorSummary'), detail: t('common.unexpectedError'), life: 4000 });
+  } finally {
+    pendingDeleteOrg.value = null;
   }
 };
 </script>
@@ -162,6 +172,12 @@ const onDelete = async (org) => {
         />
       </div>
     </div>
+
+    <ConfirmationModal
+      v-model:visible="showDeleteConfirm"
+      messageKey="organization.deleteConfirm"
+      @confirm="handleDeleteConfirm"
+    />
   </AppLayout>
 </template>
 

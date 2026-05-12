@@ -54,6 +54,16 @@ export class OrganizationApi {
         }
     }
 
+    async patch(id, organizationData) {
+        try {
+            const { data } = await this.http.patch(`${this.organizationsEndpoint}/${id}`, organizationData);
+            return data;
+        } catch (error) {
+            console.error(`Error patching organization ${id}:`, error);
+            throw error;
+        }
+    }
+
     async delete(id) {
         try {
             console.log('🗑️ DELETE organización:', id);

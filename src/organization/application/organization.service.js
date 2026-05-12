@@ -82,6 +82,30 @@ class OrganizationService {
     }
 
     /**
+     * Patch organization (partial update)
+     * @param {string} id - Organization ID
+     * @param {{ name: string, description: string, status: string, memberIds: number[] }} patchData
+     * @returns {Promise<Organization>}
+     */
+    async patchOrganization(id, patchData) {
+        this.state.loading = true;
+        this.state.error = null;
+        try {
+            const updatedData = await this.#api.patch(id, patchData);
+            const updatedOrg = this.#assembler.toOrganization(updatedData);
+            const index = this.state.organizations.findIndex(o => o.id === id);
+            if (index !== -1) this.state.organizations[index] = updatedOrg;
+            if (this.state.currentOrganization?.id === id) this.state.currentOrganization = updatedOrg;
+            return updatedOrg;
+        } catch (error) {
+            this.state.error = 'Error al actualizar la organización';
+            throw error;
+        } finally {
+            this.state.loading = false;
+        }
+    }
+
+    /**
      * Update organization
      * @param {string} id - Organization ID
      * @param {Object} organizationData - Updated organization data

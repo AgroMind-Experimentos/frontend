@@ -7,6 +7,7 @@ import { organizationService } from '../../application/organization.service.js';
 import { plotService } from '../../application/plot.service.js';
 import { invitationService } from '../../application/invitation.service.js';
 import { userStore } from '../../../iam/application/user.store.js';
+import { userProfileService } from '../../../profile/application/user-profile.service.js';
 import AppLayout from '../../../shared/presentation/components/app-layout.vue';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
@@ -34,6 +35,7 @@ const error = computed(() => plotService.state.error || organizationService.stat
 const inviteEmail = ref('');
 const inviteLoading = ref(false);
 const inviteMessage = ref(null); // { type: 'success'|'error', text: string }
+const memberEmails = ref(new Set());
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -47,6 +49,10 @@ async function sendInvitation() {
   }
   if (!EMAIL_REGEX.test(email)) {
     inviteMessage.value = { type: 'error', text: t('invitation.errorInvalidEmail') };
+    return;
+  }
+  if (memberEmails.value.has(email.toLowerCase())) {
+    inviteMessage.value = { type: 'error', text: t('invitation.errorAlreadyMember') };
     return;
   }
 
@@ -70,6 +76,17 @@ onMounted(async () => {
   try {
     await organizationService.getOrganizationById(orgId);
     await plotService.getPlotsByOrganizationId(orgId);
+
+    const org = organizationService.state.currentOrganization;
+    if (org?.members?.length) {
+      const allUsers = await userProfileService.fetchAllUsers();
+      const memberIdSet = new Set(org.members.map(id => String(id)));
+      memberEmails.value = new Set(
+        allUsers
+          .filter(u => memberIdSet.has(String(u.id)))
+          .map(u => u.email.toLowerCase())
+      );
+    }
   } catch (err) {
     console.error('Error loading organization details:', err);
   }
@@ -174,6 +191,13 @@ const getMemberCount = (plot) => {
         </div>
 
         <div v-if="isAgronomist" class="actions">
+          <Button
+            :label="t('common.edit')"
+            icon="pi pi-pencil"
+            class="p-button-outlined p-button-secondary"
+            @click="router.push({ name: 'organization-edit', params: { id: orgId } })"
+            :disabled="loading"
+          />
           <Button
             :label="t('organization.createPlot')"
             icon="pi pi-plus"

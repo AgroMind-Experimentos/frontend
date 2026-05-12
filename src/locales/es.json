@@ -97,7 +97,13 @@
     "list": "Organizaciones",
     "loading": "Cargando organizaciones...",
     "noOrganizations": "No tienes organizaciones",
-    "noOrganizationsDesc": "Comienza creando tu primera organización agrícola"
+    "noOrganizationsDesc": "Comienza creando tu primera organización agrícola",
+    "editTitle": "Editar Organización",
+    "status": "Estado",
+    "statusActive": "Activa",
+    "statusInactive": "Inactiva",
+    "updateSuccess": "Organización actualizada exitosamente",
+    "updateError": "Error al actualizar la organización"
   },
   "invitation": {
     "panelTitle": "Invitar Farmer por Email",
@@ -108,6 +114,7 @@
     "errorInvalidEmail": "El formato del correo electrónico es inválido.",
     "errorUserNotFound": "No se encontró ningún usuario registrado con ese correo.",
     "errorDuplicate": "Este usuario ya tiene una invitación pendiente en esta organización.",
+    "errorAlreadyMember": "Este usuario ya pertenece a la organización.",
     "bellTitle": "Invitaciones pendientes",
     "bellHeader": "Invitaciones",
     "loading": "Cargando…",
@@ -371,6 +378,8 @@
     "farmerDesc": "Productor agrícola",
     "registerError": "Error en el registro. Verifica los datos.",
     "roleRequired": "Selecciona un rol.",
+    "consentLabel": "Acepto el tratamiento de mis datos personales de acuerdo con la política de privacidad.",
+    "consentRequired": "Debes aceptar el consentimiento de datos personales.",
     "or": "o",
     "alreadyHaveAccount": "¿Ya tienes cuenta?",
     "login": "Iniciar sesión",

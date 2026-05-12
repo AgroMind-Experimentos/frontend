@@ -25,6 +25,7 @@ export default {
     const password = ref('');
     const confirmPassword = ref('');
     const role = ref('');
+    const consentChecked = ref(false);
 
     const logoUrl = '/logo.png';
 
@@ -47,6 +48,10 @@ export default {
         toast.add({ severity: 'warn', summary: t('iam.roleRequired'), life: 3000 });
         return;
       }
+      if (!consentChecked.value) {
+        toast.add({ severity: 'warn', summary: t('iam.consentRequired'), life: 3000 });
+        return;
+      }
 
       const ok = await userStore.register({
         name: name.value.trim(),
@@ -62,7 +67,7 @@ export default {
 
     return {
       name, email, password, confirmPassword,
-      role, logoUrl, loading, errorKey, successKey, goLogin, submit
+      role, consentChecked, logoUrl, loading, errorKey, successKey, goLogin, submit
     };
   }
 };
@@ -176,6 +181,19 @@ export default {
               </div>
             </div>
 
+            <!-- Consentimiento de datos -->
+            <div class="consent-field">
+              <input
+                type="checkbox"
+                id="consent-check"
+                v-model="consentChecked"
+                class="consent-checkbox"
+              />
+              <label for="consent-check" class="consent-label">
+                {{ $t('iam.consentLabel') }}
+              </label>
+            </div>
+
             <!-- Mensaje de error -->
             <div v-if="errorKey" class="error-message">
               <i class="pi pi-exclamation-triangle"></i>
@@ -194,7 +212,7 @@ export default {
               :label="$t('iam.createAccount')"
               class="register-button"
               :loading="loading"
-              :disabled="!name || !email || !password || !confirmPassword || !role"
+              :disabled="!name || !email || !password || !confirmPassword || !role || !consentChecked"
             />
 
             <!-- Divider -->
@@ -429,6 +447,29 @@ export default {
 .role-label small {
   color: #666;
   font-size: 0.75rem;
+}
+
+.consent-field {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  margin-bottom: 1.25rem;
+}
+
+.consent-checkbox {
+  margin-top: 2px;
+  width: 16px;
+  height: 16px;
+  accent-color: #2E7D32;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.consent-label {
+  font-size: 0.8rem;
+  color: #555;
+  cursor: pointer;
+  line-height: 1.4;
 }
 
 .error-message {
