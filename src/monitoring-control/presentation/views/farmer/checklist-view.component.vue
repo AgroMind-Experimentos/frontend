@@ -1,9 +1,8 @@
 <script setup lang="js">
 import {CheckListService} from '../../../application/checklist.service.js'
 import {TaskService} from '../../../application/task.service.js'
-import {onMounted, ref, computed} from 'vue'
+import {onMounted, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
-import { userStore } from '../../../../iam/application/user.store.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -13,8 +12,6 @@ const checkListService = new CheckListService()
 const taskId = route.params.id
 const taskService = new TaskService()
 const task = ref(null)
-const isAgronomist = computed(() => userStore.state.user?.role === 'Agronomist')
-const completeError = ref('')
 
 onMounted(async ()=>{
   const taskResponse = await taskService.getTaskById(taskId)
@@ -53,9 +50,8 @@ async function completeTask(){
     await taskService.updateStatus(numericID, 'Completed');
     task.value.status = "Completed"
     await router.push('/tasks/in-progress')
-  } catch(error) {
-    console.error(error)
-    completeError.value = 'Error al completar la tarea. Intenta de nuevo.'
+  }catch(error){
+    console.log(error)
   }
 }
 
@@ -79,29 +75,14 @@ const finishTask = ()=>{
     <h3>CheckList</h3>
     <div v-if="checklist && checklist.items && checklist.items.length > 0">
       <div v-for="item in checklist.items" :key="item.id" class="checklist-item">
-        <template v-if="task?.status?.toLowerCase() === 'pending'">
-          <pv-checkbox :modelValue="false" :inputId="`check-${item.id}`" :binary="true" class="checkbox" :disabled="true"></pv-checkbox>
-          <label :for="`check-${item.id}`" class="checklist-name">{{ item.description }}</label>
-        </template>
-        <template v-else>
-          <pv-checkbox v-model="checkedItems[item.id]" :inputId="`check-${item.id}`" :binary="true" class="checkbox" :disabled="isAgronomist || task?.status === 'Completed'"></pv-checkbox>
-          <label :for="`check-${item.id}`" class="checklist-name">{{ item.description }}</label>
-        </template>
+        <pv-checkbox v-model="checkedItems[item.id]" :inputId="`check-${item.id}`" :binary="true" class="checkbox" :disabled="task?.status === 'Completed'"></pv-checkbox>
+        <label :for="`check-${item.id}`" class="checklist-name">{{item.description}}</label>
       </div>
+      <pv-button @click="finishTask" class="finish-btn" :disabled="task?.status === 'Completed'">Finalizar</pv-button>
     </div>
     <div v-else>
-      <p v-if="checklist === null">Cargando...</p>
-      <p v-else-if="task?.status?.toLowerCase() !== 'pending'" class="no-checklist">Esta tarea no tiene checklist.</p>
+      <p v-if="checklist === null">No se encontraron checklists</p>
     </div>
-
-    <p v-if="completeError" class="complete-error">{{ completeError }}</p>
-
-    <pv-button
-      v-if="!isAgronomist && task?.status?.toLowerCase() !== 'pending'"
-      @click="finishTask"
-      class="finish-btn"
-      :disabled="task?.status === 'Completed'"
-    >Finalizar</pv-button>
   </div>
 </template>
 
@@ -182,21 +163,6 @@ const finishTask = ()=>{
 /* Hover del checkbox */
 :deep(.p-checkbox:hover .p-checkbox-box) {
   border-color: #ff9900 !important;
-}
-
-.no-checklist {
-  color: #9ca3af;
-  font-style: italic;
-  margin: 1rem 0;
-}
-
-.complete-error {
-  color: #991b1b;
-  background: #fee2e2;
-  border-radius: 8px;
-  padding: 0.6rem 1rem;
-  margin: 0.75rem 0;
-  font-size: 0.9rem;
 }
 
 /* Botón Finalizar */

@@ -8,7 +8,6 @@ import reportRoutes from "./Report/report-routes.js"
 import DashboardView from "./shared/presentation/views/dashboard-view.vue"
 import SettingsView from "./shared/presentation/views/settings-view.vue"
 import ProfileView from "./shared/presentation/views/profile-view.vue"
-import { userStore } from "./iam/application/user.store.js"
 
 const router = createRouter({
     history: createWebHistory(),
@@ -25,13 +24,6 @@ const router = createRouter({
         ...weatherRoutes,
         ...reportRoutes
     ]
-})
-
-router.beforeEach((to) => {
-    if (to.name === 'organization-create') {
-        const role = userStore.state.user?.role
-        if (role !== 'Agronomist') return { name: 'dashboard' }
-    }
 })
 
 export default router

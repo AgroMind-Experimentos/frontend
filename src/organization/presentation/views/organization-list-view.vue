@@ -4,7 +4,6 @@
       <div class="header">
         <h1>{{ t('organization.list') }}</h1>
         <Button
-          v-if="isAgronomist"
           :label="t('organization.create')"
           icon="pi pi-plus"
           @click="goToCreate"
@@ -47,7 +46,6 @@
         <h2>{{ t('organization.noOrganizations') }}</h2>
         <p>{{ t('organization.noOrganizationsDesc') }}</p>
         <Button
-          v-if="isAgronomist"
           :label="t('organization.createFirst')"
           icon="pi pi-plus"
           @click="goToCreate"
@@ -63,15 +61,12 @@ import { onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { organizationService } from '../../application/organization.service.js';
-import { userStore } from '../../../iam/application/user.store.js';
 import AppLayout from '../../../shared/presentation/components/app-layout.vue';
 import OrganizationCard from '../components/organization-card.vue';
 import Button from 'primevue/button';
 
 const { t } = useI18n();
 const router = useRouter();
-
-const isAgronomist = computed(() => userStore.state.user?.role === 'Agronomist');
 
 const organizations = computed(() => organizationService.state.organizations);
 const loading = computed(() => organizationService.state.loading);
