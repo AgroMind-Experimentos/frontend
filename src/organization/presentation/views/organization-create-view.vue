@@ -17,6 +17,8 @@ const description = ref('');
 const locationTxt = ref('');
 const search = ref('');
 const selected = ref([]);
+const successMessage = ref('');
+const errorMessage = ref('');
 
 // Estados del servicio
 const loading = computed(() => organizationService.state.loading);
@@ -58,7 +60,7 @@ onMounted(async () => {
 
 async function createOrg() {
   if (!name.value.trim()) {
-    alert(t('organization.name'));
+    errorMessage.value = 'El nombre es obligatorio';
     return;
   }
 
@@ -78,11 +80,19 @@ async function createOrg() {
     console.log('✅ Organización creada:', result);
     console.log('👥 Miembros en la organización creada:', result.getMemberCount());
 
-    alert('Organización creada exitosamente!');
-    router.push({ name: 'dashboard' });
+    successMessage.value = '✅ Organización creada exitosamente';
+
+    setTimeout(() => {
+      router.push({ name: 'dashboard' });
+    }, 2000);
+
   } catch (err) {
     console.error('❌ Error creating organization:', err);
-    alert(`Error: ${err.message || t('common.unexpectedError')}`);
+    errorMessage.value = `❌ ${err.message || t('common.unexpectedError')}`;
+
+    setTimeout(() => {
+      errorMessage.value = '';
+    }, 4000);
   }
 }
 </script>
@@ -90,6 +100,13 @@ async function createOrg() {
 <template>
   <AppLayout>
     <div class="wrap">
+      <div v-if="successMessage" class="success-box">
+        {{ successMessage }}
+      </div>
+
+      <div v-if="errorMessage" class="error-box">
+        {{ errorMessage }}
+      </div>
       <h2 class="page-title">{{ t('organization.create') }}</h2>
 
       <div class="grid">
@@ -215,5 +232,24 @@ async function createOrg() {
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}
 @media (max-width: 940px){
   .grid{grid-template-columns:1fr}
+}
+.success-box{
+  background:#dcfce7;
+  color:#166534;
+  padding:14px;
+  border-radius:10px;
+  margin-bottom:18px;
+  border:1px solid #86efac;
+  font-weight:600;
+}
+
+.error-box{
+  background:#fee2e2;
+  color:#991b1b;
+  padding:14px;
+  border-radius:10px;
+  margin-bottom:18px;
+  border:1px solid #fca5a5;
+  font-weight:600;
 }
 </style>

@@ -6,11 +6,12 @@ import { organizationService } from '../../../organization/application/organizat
 import AppLayout from '../components/app-layout.vue';
 import OrganizationCard from '../../../organization/presentation/components/organization-card.vue';
 import Button from 'primevue/button';
-
+import ConfirmDialog from 'primevue/confirmdialog';
+import { useConfirm } from 'primevue/useconfirm';
 const { t } = useI18n();
 
 const router = useRouter();
-
+const confirm = useConfirm();
 // State reactivo del servicio
 const organizations = computed(() => organizationService.state.organizations);
 const loading = computed(() => organizationService.state.loading);
@@ -30,18 +31,47 @@ const goCreate = () => router.push({ name: 'organization-create' });
 const onEnter = (org) => router.push({ name:'organization-detail', params:{ id: org.id }});
 
 const onDelete = async (org) => {
-  if (confirm(`${t('dashboard.deleteConfirm')} "${org.name}"?`)) {
-    try {
-      await organizationService.deleteOrganization(org.id);
-    } catch (err) {
-      alert(t('common.unexpectedError'));
+
+  confirm.require({
+    message: `¿Seguro que deseas eliminar "${org.name}"?`,
+    header: 'Confirmar eliminación',
+    icon: 'pi pi-exclamation-triangle',
+
+    acceptLabel: 'Eliminar',
+    rejectLabel: 'Cancelar',
+
+    accept: async () => {
+
+      try {
+
+        await organizationService.deleteOrganization(org.id);
+
+        successMessage.value =
+            '✅ Organización eliminada exitosamente';
+
+        setTimeout(() => {
+          successMessage.value = '';
+        }, 3000);
+
+      } catch (err) {
+
+        console.error(err);
+
+        errorMessage.value =
+            '❌ Error al eliminar la organización';
+
+        setTimeout(() => {
+          errorMessage.value = '';
+        }, 4000);
+      }
     }
-  }
+  });
 };
 </script>
 
 <template>
   <AppLayout>
+    <ConfirmDialog />
     <div class="dashboard-content">
       <div class="header">
         <h1>{{ t('dashboard.title') }}</h1>

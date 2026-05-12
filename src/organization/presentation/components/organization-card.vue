@@ -69,12 +69,12 @@ export default {
 
     <div class="right">
       <Button
-        icon="pi pi-trash"
-        severity="danger"
-        text
-        rounded
-        @click="$emit('delete', org)"
-        title="Eliminar organización"
+          icon="pi pi-trash"
+          severity="danger"
+          text
+          rounded
+          @click.prevent.stop="$emit('delete', org)"
+          title="Eliminar organización"
       />
       <Button
         label="Entrar"

@@ -8,11 +8,17 @@ import AppLayout from '../../../shared/presentation/components/app-layout.vue';
 import Button from 'primevue/button';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
-
+import ConfirmDialog from 'primevue/confirmdialog';
+import { useConfirm } from 'primevue/useconfirm';
+import { ref } from 'vue';
 const { t } = useI18n();
 
 const route = useRoute();
 const router = useRouter();
+const confirm = useConfirm();
+
+const successMessage = ref('');
+const errorMessage = ref('');
 const orgId = route.params.id;
 
 const organization = computed(() => organizationService.state.currentOrganization);
@@ -38,14 +44,41 @@ const editPlot = (plot) => {
 };
 
 const deletePlot = async (plot) => {
-  if (confirm(`${t('organization.deleteParcelConfirm')} "${plot.name}"?`)) {
-    try {
-      await plotService.deletePlot(plot.id);
-    } catch (err) {
-      alert(t('common.unexpectedError'));
-      console.error('Error deleting plot:', err);
+
+  confirm.require({
+    message: `${t('organization.deleteParcelConfirm')} "${plot.name}"?`,
+    header: 'Confirmar eliminación',
+    icon: 'pi pi-exclamation-triangle',
+
+    acceptLabel: 'Eliminar',
+    rejectLabel: 'Cancelar',
+
+    accept: async () => {
+
+      try {
+
+        await plotService.deletePlot(plot.id);
+
+        successMessage.value =
+            '✅ Parcela eliminada exitosamente';
+
+        setTimeout(() => {
+          successMessage.value = '';
+        }, 3000);
+
+      } catch (err) {
+
+        console.error('Error deleting plot:', err);
+
+        errorMessage.value =
+            '❌ Error al eliminar la parcela';
+
+        setTimeout(() => {
+          errorMessage.value = '';
+        }, 4000);
+      }
     }
-  }
+  });
 };
 
 const formatDate = (dateString) => {
@@ -99,6 +132,14 @@ const getMemberCount = (plot) => {
 
 <template>
   <AppLayout>
+    <ConfirmDialog />
+    <div v-if="successMessage" class="success-box">
+      {{ successMessage }}
+    </div>
+
+    <div v-if="errorMessage" class="error-box">
+      {{ errorMessage }}
+    </div>
     <div class="organization-detail">
       <div class="header" v-if="organization">
         <div class="organization-info">
@@ -372,6 +413,25 @@ const getMemberCount = (plot) => {
     flex-direction: column;
     gap: 0.5rem;
   }
+}
+.success-box{
+  background:#dcfce7;
+  color:#166534;
+  padding:14px;
+  border-radius:10px;
+  margin-bottom:18px;
+  border:1px solid #86efac;
+  font-weight:600;
+}
+
+.error-box{
+  background:#fee2e2;
+  color:#991b1b;
+  padding:14px;
+  border-radius:10px;
+  margin-bottom:18px;
+  border:1px solid #fca5a5;
+  font-weight:600;
 }
 </style>
 

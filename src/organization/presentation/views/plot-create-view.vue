@@ -17,6 +17,8 @@ const orgId = route.query.orgId ?? null;
 // Estados del servicio
 const loading = computed(() => plotService.state.loading);
 const error = computed(() => plotService.state.error);
+const successMessage = ref('');
+const errorMessage = ref('');
 
 // ---- Formulario ----
 const name = ref('');
@@ -51,18 +53,30 @@ function removeMember(id) {
 }
 
 async function createParcel() {
+  errorMessage.value = '';
+  successMessage.value = '';
+
   if (!name.value.trim()) {
-    alert('Ingresa el nombre de la parcela');
+    errorMessage.value = 'El nombre de la parcela es obligatorio';
+
+    setTimeout(() => {
+      errorMessage.value = '';
+    }, 3000);
+
     return;
   }
 
   if (!orgId) {
-    alert('ID de organización requerido');
+    errorMessage.value = 'ID de organización requerido';
+
+    setTimeout(() => {
+      errorMessage.value = '';
+    }, 3000);
+
     return;
   }
 
   try {
-    // Construir la descripción con toda la información
     const description = [
       area.value.trim() ? `Área: ${area.value.trim()}` : '',
       locationTxt.value.trim() ? `Ubicación: ${locationTxt.value.trim()}` : '',
@@ -74,7 +88,6 @@ async function createParcel() {
       organizationId: orgId,
       name: name.value.trim(),
       description: description,
-      // Campos adicionales para el estado local (no se envían al backend)
       area: area.value.trim(),
       location: locationTxt.value.trim(),
       crop: crop.value.trim(),
@@ -82,15 +95,29 @@ async function createParcel() {
     };
 
     console.log('🚀 Creando parcela con datos:', plotData);
+
     await plotService.createPlot(plotData);
+
     console.log('✅ Parcela creada exitosamente');
 
-    alert('Parcela creada exitosamente!');
-    // Redirigir al detalle de la organización
-    router.push({ name: 'organization-detail', params: { id: orgId } });
+    successMessage.value = '✅ Parcela creada exitosamente';
+
+    setTimeout(() => {
+      router.push({
+        name: 'organization-detail',
+        params: { id: orgId }
+      });
+    }, 1500);
+
   } catch (err) {
     console.error('❌ Error creating plot:', err);
-    alert(`Error al crear la parcela: ${err.message || 'Error desconocido'}`);
+
+    errorMessage.value =
+        `❌ ${err.message || 'Error al crear la parcela'}`;
+
+    setTimeout(() => {
+      errorMessage.value = '';
+    }, 4000);
   }
 }
 
@@ -106,6 +133,13 @@ function goBack() {
 <template>
   <AppLayout>
     <div class="wrap">
+      <div v-if="successMessage" class="success-box">
+        {{ successMessage }}
+      </div>
+
+      <div v-if="errorMessage" class="error-box">
+        {{ errorMessage }}
+      </div>
       <h2 class="page-title">Crear Parcela</h2>
 
       <div class="grid">
@@ -176,5 +210,24 @@ function goBack() {
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}
 @media (max-width: 940px){
   .grid{grid-template-columns:1fr}
+}
+.success-box{
+  background:#dcfce7;
+  color:#166534;
+  padding:14px;
+  border-radius:10px;
+  margin-bottom:18px;
+  border:1px solid #86efac;
+  font-weight:600;
+}
+
+.error-box{
+  background:#fee2e2;
+  color:#991b1b;
+  padding:14px;
+  border-radius:10px;
+  margin-bottom:18px;
+  border:1px solid #fca5a5;
+  font-weight:600;
 }
 </style>

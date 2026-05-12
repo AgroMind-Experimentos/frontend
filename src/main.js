@@ -7,10 +7,11 @@ import PrimeVue from 'primevue/config'
 import Lara from '@primeuix/themes/lara';
 import {Button, FloatLabel, Card, Checkbox, InputText, DatePicker, Toolbar, SelectButton} from 'primevue'
 import 'primeicons/primeicons.css'
-
+import ConfirmationService from 'primevue/confirmationservice';
 
 createApp(App)
     .use(PrimeVue, { theme: { preset: Lara, options: { darkModeSelector: false } } })
+    .use(ConfirmationService)
     .component('pv-toolbar', Toolbar)
     .component('pv-button', Button)
     .component('pv-floatlabel', FloatLabel)

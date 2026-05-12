@@ -1,6 +1,14 @@
 <template>
   <AppLayout>
+    <ConfirmDialog />
     <div class="organizations-list">
+      <div v-if="successMessage" class="success-box">
+        {{ successMessage }}
+      </div>
+
+      <div v-if="errorMessage" class="error-box">
+        {{ errorMessage }}
+      </div>
       <div class="header">
         <h1>{{ t('organization.list') }}</h1>
         <Button
@@ -57,20 +65,25 @@
 </template>
 
 <script setup>
-import { onMounted, computed } from 'vue';
+import { onMounted, computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { organizationService } from '../../application/organization.service.js';
 import AppLayout from '../../../shared/presentation/components/app-layout.vue';
 import OrganizationCard from '../components/organization-card.vue';
 import Button from 'primevue/button';
+import ConfirmDialog from 'primevue/confirmdialog';
+import { useConfirm } from 'primevue/useconfirm';
 
 const { t } = useI18n();
 const router = useRouter();
+const confirm = useConfirm();
 
 const organizations = computed(() => organizationService.state.organizations);
 const loading = computed(() => organizationService.state.loading);
 const error = computed(() => organizationService.state.error);
+const successMessage = ref('');
+const errorMessage = ref('');
 
 onMounted(async () => {
   await loadOrganizations();
@@ -95,15 +108,41 @@ function goToDetail(org) {
 }
 
 async function deleteOrganization(org) {
-  if (confirm(`¿Estás seguro de eliminar "${org.name}"?`)) {
-    try {
-      await organizationService.deleteOrganization(org.id);
-      alert('Organización eliminada exitosamente');
-    } catch (err) {
-      console.error('Error deleting organization:', err);
-      alert('Error al eliminar la organización');
+
+  confirm.require({
+    message: `¿Seguro que deseas eliminar "${org.name}"?`,
+    header: 'Confirmar eliminación',
+    icon: 'pi pi-exclamation-triangle',
+
+    acceptLabel: 'Eliminar',
+    rejectLabel: 'Cancelar',
+
+    accept: async () => {
+
+      try {
+
+        await organizationService.deleteOrganization(org.id);
+
+        successMessage.value =
+            '✅ Organización eliminada exitosamente';
+
+        setTimeout(() => {
+          successMessage.value = '';
+        }, 3000);
+
+      } catch (err) {
+
+        console.error('Error deleting organization:', err);
+
+        errorMessage.value =
+            '❌ Error al eliminar la organización';
+
+        setTimeout(() => {
+          errorMessage.value = '';
+        }, 4000);
+      }
     }
-  }
+  });
 }
 </script>
 
@@ -169,6 +208,25 @@ async function deleteOrganization(org) {
     gap: 1rem;
     align-items: stretch;
   }
+}
+.success-box{
+  background:#dcfce7;
+  color:#166534;
+  padding:14px;
+  border-radius:10px;
+  margin-bottom:18px;
+  border:1px solid #86efac;
+  font-weight:600;
+}
+
+.error-box{
+  background:#fee2e2;
+  color:#991b1b;
+  padding:14px;
+  border-radius:10px;
+  margin-bottom:18px;
+  border:1px solid #fca5a5;
+  font-weight:600;
 }
 </style>
 
