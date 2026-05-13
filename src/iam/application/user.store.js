@@ -10,13 +10,20 @@ class UserStore {
         errorKey: null,
         successKey: null,
         user: null,
+        isSessionRestored: false,
     });
 
     #api = new AuthApi();
     #assembler = new AuthAssembler();
     #profileApi = new UserProfileApi();
 
+    get isAuthenticated() {
+        return !!this.state.user;
+    }
+
     async restoreSession() {
+        if (this.state.isSessionRestored) return;
+
         try {
             const profile = await this.#profileApi.getMe();
             if (profile) {
@@ -29,6 +36,8 @@ class UserStore {
             }
         } catch {
             this.state.user = null;
+        } finally {
+            this.state.isSessionRestored = true;
         }
     }
 

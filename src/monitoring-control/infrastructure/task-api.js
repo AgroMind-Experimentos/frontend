@@ -18,7 +18,6 @@ export class TaskApi{
             const response = await axios.get(endpoint);
             return response.data.map(task=> TaskAssembler.toEntityFromResponse(task))
         }catch(error){
-            console.log(error)
             return []
         }
     }
@@ -29,7 +28,6 @@ export class TaskApi{
             const response = await axios.get(endpoint);
             return response.data.map(task=> TaskAssembler.toEntityFromResponse(task))
         }catch(error){
-            console.log(error)
             return []
         }
     }
@@ -40,7 +38,6 @@ export class TaskApi{
             const response = await axios.get(endpoint);
             return response.data.map(task=> TaskAssembler.toEntityFromResponse(task))
         }catch (error){
-            console.log(error)
             return []
         }
     }
@@ -51,7 +48,6 @@ export class TaskApi{
             const response = await axios.patch(endpoint, {status: newStatus})
             return response.data
         }catch(error){
-            console.log(error)
         }
     }
 

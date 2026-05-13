@@ -36,12 +36,7 @@ export class PlotAssembler {
      * @returns {Plot}
      */
     static toEntityFromResponse(response) {
-        // Parsear la descripción para extraer los datos estructurados
         const parsedData = this.parseDescription(response.description);
-
-        console.log('📋 Parseando plota:', response.name);
-        console.log('   Descripción:', response.description);
-        console.log('   ✅ Datos extraídos:', parsedData);
 
         return new Plot({
             id: response.id,

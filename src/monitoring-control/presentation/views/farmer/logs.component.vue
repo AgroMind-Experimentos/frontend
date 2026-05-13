@@ -10,7 +10,6 @@ onMounted(async () => {
     const result = await logsService.getLogs()
     logsList.value = result && Array.isArray(result)? result: []
   }catch(err){
-    console.log(err)
     logsList.value = []
   }
 })

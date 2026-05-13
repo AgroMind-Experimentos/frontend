@@ -4,7 +4,6 @@ export class OrganizationAssembler {
     toOrganization(dto) {
         const data = dto?.data || dto;
         const members = Array.isArray(data?.memberIds) ? data.memberIds : [];
-        console.log(data)
         return new Organization({
             id: data?.id || data?._id || null,
             name: data?.name || '',

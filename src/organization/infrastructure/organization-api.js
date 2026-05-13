@@ -68,13 +68,9 @@ export class OrganizationApi {
 
     async delete(id) {
         try {
-            console.log('🗑️ DELETE organización:', id);
             await this.http.delete(`${this.organizationsEndpoint}/${id}`);
-            console.log('✅ Organización eliminada exitosamente');
             return true;
         } catch (error) {
-            console.error('❌ Error deleting organization:', error);
-            console.error('Error details:', error.response?.data);
             throw error;
         }
     }
@@ -88,7 +84,6 @@ export class OrganizationApi {
             }
             return organization;
         } catch (error) {
-            console.error(`Error adding member to organization ${organizationId}:`, error);
             throw error;
         }
     }
@@ -99,7 +94,6 @@ export class OrganizationApi {
             organization.members = organization.members.filter(id => id !== memberId);
             return await this.update(organizationId, organization);
         } catch (error) {
-            console.error(`Error removing member from organization ${organizationId}:`, error);
             throw error;
         }
     }
