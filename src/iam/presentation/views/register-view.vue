@@ -1,71 +1,75 @@
 <script>
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { useToast } from 'primevue/usetoast';
 import { userStore } from '../../application/user.store.js';
 
 // PrimeVue
 import InputText from 'primevue/inputtext';
 import Password from 'primevue/password';
-import Checkbox from 'primevue/checkbox';
+import RadioButton from 'primevue/radiobutton';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
+import Dialog from 'primevue/dialog';
 
 export default {
   name: 'register-view',
-  components: { InputText, Password, Checkbox, Button, Card },
+  components: { InputText, Password, RadioButton, Button, Card, Dialog },
   setup() {
     const router = useRouter();
+    const { t } = useI18n();
+    const toast = useToast();
 
-    // Form
     const name = ref('');
     const email = ref('');
     const password = ref('');
     const confirmPassword = ref('');
+    const role = ref('');
+    const consentChecked = ref(false);
+    const showPolicyModal = ref(false);
 
-    // Roles (al menos uno)
-    const roles = ref({
-      agronomo: false,
-      agricultor: false
-    });
-
-    // Logo (puedes cambiarlo)
-    const logoUrl = 'https://files.catbox.moe/2ws3bu.png';
+    const logoUrl = '/logo.png';
 
     const loading = computed(() => userStore.state.loading);
     const errorKey = computed(() => userStore.state.errorKey);
+    const successKey = computed(() => userStore.state.successKey);
 
     const goLogin = () => router.push({ name: 'user-login' });
 
     const submit = async () => {
-      // Validaciones mínimas locales
       if (!name.value || !email.value || !password.value || !confirmPassword.value) {
-        alert('Completa todos los campos.');
+        toast.add({ severity: 'warn', summary: t('auth.fieldsRequired'), life: 3000 });
         return;
       }
       if (password.value !== confirmPassword.value) {
-        alert('Las contraseñas no coinciden.');
+        toast.add({ severity: 'warn', summary: t('auth.passwordMismatch'), life: 3000 });
         return;
       }
-      if (!roles.value.agronomo && !roles.value.agricultor) {
-        alert('Selecciona al menos un rol.');
+      if (!role.value) {
+        toast.add({ severity: 'warn', summary: t('iam.roleRequired'), life: 3000 });
+        return;
+      }
+      if (!consentChecked.value) {
+        toast.add({ severity: 'warn', summary: t('iam.consentRequired'), life: 3000 });
         return;
       }
 
-      // Llamar al registro real usando el store
       const ok = await userStore.register({
         name: name.value.trim(),
         email: email.value.trim(),
-        password: password.value
+        password: password.value,
+        role: role.value
       });
 
       if (ok) {
-        router.push('/dashboard');
+        setTimeout(() => router.push({ name: 'user-login' }), 2000);
       }
     };
 
     return {
       name, email, password, confirmPassword,
-      roles, logoUrl, loading, errorKey, goLogin, submit
+      role, consentChecked, showPolicyModal, logoUrl, loading, errorKey, successKey, goLogin, submit
     };
   }
 };
@@ -89,8 +93,8 @@ export default {
         <!-- Título -->
         <template #title>
           <div class="title-section">
-            <h1 class="register-title">Crear Cuenta</h1>
-            <p class="register-subtitle">Únete a nuestra comunidad agrícola</p>
+            <h1 class="register-title">{{ $t('iam.createAccount') }}</h1>
+            <p class="register-subtitle">{{ $t('iam.joinCommunity') }}</p>
           </div>
         </template>
 
@@ -99,21 +103,21 @@ export default {
           <form @submit.prevent="submit" class="register-form">
             <!-- Campo de nombre -->
             <div class="form-field">
-              <label class="field-label">Nombre completo</label>
+              <label class="field-label">{{ $t('iam.fullName') }}</label>
               <InputText
                 v-model="name"
-                placeholder="Tu nombre completo"
+                :placeholder="$t('iam.fullNamePlaceholder')"
                 class="form-input"
               />
             </div>
 
             <!-- Campo de correo -->
             <div class="form-field">
-              <label class="field-label">Correo electrónico</label>
+              <label class="field-label">{{ $t('iam.email') }}</label>
               <InputText
                 v-model="email"
                 type="email"
-                placeholder="ejemplo@correo.com"
+                :placeholder="$t('iam.emailPlaceholder')"
                 class="form-input"
               />
             </div>
@@ -121,89 +125,135 @@ export default {
             <!-- Campos de contraseña en fila -->
             <div class="password-row">
               <div class="form-field password-field-half">
-                <label class="field-label">Contraseña</label>
+                <label class="field-label">{{ $t('iam.password') }}</label>
                 <Password
                   v-model="password"
                   :feedback="false"
                   toggleMask
-                  placeholder="Contraseña"
+                  :placeholder="$t('iam.password')"
                   inputClass="form-input-password"
                   class="password-field"
                 />
               </div>
 
               <div class="form-field password-field-half">
-                <label class="field-label">Confirmar</label>
+                <label class="field-label">{{ $t('iam.confirmPassword') }}</label>
                 <Password
                   v-model="confirmPassword"
                   :feedback="false"
                   toggleMask
-                  placeholder="Confirmar"
+                  :placeholder="$t('iam.confirmPassword')"
                   inputClass="form-input-password"
                   class="password-field"
                 />
               </div>
             </div>
 
-            <!-- Selección de roles -->
+            <!-- Selección de rol -->
             <div class="roles-section">
-              <label class="field-label">Tipo de usuario</label>
+              <label class="field-label">{{ $t('iam.userType') }}</label>
               <div class="roles-container">
-                <div class="role-option" :class="{ active: roles.agronomo }">
-                  <Checkbox
-                    v-model="roles.agronomo"
-                    :binary="true"
+                <div class="role-option" :class="{ active: role === 'Agronomist' }">
+                  <RadioButton
+                    v-model="role"
+                    value="Agronomist"
                     inputId="role-agronomo"
                     class="role-checkbox"
                   />
                   <label for="role-agronomo" class="role-label">
                     <i class="pi pi-user-edit"></i>
-                    <span>Agrónomo</span>
-                    <small>Especialista técnico</small>
+                    <span>{{ $t('iam.agronomist') }}</span>
+                    <small>{{ $t('iam.agronomistDesc') }}</small>
                   </label>
                 </div>
 
-                <div class="role-option" :class="{ active: roles.agricultor }">
-                  <Checkbox
-                    v-model="roles.agricultor"
-                    :binary="true"
+                <div class="role-option" :class="{ active: role === 'Farmer' }">
+                  <RadioButton
+                    v-model="role"
+                    value="Farmer"
                     inputId="role-agricultor"
                     class="role-checkbox"
                   />
                   <label for="role-agricultor" class="role-label">
                     <i class="pi pi-home"></i>
-                    <span>Agricultor</span>
-                    <small>Productor agrícola</small>
+                    <span>{{ $t('iam.farmer') }}</span>
+                    <small>{{ $t('iam.farmerDesc') }}</small>
                   </label>
                 </div>
               </div>
             </div>
 
+            <!-- Consentimiento de datos -->
+            <div class="consent-field">
+              <input
+                type="checkbox"
+                id="consent-check"
+                v-model="consentChecked"
+                class="consent-checkbox"
+              />
+              <label for="consent-check" class="consent-label">
+                {{ $t('iam.consentLabelStart') }}
+                <button type="button" class="policy-link" @click.stop="showPolicyModal = true">
+                  {{ $t('iam.privacyPolicyLink') }}
+                </button>{{ $t('iam.consentLabelEnd') }}
+              </label>
+            </div>
+
+            <!-- Modal política de privacidad -->
+            <Dialog
+              v-model:visible="showPolicyModal"
+              :header="$t('iam.policyModalTitle')"
+              :modal="true"
+              :closable="true"
+              :draggable="false"
+              style="width: 540px; max-width: 95vw"
+            >
+              <div class="policy-body">
+                <p>{{ $t('iam.policyP1') }}</p>
+                <p>{{ $t('iam.policyP2') }}</p>
+                <p>{{ $t('iam.policyP3') }}</p>
+                <p>{{ $t('iam.policyP4') }}</p>
+              </div>
+              <template #footer>
+                <Button
+                  :label="$t('common.accept')"
+                  class="p-button-success"
+                  @click="showPolicyModal = false"
+                />
+              </template>
+            </Dialog>
+
             <!-- Mensaje de error -->
             <div v-if="errorKey" class="error-message">
               <i class="pi pi-exclamation-triangle"></i>
-              {{ $t ? $t(errorKey) : 'Error en el registro. Verifica los datos.' }}
+              {{ $t ? $t(errorKey) : $t('iam.registerError') }}
+            </div>
+
+            <!-- Mensaje de éxito -->
+            <div v-if="successKey" class="success-message">
+              <i class="pi pi-check-circle"></i>
+              {{ $t(successKey) }}
             </div>
 
             <!-- Botón de registro -->
             <Button
               type="submit"
-              label="Crear Cuenta"
+              :label="$t('iam.createAccount')"
               class="register-button"
               :loading="loading"
-              :disabled="!name || !email || !password || !confirmPassword || (!roles.agronomo && !roles.agricultor)"
+              :disabled="!name || !email || !password || !confirmPassword || !role || !consentChecked"
             />
 
             <!-- Divider -->
             <div class="divider">
-              <span>o</span>
+              <span>{{ $t('iam.or') }}</span>
             </div>
 
             <!-- Enlace a login -->
             <div class="login-link">
-              <span class="text-secondary">¿Ya tienes cuenta?</span>
+              <span class="text-secondary">{{ $t('iam.alreadyHaveAccount') }}</span>
               <Button
-                label="Iniciar sesión"
+                :label="$t('iam.login')"
                 class="p-button-link login-button"
                 @click="goLogin"
               />
@@ -219,6 +269,7 @@ export default {
 .register-container {
   background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 50%, #388E3C 100%);
   min-height: 100vh;
+  overflow-y: auto;
   position: relative;
 }
 
@@ -235,8 +286,10 @@ export default {
 }
 
 .card-wrapper {
-  padding-top: 3rem !important;
-  padding-bottom: 3rem !important;
+  padding-top: 2rem !important;
+  padding-bottom: 2rem !important;
+  overflow-y: auto;
+  align-items: flex-start !important;
 }
 
 .register-card {
@@ -259,26 +312,14 @@ export default {
 }
 
 .avatar-circle {
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #2E7D32, #4CAF50);
+  width: 100px;
+  height: 100px;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  box-shadow:
-    0 8px 25px rgba(46, 125, 50, 0.3),
-    0 4px 10px rgba(0, 0, 0, 0.1);
   border: 3px solid rgba(255, 255, 255, 0.9);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.avatar-circle:hover {
-  transform: translateY(-2px);
-  box-shadow:
-    0 12px 35px rgba(46, 125, 50, 0.4),
-    0 6px 15px rgba(0, 0, 0, 0.15);
 }
 
 .avatar-img {
@@ -437,6 +478,55 @@ export default {
   font-size: 0.75rem;
 }
 
+.consent-field {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  margin-bottom: 1.25rem;
+}
+
+.consent-checkbox {
+  margin-top: 2px;
+  width: 16px;
+  height: 16px;
+  accent-color: #2E7D32;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.consent-label {
+  font-size: 0.8rem;
+  color: #555;
+  cursor: pointer;
+  line-height: 1.4;
+}
+
+.policy-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  color: #2E7D32;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  line-height: inherit;
+}
+
+.policy-link:hover {
+  color: #1B5E20;
+}
+
+.policy-body {
+  line-height: 1.7;
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.policy-body p {
+  margin: 0 0 1rem 0;
+}
+
 .error-message {
   background: #FFEBEE;
   border: 1px solid #FFCDD2;
@@ -522,11 +612,6 @@ export default {
 
 .login-button:hover {
   color: #1B5E20 !important;
-  .card-wrapper {
-    padding-top: 2rem !important;
-    padding-bottom: 2rem !important;
-  }
-
   text-decoration: underline !important;
 }
 
@@ -579,5 +664,20 @@ export default {
     align-items: flex-start;
     text-align: left;
   }
+}
+</style>
+<style scoped>
+.success-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: #d1fae5;
+  color: #065f46;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+  animation: fadeIn 0.3s ease-out;
 }
 </style>

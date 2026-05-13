@@ -6,16 +6,16 @@ export class TaskService {
         this.taskApi = new TaskApi()
     }
 
-    async getTasksCompleted(){
-        return await this.taskApi.getTasksCompleted()
+    async getTasksCompleted(filters = {}){
+        return await this.taskApi.getTasksCompleted(filters)
     }
 
-    async getTasksInProgress(){
-        return await this.taskApi.getTasksInProgress()
+    async getTasksInProgress(filters = {}){
+        return await this.taskApi.getTasksInProgress(filters)
     }
 
-    async getTasksPending(){
-        return await this.taskApi.getTasksPending()
+    async getTasksPending(filters = {}){
+        return await this.taskApi.getTasksPending(filters)
     }
 
     async updateStatus(taskID, status){
@@ -36,5 +36,13 @@ export class TaskService {
 
     async registerNewTask(task){
         return await this.taskApi.registerNewTask(task);
+    }
+
+    async updateTask(taskId, data) {
+        return await this.taskApi.updateTask(taskId, data);
+    }
+
+    async deleteTask(taskId) {
+        return await this.taskApi.deleteTask(taskId);
     }
 }

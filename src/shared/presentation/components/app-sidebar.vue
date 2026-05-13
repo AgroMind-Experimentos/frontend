@@ -18,7 +18,7 @@ const userName = userStore.state.user?.name || 'Usuario';
 <template>
   <aside class="sidebar">
     <div class="profile">
-      <img class="avatar" src="https://files.catbox.moe/7kr0f6.png" alt="User" />
+      <div class="avatar"><i class="pi pi-user avatar-icon"></i></div>
       <div class="welcome">{{ t('sidebar.welcome') }} {{ userName }}</div>
     </div>
 
@@ -62,7 +62,8 @@ const userName = userStore.state.user?.name || 'Usuario';
   display:flex;flex-direction:column;padding:18px 16px 24px
 }
 .profile{display:flex;flex-direction:column;align-items:center;gap:.75rem;margin-top:.5rem}
-.avatar{width:96px;height:96px;border-radius:50%;object-fit:cover;border:3px solid #2f8b4a;background:#2f8b4a}
+.avatar{width:96px;height:96px;border-radius:50%;border:3px solid #2f8b4a;background:#2f8b4a;display:flex;align-items:center;justify-content:center}
+.avatar-icon{font-size:2.5rem;color:#fff}
 .welcome{font-weight:700;text-align:center}
 .menu{display:flex;flex-direction:column;margin-top:12px;gap:6px}
 .item{

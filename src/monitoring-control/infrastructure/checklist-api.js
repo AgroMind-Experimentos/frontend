@@ -24,6 +24,33 @@ export class CheckListApi{
         }
     }
 
+    async updateChecklist(checklistId, items) {
+        try {
+            const endpoint = `${this.baseUrl}${this.checklistsEndpoint}/${checklistId}`;
+            const payload = {
+                items: items.map(item => ({
+                    description: (item.description || item.Description || '').trim()
+                })).filter(i => i.description)
+            };
+            await axios.put(endpoint, payload);
+            return true;
+        } catch (error) {
+            console.error('Error actualizando checklist:', error.response?.data || error.message);
+            throw error;
+        }
+    }
+
+    async markItemCompleted(itemId, isCompleted) {
+        try {
+            const endpoint = `${this.baseUrl}${this.checklistsEndpoint}/items/${itemId}`;
+            await axios.patch(endpoint, { isCompleted });
+            return true;
+        } catch (error) {
+            console.error('Error marcando ítem:', error.response?.data || error.message);
+            throw error;
+        }
+    }
+
     async registerNewChecklist(resource) {
         try {
             const endpoint = `${this.baseUrl}${this.checklistsEndpoint}`;

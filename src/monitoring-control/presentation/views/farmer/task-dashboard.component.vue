@@ -1,14 +1,16 @@
 <script setup lang="js">
-import {ref, onMounted} from 'vue'
+import {ref, computed, onMounted} from 'vue'
 import {useRouter, useRoute} from 'vue-router'
 import AppLayout from '../../../../shared/presentation/components/app-layout.vue'
+import { userStore } from '../../../../iam/application/user.store.js'
 
 const router = useRouter()
 const route = useRoute()
 const activeTab = ref('completed')
 
+const isAgronomist = computed(() => userStore.state.user?.role === 'Agronomist')
+
 onMounted(() => {
-  // Detectar la pestaña activa basada en la ruta actual
   const currentPath = route.path
   if (currentPath.includes('/completed')) {
     activeTab.value = 'completed'
@@ -18,8 +20,12 @@ onMounted(() => {
     activeTab.value = 'pending'
   } else if (currentPath.includes('/logs')) {
     activeTab.value = 'logs'
-  } else if(currentPath.includes('/new-task')) {
-    activeTab.value = 'new-task'
+  } else if (currentPath.includes('/new-task')) {
+    if (!isAgronomist.value) {
+      router.push('/tasks/completed')
+    } else {
+      activeTab.value = 'new-task'
+    }
   } else {
     router.push('/tasks/completed')
   }
@@ -37,24 +43,10 @@ const navigateToTab = (tab) => {
       <!-- Header Section -->
       <div class="dashboard-header">
         <div class="title-section">
-          <h1>Gestión de Tareas</h1>
-          <p>Administra y supervisa todas tus tareas agrícolas</p>
+          <h1>{{ $t('tasksExt.taskDashboardTitle') }}</h1>
+          <p>{{ $t('tasksExt.taskDashboardDesc') }}</p>
         </div>
 
-        <!-- Organization Card -->
-        <div class="organization-section">
-          <pv-card class="organization-card">
-            <template #content>
-              <div class="icon-and-text">
-                <span class="pi pi-sitemap icon-spacer"></span>
-                <div>
-                  <div class="organization-name">Organización</div>
-                  <div class="details">EcoTrack Farm</div>
-                </div>
-              </div>
-            </template>
-          </pv-card>
-        </div>
       </div>
 
       <!-- Navigation Tabs -->
@@ -64,28 +56,29 @@ const navigateToTab = (tab) => {
           @click="navigateToTab('completed')"
         >
           <i class="pi pi-check-circle"></i>
-          Completadas
+          {{ $t('tasks.completedTasks') }}
         </button>
         <button
           :class="['tab-button', { active: activeTab === 'in-progress' }]"
           @click="navigateToTab('in-progress')"
         >
           <i class="pi pi-clock"></i>
-          En Progreso
+          {{ $t('tasks.inProgressTasks') }}
         </button>
         <button
           :class="['tab-button', { active: activeTab === 'pending' }]"
           @click="navigateToTab('pending')"
         >
           <i class="pi pi-pause"></i>
-          Pendientes
+          {{ $t('tasks.pendingTasks') }}
         </button>
         <button
+            v-if="isAgronomist"
             :class="['tab-button', { active: activeTab === 'new-task' }]"
             @click="navigateToTab('new-task')"
         >
           <i class="pi pi-plus"></i>
-          Nueva Tarea
+          {{ $t('tasks.newTask') }}
         </button>
       </div>
 
@@ -103,11 +96,7 @@ const navigateToTab = (tab) => {
 }
 
 .dashboard-header {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 2rem;
   margin-bottom: 2rem;
-  align-items: start;
 }
 
 .title-section h1 {
@@ -120,32 +109,6 @@ const navigateToTab = (tab) => {
   margin: 0;
   color: #666;
   font-size: 1.1rem;
-}
-
-.organization-card {
-  min-width: 250px;
-}
-
-.icon-and-text {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.icon-spacer {
-  font-size: 2rem;
-  color: #2c5530;
-}
-
-.organization-name {
-  font-weight: 600;
-  color: #2c5530;
-  margin-bottom: 0.25rem;
-}
-
-.details {
-  color: #666;
-  font-size: 0.9rem;
 }
 
 
@@ -186,10 +149,6 @@ const navigateToTab = (tab) => {
 }
 
 @media (max-width: 768px) {
-  .dashboard-header {
-    grid-template-columns: 1fr;
-  }
-
   .tabs-navigation {
     flex-wrap: wrap;
   }

@@ -5,93 +5,116 @@ export class AuthApi {
     loginEndpoint = import.meta.env.VITE_LOGIN_ENDPOINT;
     registerEndpoint = import.meta.env.VITE_REGISTER_ENDPOINT;
     logoutEndpoint = import.meta.env.VITE_LOGOUT_ENDPOINT;
+    updatePasswordEndpoint = import.meta.env.VITE_UPDATE_PASSWORD_ENDPOINT;
+
     http = axios.create({
         baseURL: this.baseUrl,
+        withCredentials: true
     });
 
+    /**
+     * Consume el nuevo LoginCommandService.
+     * Maneja el error 401 (InvalidCredentials).
+     */
     async login(email, password) {
         try {
-            // Enviar los datos de login con POST a la URL del backend
-            const { data } = await this.http.post(this.loginEndpoint, {
-                email,      // email enviado en el cuerpo
-                password    // password enviado en el cuerpo
-            }, {
-                headers: {
-                    'Content-Type': 'application/json'  // Asegúrate de que el Content-Type sea application/json
-                }
+            const { data } = await this.http.post(this.loginEndpoint, { email, password }, {
+                headers: { 'Content-Type': 'application/json' }
             });
 
-            // Si el login es exitoso, devuelve el usuario y los tokens
             return {
-                user: data.user || {
+                user: {
                     id: data.userId,
-                    name: data.displayName || data.name || email.split('@')[0],
-                    email: data.email || email,
-                    displayName: data.displayName || data.name || email.split('@')[0]
+                    name: data.displayName,
+                    email: email,
+                    displayName: data.displayName,
+                    role: data.role
                 },
-                tokens: data.tokens     // Tokens generados por el backend
+                tokens: {
+                    accessToken: data.token,
+                    refreshToken: null,
+                    expiresAt: data.expiresAt
+                }
             };
         } catch (error) {
-            // Manejo de errores en el frontend
-            if (error.response?.status === 401) {
-                throw new Error('Invalid credentials');  // Las credenciales son incorrectas
-            }
-            const err = new Error('Service unavailable');  // Error de servicio
-            err.response = { status: 503 };
+            const message = error.response?.data?.message || 'Service unavailable';
+            const status = error.response?.status || 503;
+
+            const err = new Error(message);
+            err.response = error.response;
             throw err;
         }
     }
 
-    async register(name, email, password) {
+    /**
+     * Consume el nuevo RegisterCommandService.
+     * Mapea errores 400 (InvalidInput/PasswordTooShort) y 409 (EmailAlreadyExists).
+     */
+    async register(name, email, password, role) {
         try {
-            // Enviar los datos de registro con POST al backend
             const { data } = await this.http.post(this.registerEndpoint, {
                 email,
                 password,
-                displayName: name
+                displayName: name,
+                role: role
             }, {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
+                headers: { 'Content-Type': 'application/json' }
             });
 
-            // Si el registro es exitoso, devuelve el usuario y los tokens
             return {
-                user: data.user || {
-                    id: data.userId,
-                    name: data.displayName || name,
-                    email: data.email || email,
-                    displayName: data.displayName || name
-                },
-                tokens: data.tokens
+                message: data.message,
+                userId: data.userId,
+                email: data.email,
+                displayName: data.displayName
             };
         } catch (error) {
-            // Manejo de errores específicos del backend
-            if (error.response?.status === 409) {
-                const err = new Error('Email already exists');
-                err.response = { status: 409 };
-                throw err;
-            }
-            if (error.response?.status === 400) {
-                const err = new Error('Invalid registration data');
-                err.response = { status: 400 };
-                throw err;
-            }
-            const err = new Error('Registration failed');
-            err.response = { status: 500 };
+            const message = error.response?.data?.message || 'Registration failed';
+            const status = error.response?.status || 500;
+
+            const err = new Error(message);
+            err.response = error.response;
             throw err;
         }
     }
 
+    /**
+     * Consume el nuevo LogoutCommandService.
+     * La cookie 'sid' se envía automáticamente gracias a withCredentials.
+     */
     async logout() {
         try {
             const { data } = await this.http.post(this.logoutEndpoint);
             return data;
         } catch (error) {
+            if (error.response?.status === 404) {
+                return { message: "Session already invalidated" };
+            }
             console.error('Logout failed:', error);
             throw error;
         }
     }
 
+    async changePassword(currentPassword, newPassword) {
+        try {
+            const { data } = await this.http.post(this.updatePasswordEndpoint, {
+                currentPassword,
+                newPassword
+            }, {
+                headers: { 'Content-Type': 'application/json' }
+            });
 
+            return data;
+        } catch (error) {
+            const message = error.response?.data?.message || 'Password update failed';
+
+            const err = new Error(message);
+            err.response = error.response;
+
+            if (error.response?.status === 401) {
+                console.error('Session expired or unauthorized');
+            }
+
+            throw err;
+        }
+    }
 }

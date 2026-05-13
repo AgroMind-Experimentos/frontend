@@ -1,28 +1,19 @@
-<script setup>
-import { computed } from 'vue';
-import { userStore } from '../../../iam/application/user.store.js';
-import LanguagueSwitcher from "./languague-switcher.vue";
 
-// Obtener información del usuario de forma reactiva
-const userName = computed(() => userStore.state.user?.name || 'Usuario');
+<script setup>
+import InvitationBell from './invitation-bell.vue';
 </script>
 
 <template>
   <header class="topbar">
     <div class="brand">
       <div class="logo">
-        <img src="https://files.catbox.moe/2ws3bu.png" alt="EcoTrack" />
+        <img src="/icon.ico" alt="EcoTrack" />
       </div>
-      <h3 class="title">EcoTrack</h3>
+      <h3 class="title">{{ $t('sharedExt.ecotrack') }}</h3>
     </div>
 
     <div class="right">
-      <div class="user-info">
-        <span class="user-name">{{ userName }}</span>
-      </div>
-      <languague-switcher></languague-switcher>
-      <i class="pi pi-envelope icon"></i>
-      <i class="pi pi-bell icon"></i>
+      <InvitationBell />
     </div>
   </header>
 </template>
@@ -40,6 +31,4 @@ const userName = computed(() => userStore.state.user?.name || 'Usuario');
 .right{display:flex;align-items:center;gap:12px}
 .user-info{display:flex;align-items:center;gap:8px}
 .user-name{color:#2c5530;font-weight:600;font-size:0.9rem}
-.icon{color:#111;cursor:pointer}
-.icon:hover{color:#2c5530}
 </style>

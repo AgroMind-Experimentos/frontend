@@ -1,9 +1,11 @@
 import WeatherView from './views/weather.component.vue';
 
-export default [
+const weatherRoutes = [
     {
         path: '/weather',
         name: 'weather',
         component: WeatherView
     }
 ];
+
+export default weatherRoutes;

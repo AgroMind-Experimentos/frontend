@@ -1,5 +1,5 @@
 /**
- * Represents a Plot (Parcela) entity in the application.
+ * Represents a Plot (Plota) entity in the application.
  * @remarks
  * This class is used as a domain model for agricultural plots within organizations.
  */

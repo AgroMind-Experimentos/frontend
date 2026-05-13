@@ -4,7 +4,7 @@ export class PlotAssembler {
     /**
      * Parsea la descripción y extrae campos estructurados
      * Formato esperado: "Área: 5.2 ha | Ubicación: Norte | Cultivo: Maíz | Miembros: 3"
-     * @param {string} description - Descripción de la parcela
+     * @param {string} description - Descripción de la plota
      * @returns {Object} - Objeto con los campos parseados
      */
     static parseDescription(description) {
@@ -39,7 +39,7 @@ export class PlotAssembler {
         // Parsear la descripción para extraer los datos estructurados
         const parsedData = this.parseDescription(response.description);
 
-        console.log('📋 Parseando parcela:', response.name);
+        console.log('📋 Parseando plota:', response.name);
         console.log('   Descripción:', response.description);
         console.log('   ✅ Datos extraídos:', parsedData);
 
@@ -48,13 +48,12 @@ export class PlotAssembler {
             organizationId: response.organizationId,
             name: response.name,
             description: response.description,
-            // Usar los datos parseados de la descripción o los campos directos si existen
-            area: response.area || parsedData.area || '',
+            area: response.area ?? parsedData.area ?? '',
             location: response.location || parsedData.location || '',
-            crop: response.crop || parsedData.crop || '',
+            crop: response.cultivation || response.crop || parsedData.crop || '',
             createdAt: response.createdAt,
             status: response.status || 'active',
-            members: response.members || []
+            members: response.memberIds || response.members || []
         });
     }
 
@@ -83,10 +82,11 @@ export class PlotAssembler {
 
         const description = descriptionParts.join(' | ');
 
-        // Solo enviar los campos que el backend espera
         return {
             name: formData.name,
-            description: description,
+            location: formData.location || '',
+            area: parseFloat(formData.area) || 0,
+            cultivation: formData.crop || '',
             organizationId: parseInt(formData.organizationId)
         };
     }

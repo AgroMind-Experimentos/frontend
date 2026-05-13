@@ -1,57 +1,132 @@
 <script setup>
-import { onMounted, computed } from 'vue';
+import { onMounted, computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { useToast } from 'primevue/usetoast';
 import { organizationService } from '../../application/organization.service.js';
 import { plotService } from '../../application/plot.service.js';
+import { invitationService } from '../../application/invitation.service.js';
+import { userStore } from '../../../iam/application/user.store.js';
+import { userProfileService } from '../../../profile/application/user-profile.service.js';
 import AppLayout from '../../../shared/presentation/components/app-layout.vue';
 import Button from 'primevue/button';
+import InputText from 'primevue/inputtext';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
+import ConfirmationModal from '../../../shared/presentation/components/confirmation-modal.vue';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 const route = useRoute();
 const router = useRouter();
+const toast = useToast();
 const orgId = route.params.id;
 
+const showDeletePlotConfirm = ref(false);
+const pendingDeletePlot = ref(null);
+
+const isAgronomist = computed(() => userStore.state.user?.role === 'Agronomist');
 const organization = computed(() => organizationService.state.currentOrganization);
+const isOwner = computed(() => {
+  const user = userStore.state.user;
+  const org = organization.value;
+  return user && org && Number(org.agronomistId) === Number(user.id);
+});
 const plots = computed(() => plotService.state.plots);
 const loading = computed(() => plotService.state.loading || organizationService.state.loading);
 const error = computed(() => plotService.state.error || organizationService.state.error);
+
+// Invitation by email
+const inviteEmail = ref('');
+const inviteLoading = ref(false);
+const inviteMessage = ref(null); // { type: 'success'|'error', text: string }
+const memberEmails = ref(new Set());
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+async function sendInvitation() {
+  inviteMessage.value = null;
+  const email = inviteEmail.value.trim();
+
+  if (!email) {
+    inviteMessage.value = { type: 'error', text: t('invitation.errorEmptyEmail') };
+    return;
+  }
+  if (!EMAIL_REGEX.test(email)) {
+    inviteMessage.value = { type: 'error', text: t('invitation.errorInvalidEmail') };
+    return;
+  }
+  if (memberEmails.value.has(email.toLowerCase())) {
+    inviteMessage.value = { type: 'error', text: t('invitation.errorAlreadyMember') };
+    return;
+  }
+
+  inviteLoading.value = true;
+  try {
+    await invitationService.sendInvitationByEmail(orgId, email, userStore.state.user?.id);
+    inviteEmail.value = '';
+    inviteMessage.value = { type: 'success', text: t('invitation.successSent') };
+  } catch (err) {
+    const status = err.response?.status;
+    if (status === 400) inviteMessage.value = { type: 'error', text: t('invitation.errorInvalidEmail') };
+    else if (status === 404) inviteMessage.value = { type: 'error', text: t('invitation.errorUserNotFound') };
+    else if (status === 409) inviteMessage.value = { type: 'error', text: t('invitation.errorDuplicate') };
+    else inviteMessage.value = { type: 'error', text: t('common.unexpectedError') };
+  } finally {
+    inviteLoading.value = false;
+  }
+}
 
 onMounted(async () => {
   try {
     await organizationService.getOrganizationById(orgId);
     await plotService.getPlotsByOrganizationId(orgId);
+
+    const org = organizationService.state.currentOrganization;
+    if (org?.members?.length) {
+      const allUsers = await userProfileService.fetchAllUsers();
+      const memberIdSet = new Set(org.members.map(id => String(id)));
+      memberEmails.value = new Set(
+        allUsers
+          .filter(u => memberIdSet.has(String(u.id)))
+          .map(u => u.email.toLowerCase())
+      );
+    }
   } catch (err) {
     console.error('Error loading organization details:', err);
   }
 });
 
-const goCreateParcel = () => {
-  router.push({ name: 'parcel-create', query: { orgId } });
+const goCreatePlot = () => {
+  router.push({ name: 'plot-create', query: { orgId } });
 };
 
 const editPlot = (plot) => {
-  router.push({ name: 'parcel-edit', params: { id: plot.id } });
+  router.push({ name: 'plot-edit', params: { id: plot.id } });
 };
 
-const deletePlot = async (plot) => {
-  if (confirm(`${t('organization.deleteParcelConfirm')} "${plot.name}"?`)) {
-    try {
-      await plotService.deletePlot(plot.id);
-    } catch (err) {
-      alert(t('common.unexpectedError'));
-      console.error('Error deleting plot:', err);
-    }
+const deletePlot = (plot) => {
+  pendingDeletePlot.value = plot;
+  showDeletePlotConfirm.value = true;
+};
+
+const handleDeletePlotConfirm = async () => {
+  const plot = pendingDeletePlot.value;
+  try {
+    await plotService.deletePlot(plot.id);
+  } catch (err) {
+    console.error('Error deleting plot:', err);
+    toast.add({ severity: 'error', summary: t('organization.deletePlotError'), life: 3000 });
+  } finally {
+    pendingDeletePlot.value = null;
   }
 };
 
 const formatDate = (dateString) => {
   if (!dateString) return '';
   const date = new Date(dateString);
-  return date.toLocaleDateString('es-ES', {
+  const currentLocale = locale.value === 'en' ? 'en-US' : 'es-ES';
+  return date.toLocaleDateString(currentLocale, {
     year: 'numeric',
     month: 'long',
     day: 'numeric'
@@ -120,20 +195,55 @@ const getMemberCount = (plot) => {
           </div>
         </div>
 
-        <div class="actions">
+        <div v-if="isOwner" class="actions">
           <Button
-            :label="t('organization.createParcel')"
+            :label="t('common.edit')"
+            icon="pi pi-pencil"
+            class="p-button-outlined p-button-secondary"
+            @click="router.push({ name: 'organization-edit', params: { id: orgId } })"
+            :disabled="loading"
+          />
+          <Button
+            :label="t('organization.createPlot')"
             icon="pi pi-plus"
-            @click="goCreateParcel"
+            @click="goCreatePlot"
             class="p-button-success"
             :disabled="loading"
           />
         </div>
       </div>
 
+      <!-- Panel: Invitar farmer por email (solo Agrónomo) -->
+      <div v-if="isOwner" class="invite-panel">
+        <h2 class="invite-title">
+          <i class="pi pi-envelope"></i>
+          {{ t('invitation.panelTitle') }}
+        </h2>
+        <div class="invite-form">
+          <InputText
+            v-model="inviteEmail"
+            :placeholder="t('invitation.emailPlaceholder')"
+            class="invite-input"
+            type="email"
+            @keyup.enter="sendInvitation"
+          />
+          <Button
+            :label="t('invitation.sendButton')"
+            icon="pi pi-send"
+            class="p-button-success"
+            :loading="inviteLoading"
+            @click="sendInvitation"
+          />
+        </div>
+        <div v-if="inviteMessage" :class="['invite-msg', inviteMessage.type]">
+          <i :class="inviteMessage.type === 'success' ? 'pi pi-check-circle' : 'pi pi-exclamation-circle'"></i>
+          {{ inviteMessage.text }}
+        </div>
+      </div>
+
       <div v-if="loading" class="loading-state">
         <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
-        <p>{{ t('organization.loadingParcels') }}</p>
+        <p>{{ t('organization.loadingPlots') }}</p>
       </div>
 
       <div v-else-if="error" class="error-state">
@@ -148,7 +258,7 @@ const getMemberCount = (plot) => {
       </div>
 
       <div v-else-if="plots.length > 0" class="plots-section">
-        <h2>{{ t('organization.parcelsTitle') }}</h2>
+        <h2>{{ t('organization.plotsTitle') }}</h2>
 
         <DataTable :value="plots" responsiveLayout="scroll" class="plots-table">
           <Column field="name" :header="t('organization.name')" :sortable="true">
@@ -181,21 +291,20 @@ const getMemberCount = (plot) => {
             </template>
           </Column>
 
-          <Column field="members" :header="t('organization.members')">
-            <template #body="slotProps">
-              <span class="members-count">{{ getMemberCount(slotProps.data) }}</span>
-            </template>
-          </Column>
-
-          <Column :header="t('organization.actions')">
+          <Column v-if="isOwner" :header="t('organization.actions')">
             <template #body="slotProps">
               <div class="action-buttons">
-
+                <Button
+                  icon="pi pi-pencil"
+                  class="p-button-rounded p-button-text p-button-info"
+                  @click="editPlot(slotProps.data)"
+                  :title="t('organization.editPlot')"
+                />
                 <Button
                   icon="pi pi-trash"
                   class="p-button-rounded p-button-text p-button-danger"
                   @click="deletePlot(slotProps.data)"
-                  :title="t('organization.deleteParcel')"
+                  :title="t('organization.deletePlot')"
                 />
               </div>
             </template>
@@ -205,17 +314,24 @@ const getMemberCount = (plot) => {
 
       <div v-else class="empty-state">
         <i class="pi pi-map box-icon"></i>
-        <h2 class="title">{{ t('organization.noParcels') }}</h2>
-        <p>{{ t('organization.noParcelsDesc') }}</p>
+        <h2 class="title">{{ t('organization.noPlots') }}</h2>
+        <p>{{ t('organization.noPlotsDesc') }}</p>
         <Button
-          :label="t('organization.createFirstParcel')"
+          v-if="isOwner"
+          :label="t('organization.createFirstPlot')"
           icon="pi pi-plus"
-          @click="goCreateParcel"
+          @click="goCreatePlot"
           class="p-button-success"
         />
       </div>
     </div>
   </AppLayout>
+
+  <ConfirmationModal
+    v-model:visible="showDeletePlotConfirm"
+    messageKey="organization.deletePlotConfirmFull"
+    @confirm="handleDeletePlotConfirm"
+  />
 </template>
 
 <style scoped>
@@ -360,6 +476,60 @@ const getMemberCount = (plot) => {
 
 .text-green-500 {
   color: #22c55e;
+}
+
+.invite-panel {
+  background: #f0faf2;
+  border: 1px solid #b7dfc0;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.invite-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.1rem;
+  color: #2c5530;
+  margin: 0 0 1rem 0;
+}
+
+.invite-form {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.invite-input {
+  flex: 1;
+  min-width: 220px;
+}
+
+:deep(.invite-input.p-inputtext) {
+  background: #fff !important;
+  color: #111 !important;
+}
+
+.invite-msg {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+}
+
+.invite-msg.success {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.invite-msg.error {
+  background: #fee2e2;
+  color: #991b1b;
 }
 
 @media (max-width: 768px) {

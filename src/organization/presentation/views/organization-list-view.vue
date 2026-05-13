@@ -4,6 +4,7 @@
       <div class="header">
         <h1>{{ t('organization.list') }}</h1>
         <Button
+          v-if="isAgronomist"
           :label="t('organization.create')"
           icon="pi pi-plus"
           @click="goToCreate"
@@ -35,6 +36,7 @@
           v-for="org in organizations"
           :key="org.id"
           :org="org"
+          :canDelete="isOwner(org)"
           @enter="goToDetail"
           @delete="deleteOrganization"
         />
@@ -46,6 +48,7 @@
         <h2>{{ t('organization.noOrganizations') }}</h2>
         <p>{{ t('organization.noOrganizationsDesc') }}</p>
         <Button
+          v-if="isAgronomist"
           :label="t('organization.createFirst')"
           icon="pi pi-plus"
           @click="goToCreate"
@@ -54,19 +57,34 @@
       </div>
     </div>
   </AppLayout>
+
+  <ConfirmationModal
+    v-model:visible="showDeleteConfirm"
+    messageKey="organization.deleteConfirm"
+    @confirm="handleDeleteConfirm"
+  />
 </template>
 
 <script setup>
-import { onMounted, computed } from 'vue';
+import { onMounted, computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { useToast } from 'primevue/usetoast';
 import { organizationService } from '../../application/organization.service.js';
+import { userStore } from '../../../iam/application/user.store.js';
 import AppLayout from '../../../shared/presentation/components/app-layout.vue';
 import OrganizationCard from '../components/organization-card.vue';
 import Button from 'primevue/button';
+import ConfirmationModal from '../../../shared/presentation/components/confirmation-modal.vue';
 
 const { t } = useI18n();
 const router = useRouter();
+const toast = useToast();
+
+const showDeleteConfirm = ref(false);
+const pendingDeleteOrg = ref(null);
+
+const isAgronomist = computed(() => userStore.state.user?.role === 'Agronomist');
 
 const organizations = computed(() => organizationService.state.organizations);
 const loading = computed(() => organizationService.state.loading);
@@ -94,15 +112,28 @@ function goToDetail(org) {
   router.push({ name: 'organization-detail', params: { id: org.id } });
 }
 
-async function deleteOrganization(org) {
-  if (confirm(`¿Estás seguro de eliminar "${org.name}"?`)) {
-    try {
-      await organizationService.deleteOrganization(org.id);
-      alert('Organización eliminada exitosamente');
-    } catch (err) {
-      console.error('Error deleting organization:', err);
-      alert('Error al eliminar la organización');
-    }
+function isOwner(org) {
+  const user = userStore.state.user;
+  return user && org && Number(org.agronomistId) === Number(userId.value);
+}
+
+const userId = computed(() => userStore.state.user?.id);
+
+function deleteOrganization(org) {
+  pendingDeleteOrg.value = org;
+  showDeleteConfirm.value = true;
+}
+
+async function handleDeleteConfirm() {
+  const org = pendingDeleteOrg.value;
+  try {
+    await organizationService.deleteOrganization(org.id);
+    toast.add({ severity: 'success', summary: t('organization.deleteSuccess'), life: 3000 });
+  } catch (err) {
+    console.error('Error deleting organization:', err);
+    toast.add({ severity: 'error', summary: t('organization.deleteError'), life: 3000 });
+  } finally {
+    pendingDeleteOrg.value = null;
   }
 }
 </script>
