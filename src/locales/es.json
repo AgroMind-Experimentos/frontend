@@ -371,7 +371,7 @@
     "fullName": "Nombre completo",
     "fullNamePlaceholder": "Tu nombre completo",
     "email": "Correo electrónico",
-    "emailPlaceholder": "ejemplo@correo.com",
+    "emailPlaceholder": "ejemplo{'@'}correo.com",
     "password": "Contraseña",
     "passwordPlaceholder": "Ingresa tu contraseña",
     "confirmPassword": "Confirmar",
