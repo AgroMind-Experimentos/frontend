@@ -19,7 +19,6 @@ export class CheckListApi{
             if(error.response?.status === 404 || error.response?.data?.message){
                 return null;
             }
-            console.error("Error cargando las checklists: ", error);
             throw error;
         }
     }
@@ -35,7 +34,6 @@ export class CheckListApi{
             await axios.put(endpoint, payload);
             return true;
         } catch (error) {
-            console.error('Error actualizando checklist:', error.response?.data || error.message);
             throw error;
         }
     }
@@ -46,7 +44,6 @@ export class CheckListApi{
             await axios.patch(endpoint, { isCompleted });
             return true;
         } catch (error) {
-            console.error('Error marcando ítem:', error.response?.data || error.message);
             throw error;
         }
     }
@@ -62,11 +59,9 @@ export class CheckListApi{
                     Description: (item.description || item.Description || "").trim()
                 })).filter(i => i.Description)
             };
-            console.log("CHECKLIST PAYLOAD FINAL ENVIADO:", payload);
             await axios.post(endpoint, payload);
             return true;
         } catch (error) {
-            console.error("ERROR CREANDO CHECKLIST:", error.response?.data || error.message);
             return false;
         }
     }

@@ -96,11 +96,8 @@ onMounted(async () => {
 
 async function loadOrganizations() {
   try {
-    console.log('📥 Cargando organizaciones desde el backend...');
     await organizationService.getAllOrganizations();
-    console.log('✅ Organizaciones cargadas:', organizations.value);
   } catch (err) {
-    console.error('❌ Error al cargar organizaciones:', err);
   }
 }
 

@@ -62,7 +62,6 @@ const agriculturalInfo = computed(() => {
     }
   }
   
-  console.log("WEATHER_BASE_URL:", import.meta.env.VITE_WEATHER_API_BASE_URL);
   const temp = weatherData.value.temperature
 
   // Muy frío (< 5°C)
