@@ -10,7 +10,6 @@ import { userStore } from "./iam/application/user.store.js"
 
 const protectedRoutes = [
     ...sharedRoutes,
-    ...userRoutes,
     ...tasksRoutes,
     ...organizationRoutes,
     ...plotRoutes,
@@ -22,6 +21,7 @@ const router = createRouter({
     history: createWebHistory(),
     routes: [
         { path: '/', redirect: '/login' },
+        ...userRoutes,
         ...protectedRoutes
     ]
 })
@@ -33,13 +33,13 @@ router.beforeEach(async (to) => {
     }
 
     const isAuthenticated = userStore.isAuthenticated;
-    const isLoginRoute = to.path === '/login' || to.name === 'login';
+    const isPublicRoute = userRoutes.some(route => route.path === to.path || route.name === to.name);
 
-    if (!isAuthenticated && !isLoginRoute) {
+    if (!isAuthenticated && !isPublicRoute) {
         return { path: '/login' };
     }
 
-    if (isAuthenticated && isLoginRoute) {
+    if (isAuthenticated && isPublicRoute) {
         return { name: 'dashboard' };
     }
 

@@ -350,11 +350,6 @@ export default {
 
 .register-button:hover {
   color: #1B5E20 !important;
-  .card-wrapper {
-    padding-top: 2rem !important;
-    padding-bottom: 2rem !important;
-  }
-
   text-decoration: underline !important;
 }
 
