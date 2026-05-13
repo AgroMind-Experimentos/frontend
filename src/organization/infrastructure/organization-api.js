@@ -1,4 +1,6 @@
 import axios from 'axios';
+import { OrganizationAssembler } from './organization-assembler.js';
+import { userStore } from '../../iam/application/user.store.js';
 
 export class OrganizationApi {
     baseUrl = import.meta.env.VITE_API_BASE_URL;
@@ -11,7 +13,8 @@ export class OrganizationApi {
                 ? `${this.organizationsEndpoint}?profileId=${profileId}`
                 : this.organizationsEndpoint;
             const { data } = await this.http.get(url);
-            return data;
+            const organizationsData = data?.data || data?.organizations || data;
+            return new OrganizationAssembler().toOrganizationArray(organizationsData);
         } catch (error) {
             console.error('Error fetching organizations:', error);
             throw error;
@@ -21,7 +24,7 @@ export class OrganizationApi {
     async getById(id) {
         try {
             const { data } = await this.http.get(`${this.organizationsEndpoint}/${id}`);
-            return data;
+            return new OrganizationAssembler().toOrganization(data);
         } catch (error) {
             console.error(`Error fetching organization ${id}:`, error);
             throw error;
@@ -33,11 +36,13 @@ export class OrganizationApi {
             const payload = {
                 name: organizationData.name,
                 description: organizationData.description,
-                status: organizationData.status || 'active',
-                agronomistId: organizationData.agronomistId || null
+                location: organizationData.location,
+                agronomistId: organizationData.agronomistId || userStore.state.user?.id || null
             };
             const { data } = await this.http.post(this.organizationsEndpoint, payload);
-            return data;
+            const entity = new OrganizationAssembler().toOrganization(data);
+            if (data.message) entity.messageKey = data.message;
+            return entity;
         } catch (error) {
             console.error('❌ Error creating organization:', error.response?.data);
             throw error;
@@ -46,12 +51,19 @@ export class OrganizationApi {
 
     async update(id, organizationData) {
         try {
-            const { data } = await this.http.put(`${this.organizationsEndpoint}/${id}`, organizationData);
-            return data;
+            // El backend usa PATCH según el snippet proveído
+            const { data } = await this.http.patch(`${this.organizationsEndpoint}/${id}`, organizationData);
+            const entity = new OrganizationAssembler().toOrganization(data);
+            if (data.message) entity.messageKey = data.message;
+            return entity;
         } catch (error) {
             console.error(`Error updating organization ${id}:`, error);
             throw error;
         }
+    }
+
+    async patch(id, organizationData) {
+        return this.update(id, organizationData);
     }
 
     async delete(id) {

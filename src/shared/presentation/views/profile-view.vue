@@ -1,128 +1,180 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import AppLayout from '../components/app-layout.vue';
+import { UserProfileApi } from '../../../profile/infrastructure/user-profile-api.js';
 import { userStore } from '../../../iam/application/user.store.js';
 
-// PrimeVue
 import Card from 'primevue/card';
 import InputText from 'primevue/inputtext';
 import Password from 'primevue/password';
-import Dropdown from 'primevue/dropdown';
 import Button from 'primevue/button';
+import {AuthApi} from "../../../iam/infrastructure/auth-api.js";
 
-// Datos iniciales (mock desde el store si existe)
-const current = userStore.state.user ?? { name: 'Juan', email: 'juan@example.com' };
-const nombres = ref(current.name || '');
-const apellidos = ref('');
-const correo = ref(current.email || '');
-const password = ref(''); // por seguridad, se deja vacío
-const rol = ref(null);
-const roles = [
-  { label: 'Agrónomo', value: 'agronomo' },
-  { label: 'Agricultor', value: 'agricultor' }
-];
+const { t } = useI18n();
+const api = new UserProfileApi();
+const authApi = new AuthApi();
 
-// Avatar
-const defaultAvatar = 'https://files.catbox.moe/7kr0f6.png';
-const avatarUrl = ref(defaultAvatar);
-const fileInput = ref(null);
+const name        = ref('');
+const email       = ref('');
+const loading     = ref(false);
+const saving      = ref(false);
+const profileError   = ref('');
+const profileSuccess = ref('');
 
-function pickPhoto() {
-  fileInput.value?.click();
+const currentPassword = ref('');
+const newPassword     = ref('');
+const confirmNew      = ref('');
+const savingPwd       = ref(false);
+const pwdError        = ref('');
+const pwdSuccess      = ref('');
+
+onMounted(async () => {
+  loading.value = true;
+  try {
+    const profile = await api.getMe();
+    name.value  = profile.displayName || profile.name || '';
+    email.value = profile.email ?? '';
+  } catch {
+    profileError.value = t('profile.loadError');
+  } finally {
+    loading.value = false;
+  }
+});
+
+async function saveProfile() {
+  profileError.value = '';
+  profileSuccess.value = '';
+  if (!name.value.trim()) { profileError.value = t('profile.nameRequired'); return; }
+  saving.value = true;
+  try {
+    await api.updateById(userStore.state.user?.id, {
+      displayName: name.value.trim(),
+      email: email.value.trim(),
+    });
+    profileSuccess.value = t('profile.updatedSuccess');
+  } catch {
+    profileError.value = t('profile.updateError');
+  } finally {
+    saving.value = false;
+  }
 }
-function onPhotoSelected(e) {
-  const file = e.target.files?.[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = () => (avatarUrl.value = reader.result);
-  reader.readAsDataURL(file);
-}
 
-// Guardar (placeholder)
-function saveProfile() {
-  // Aquí harías: await userStore.updateProfile({ nombres, apellidos, correo, password, rol, avatar })
-  alert('Perfil guardado (placeholder)');
+async function changePassword() {
+  pwdError.value = '';
+  pwdSuccess.value = '';
+  if (!currentPassword.value || !newPassword.value) {
+    pwdError.value = 'fieldsRequired'; return;
+  }
+  if (newPassword.value !== confirmNew.value) {
+    pwdError.value = 'passwordMismatch'; return;
+  }
+  savingPwd.value = true;
+  try {
+    const response = await authApi.changePassword(currentPassword.value.trim(), newPassword.value.trim());
+    pwdSuccess.value = response.message;
+    currentPassword.value = '';
+    newPassword.value = '';
+    confirmNew.value = '';
+  } catch (err) {
+    pwdError.value = err?.response?.data?.message || 'passwordChangeError';
+  } finally {
+    savingPwd.value = false;
+  }
 }
 </script>
 
 <template>
   <AppLayout>
     <div class="wrap">
-      <!-- Avatar + Editar foto -->
       <div class="avatar-box">
-        <img :src="avatarUrl" alt="Avatar" class="avatar" />
-        <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="onPhotoSelected" />
-        <Button label="Editar foto" class="btn-edit" @click="pickPhoto" />
+        <div class="avatar"><i class="pi pi-user avatar-icon"></i></div>
       </div>
 
-      <!-- Card con formulario -->
-      <Card class="profile-card">
-        <template #content>
-          <div class="form-grid">
-            <div class="field">
-              <label class="lbl">Nombres:</label>
-              <InputText v-model="nombres" placeholder="Nombre" class="w-full" />
-            </div>
-
-            <div class="field">
-              <label class="lbl">Contraseña:</label>
-              <Password v-model="password" :feedback="false" toggleMask inputClass="w-full" class="w-full" placeholder="********" />
-            </div>
-
-            <div class="field">
-              <label class="lbl">Apellidos:</label>
-              <InputText v-model="apellidos" placeholder="Apellido" class="w-full" />
-            </div>
-
-            <div class="field">
-              <label class="lbl">Rol:</label>
-              <Dropdown v-model="rol" :options="roles" optionLabel="label" optionValue="value" placeholder="Rol" class="w-full" />
-            </div>
-
-            <div class="field span-2">
-              <label class="lbl">Correo:</label>
-              <InputText v-model="correo" placeholder="Correo" class="w-full" />
-            </div>
-          </div>
-        </template>
-      </Card>
-
-      <!-- Guardar -->
-      <div class="actions">
-        <Button label="Guardar" class="btn-save" @click="saveProfile" />
+      <div v-if="loading" class="loading-msg">
+        <i class="pi pi-spin pi-spinner"></i> {{ t('profile.loading') }}
       </div>
+
+      <template v-else>
+        <!-- Sección: datos de perfil -->
+        <Card class="profile-card">
+          <template #title><span class="section-title">{{ t('profile.personalInfo') }}</span></template>
+          <template #content>
+            <div class="form-grid">
+              <div class="field">
+                <label class="lbl">{{ $t('sharedExt.names') }}</label>
+                <InputText v-model="name" :placeholder="$t('organization.name')" class="w-full" />
+              </div>
+              <div class="field">
+                <label class="lbl">{{ $t('sharedExt.email') }}</label>
+                <InputText v-model="email" :placeholder="$t('sharedExt.email')" class="w-full" />
+              </div>
+            </div>
+            <div v-if="profileError"   class="msg error">  <i class="pi pi-exclamation-circle"></i> {{ profileError }}</div>
+            <div v-if="profileSuccess" class="msg success"><i class="pi pi-check-circle"></i>       {{ profileSuccess }}</div>
+          </template>
+        </Card>
+        <div class="actions">
+          <Button :label="t('profile.saveProfile')" class="btn-save" :loading="saving" @click="saveProfile" />
+        </div>
+
+        <!-- Sección: cambio de contraseña -->
+        <Card class="profile-card">
+          <template #title><span class="section-title">{{ t('profile.changePassword') }}</span></template>
+          <template #content>
+            <div class="form-grid">
+              <div class="field">
+                <label class="lbl">{{ t('profile.currentPassword') }}</label>
+                <Password v-model="currentPassword" :feedback="false" toggleMask inputClass="w-full" class="w-full" :placeholder="t('profile.currentPassword')" />
+              </div>
+              <div class="field">
+                <label class="lbl">{{ t('profile.newPassword') }}</label>
+                <Password v-model="newPassword" :feedback="false" toggleMask inputClass="w-full" class="w-full" :placeholder="t('profile.newPassword')" />
+              </div>
+              <div class="field">
+                <label class="lbl">{{ t('profile.confirmNewPassword') }}</label>
+                <Password v-model="confirmNew" :feedback="false" toggleMask inputClass="w-full" class="w-full" :placeholder="t('profile.confirmNewPassword')" />
+              </div>
+            </div>
+            <div v-if="pwdError"   class="msg error">  <i class="pi pi-exclamation-circle"></i> {{ $t('auth.' + pwdError) }}</div>
+            <div v-if="pwdSuccess" class="msg success"><i class="pi pi-check-circle"></i>       {{ $t('auth.' + pwdSuccess) }}</div>
+          </template>
+        </Card>
+        <div class="actions">
+          <Button :label="t('profile.changePassword')" class="btn-save" :loading="savingPwd" @click="changePassword" />
+        </div>
+      </template>
     </div>
   </AppLayout>
 </template>
 
 <style scoped>
-.wrap { max-width: 980px; margin: 0 auto; }
-.avatar-box { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 18px; }
+.wrap { max-width: 560px; margin: 0 auto; }
+.avatar-box { display: flex; justify-content: center; margin-top: 18px; }
 .avatar {
-  width: 140px; height: 140px; border-radius: 50%; object-fit: cover;
-  border: 3px solid #3b82f6; /* aro azul suave */
+  width: 120px; height: 120px; border-radius: 50%;
+  background: #2c5530; border: 3px solid #3b82f6;
   box-shadow: 0 6px 18px rgba(0,0,0,.08);
+  display: flex; align-items: center; justify-content: center;
 }
-.hidden { display: none; }
-.btn-edit { background: #236d34; border: none; }
+.avatar-icon { font-size: 3rem; color: #fff; }
 
-.profile-card {
-  margin-top: 18px; background: #fff; border-radius: 16px;
-  box-shadow: 0 10px 22px rgba(0,0,0,.06); color: #111;
-}
-.form-grid {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 18px; padding: 10px;
-}
-.field { display: flex; align-items: center; gap: 12px; }
-.lbl { width: 120px; font-weight: 600; color: #111; text-align: right; }
-.span-2 { grid-column: span 2; }
+.loading-msg { text-align: center; color: #6b7280; margin-top: 2rem; display: flex; align-items: center; justify-content: center; gap: .5rem; }
 
-.actions { display: flex; justify-content: flex-end; margin: 22px 6px 0 6px; }
-.btn-save { min-width: 150px; }
+.profile-card { margin-top: 18px; background: #fff; border-radius: 16px; box-shadow: 0 10px 22px rgba(0,0,0,.06); color: #111; }
+.section-title { font-size: 1rem; font-weight: 700; color: #2c5530; }
+.form-grid { display: flex; flex-direction: column; gap: 18px; padding: 10px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.lbl { font-weight: 600; color: #444; font-size: .9rem; }
 
-/* inputs PrimeVue blancos y texto negro */
-:deep(.p-inputtext), :deep(.p-password-input), :deep(.p-dropdown .p-dropdown-label) {
-  background: #fff !important; color: #111 !important; border-color: #d1d5db;
-}
+.msg { display: flex; align-items: center; gap: .5rem; padding: .65rem .9rem; border-radius: 8px; font-size: .9rem; margin-top: 1rem; }
+.msg.error   { background: #fee2e2; color: #991b1b; }
+.msg.success { background: #d1fae5; color: #065f46; }
+
+.actions { display: flex; justify-content: flex-end; margin: 10px 6px 18px 6px; }
+.btn-save { min-width: 180px; }
+
+:deep(.p-inputtext), :deep(.p-password-input) { background: #fff !important; color: #111 !important; border-color: #d1d5db; width: 100%; }
 :deep(.p-inputtext::placeholder) { color: #9ca3af; }
+:deep(.p-password) { width: 100%; }
 </style>

@@ -1,29 +1,29 @@
-import {createRouter, createWebHistory} from "vue-router"
+import { createRouter, createWebHistory } from "vue-router"
+import { userStore } from "./iam/application/user.store.js"
+
+import sharedRoutes from "./shared/presentation/shared-views.js"
 import userRoutes from "./iam/presentation/user-routes.js"
 import tasksRoutes from "./monitoring-control/presentation/tasks-routes.js"
 import organizationRoutes from "./organization/presentation/organization-routes.js"
-import parcelRoutes from "./organization/presentation/parcel-routes.js"
+import plotRoutes from "./organization/presentation/plot-routes.js"
 import weatherRoutes from "./weather/presentation/weather-routes.js"
-import reportRoutes from "./Report/report-routes.js"
-import DashboardView from "./shared/presentation/views/dashboard-view.vue"
-import SettingsView from "./shared/presentation/views/settings-view.vue"
-import ProfileView from "./shared/presentation/views/profile-view.vue"
-import { userStore } from "./iam/application/user.store.js"
+import reportRoutes from "./Report/presentation/report-routes.js"
+
+const protectedRoutes = [
+    ...sharedRoutes,
+    ...userRoutes,
+    ...tasksRoutes,
+    ...organizationRoutes,
+    ...plotRoutes,
+    ...weatherRoutes,
+    ...reportRoutes
+]
 
 const router = createRouter({
     history: createWebHistory(),
     routes: [
         { path: '/', redirect: '/login' },
-
-        { path: '/dashboard', name: 'dashboard', component: DashboardView },
-        { path: '/settings', name: 'settings', component: SettingsView },
-        { path: '/profile', name: 'user-profile', component: ProfileView },
-        ...userRoutes,
-        ...tasksRoutes,
-        ...organizationRoutes,
-        ...parcelRoutes,
-        ...weatherRoutes,
-        ...reportRoutes
+        ...protectedRoutes
     ]
 })
 
@@ -34,4 +34,4 @@ router.beforeEach((to) => {
     }
 })
 
-export default router
+export default router;

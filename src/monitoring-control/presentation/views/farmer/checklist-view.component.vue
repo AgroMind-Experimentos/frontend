@@ -3,12 +3,15 @@ import {CheckListService} from '../../../application/checklist.service.js'
 import {TaskService} from '../../../application/task.service.js'
 import {onMounted, ref, computed} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { userStore } from '../../../../iam/application/user.store.js'
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const checklist = ref(null)
 const checkedItems = ref({})
+const togglingItem = ref(null)
 const checkListService = new CheckListService()
 const taskId = route.params.id
 const taskService = new TaskService()
@@ -26,19 +29,26 @@ onMounted(async ()=>{
     checklist.value = response
     if (checklist.value.items && checklist.value.items.length > 0) {
       checklist.value.items.forEach(item=>{
-        checkedItems.value[item.id] = false
+        checkedItems.value[item.id] = item.isCompleted
       })
-    }
-    if(task.value.status?.toLowerCase() === "completed"){
-      checklist.value.items.forEach(item => {
-        checkedItems.value[item.id] = true;
-      });
     }
   } else {
     console.warn('No se encontró checklist para esta tarea:', taskId)
     checklist.value = {}
   }
 })
+
+async function toggleItem(itemId, newValue) {
+  togglingItem.value = itemId
+  try {
+    await checkListService.markItemCompleted(itemId, newValue)
+    checkedItems.value[itemId] = newValue
+  } catch {
+    checkedItems.value[itemId] = !newValue
+  } finally {
+    togglingItem.value = null
+  }
+}
 
 async function completeTask(){
   try{
@@ -60,15 +70,15 @@ async function completeTask(){
 }
 
 const finishTask = ()=>{
+  completeError.value = ''
   if(task.value?.status === "Completed"){
-    alert("This monitoring-control is already completed")
+    completeError.value = t('tasks.taskAlreadyCompleted')
     return
   }
   const allChecked = Object.values(checkedItems.value).every(val => val === true)
   if(!allChecked){
-    alert("Complete all tasks")
+    completeError.value = t('tasks.completeAllTasks')
   }else{
-    alert("Task Completed")
     completeTask()
   }
 }
@@ -76,22 +86,25 @@ const finishTask = ()=>{
 
 <template>
   <div class="container">
-    <h3>CheckList</h3>
+    <h3>{{ $t('tasksExt.checklist') }}</h3>
     <div v-if="checklist && checklist.items && checklist.items.length > 0">
       <div v-for="item in checklist.items" :key="item.id" class="checklist-item">
-        <template v-if="task?.status?.toLowerCase() === 'pending'">
-          <pv-checkbox :modelValue="false" :inputId="`check-${item.id}`" :binary="true" class="checkbox" :disabled="true"></pv-checkbox>
-          <label :for="`check-${item.id}`" class="checklist-name">{{ item.description }}</label>
-        </template>
-        <template v-else>
-          <pv-checkbox v-model="checkedItems[item.id]" :inputId="`check-${item.id}`" :binary="true" class="checkbox" :disabled="isAgronomist || task?.status === 'Completed'"></pv-checkbox>
-          <label :for="`check-${item.id}`" class="checklist-name">{{ item.description }}</label>
-        </template>
+        <pv-checkbox
+          :modelValue="checkedItems[item.id]"
+          :inputId="`check-${item.id}`"
+          :binary="true"
+          class="checkbox"
+          :disabled="isAgronomist || task?.status?.toLowerCase() === 'pending' || task?.status === 'Completed' || togglingItem === item.id"
+          @update:modelValue="(val) => toggleItem(item.id, val)"
+        />
+        <label :for="`check-${item.id}`" class="checklist-name" :class="{ 'item-done': checkedItems[item.id] }">
+          {{ item.description }}
+        </label>
       </div>
     </div>
     <div v-else>
-      <p v-if="checklist === null">Cargando...</p>
-      <p v-else-if="task?.status?.toLowerCase() !== 'pending'" class="no-checklist">Esta tarea no tiene checklist.</p>
+      <p v-if="checklist === null">{{ $t('common.loading') }}</p>
+      <p v-else-if="task?.status?.toLowerCase() !== 'pending'" class="no-checklist">{{ $t('tasksExt.noChecklist') }}</p>
     </div>
 
     <p v-if="completeError" class="complete-error">{{ completeError }}</p>
@@ -101,7 +114,7 @@ const finishTask = ()=>{
       @click="finishTask"
       class="finish-btn"
       :disabled="task?.status === 'Completed'"
-    >Finalizar</pv-button>
+    >{{ $t('tasks.finish') }}</pv-button>
   </div>
 </template>
 
@@ -153,6 +166,12 @@ const finishTask = ()=>{
 .checklist-name {
   font-size: 1.1rem;
   color: #444;
+  transition: color 0.2s, text-decoration 0.2s;
+}
+
+.item-done {
+  color: #9ca3af;
+  text-decoration: line-through;
 }
 
 /* Checkbox personalizado PrimeVue */

@@ -16,4 +16,8 @@ export class CheckListService{
     async updateChecklist(checklistId, items) {
         return await this.checkListApi.updateChecklist(checklistId, items)
     }
+
+    async markItemCompleted(itemId, isCompleted) {
+        return await this.checkListApi.markItemCompleted(itemId, isCompleted)
+    }
 }

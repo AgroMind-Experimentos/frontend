@@ -28,14 +28,25 @@ export class CheckListApi{
         try {
             const endpoint = `${this.baseUrl}${this.checklistsEndpoint}/${checklistId}`;
             const payload = {
-                Items: items.map(item => ({
-                    Description: (item.description || item.Description || '').trim()
-                })).filter(i => i.Description)
+                items: items.map(item => ({
+                    description: (item.description || item.Description || '').trim()
+                })).filter(i => i.description)
             };
             await axios.put(endpoint, payload);
             return true;
         } catch (error) {
             console.error('Error actualizando checklist:', error.response?.data || error.message);
+            throw error;
+        }
+    }
+
+    async markItemCompleted(itemId, isCompleted) {
+        try {
+            const endpoint = `${this.baseUrl}${this.checklistsEndpoint}/items/${itemId}`;
+            await axios.patch(endpoint, { isCompleted });
+            return true;
+        } catch (error) {
+            console.error('Error marcando ítem:', error.response?.data || error.message);
             throw error;
         }
     }

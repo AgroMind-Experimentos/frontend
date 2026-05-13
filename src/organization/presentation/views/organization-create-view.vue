@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { useToast } from 'primevue/usetoast';
 import { organizationService } from '../../application/organization.service.js';
 import { userStore } from '../../../iam/application/user.store.js';
 import AppLayout from '../../../shared/presentation/components/app-layout.vue';
@@ -10,6 +11,7 @@ import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 
 const { t } = useI18n();
+const toast = useToast();
 const router = useRouter();
 
 const name = ref('');
@@ -20,14 +22,14 @@ const loading = computed(() => organizationService.state.loading);
 
 async function createOrg() {
   if (!name.value.trim()) {
-    alert(t('organization.nameRequired'));
+    toast.add({ severity: 'warn', summary: t('organization.nameRequired'), life: 3000 });
     return;
   }
 
   try {
     const agronomistId = userStore.state.user?.id;
 
-    await organizationService.createOrganization({
+    const newOrg = await organizationService.createOrganization({
       name: name.value.trim(),
       description: description.value.trim(),
       location: locationTxt.value.trim(),
@@ -35,9 +37,15 @@ async function createOrg() {
       agronomistId
     });
 
+    const successKey = newOrg.messageKey ? `auth.${newOrg.messageKey}` : 'organization.createSuccess';
+    toast.add({ severity: 'success', summary: t(successKey), life: 3000 });
     router.push({ name: 'dashboard' });
   } catch (err) {
-    alert(`Error: ${err.message || t('common.unexpectedError')}`);
+    console.error('❌ Error creating organization:', err);
+    const msgKey = err?.response?.data?.message;
+    const summary = msgKey ? t(`auth.${msgKey}`) : t('organization.createError');
+    toast.add({ severity: 'error', summary, life: 3000 });
+    organizationService.clearError();
   }
 }
 </script>

@@ -15,15 +15,15 @@ const profileApi = new UserProfileApi()
 const orgs       = computed(() => organizationService.state.organizations)
 const selectedOrg    = ref(null)
 const farmers    = ref([])
-const parcels    = ref([])
+const plots    = ref([])
 const loadingOrg = ref(false)
 
 const title          = ref('')
 const description    = ref('')
 const selectedFarmer = ref(null)
-const selectedParcel = ref(null)
+const selectedPlot = ref(null)
 
-// muestra todos los farmers de la org (el backend ya no exige que sean miembros de la parcela)
+// muestra todos los farmers de la org (el backend ya no exige que sean miembros de la plota)
 const availableFarmers = computed(() => farmers.value)
 
 const checklist = ref({ title: '', items: [] })
@@ -40,24 +40,24 @@ onMounted(async () => {
 // ─── cuando cambia la org carga farmers y parcelas ─────────
 watch(selectedOrg, async (org) => {
   selectedFarmer.value = null
-  selectedParcel.value = null
+  selectedPlot.value = null
   farmers.value = []
-  parcels.value = []
+  plots.value = []
   errorMsg.value = ''
 
   if (!org) return
   loadingOrg.value = true
   try {
-    const [allFarmers, plots] = await Promise.all([
+    const [allFarmers, orgPlots] = await Promise.all([
       profileApi.getAllUsers(),
       plotService.getPlotsByOrganizationId(org.id)
     ])
 
-    const memberIds = new Set(org.members)
+    const memberIds = new Set(org.members?.map(m => (typeof m === 'object' ? m.id : m)))
     farmers.value = (Array.isArray(allFarmers) ? allFarmers : [])
       .filter(u => memberIds.has(u.id) && u.role?.toLowerCase() === 'farmer')
 
-    parcels.value = plots || []
+    plots.value = orgPlots || []
   } catch (e) {
     errorMsg.value = 'Error al cargar datos de la organización.'
   } finally {
@@ -78,7 +78,7 @@ async function submitForm() {
   if (!selectedOrg.value)    return (errorMsg.value = 'Selecciona una organización.')
   if (!title.value.trim())   return (errorMsg.value = 'El título es obligatorio.')
   if (!selectedFarmer.value) return (errorMsg.value = 'Selecciona un agricultor responsable.')
-  if (!selectedParcel.value) return (errorMsg.value = 'Selecciona una parcela.')
+  if (!selectedPlot.value) return (errorMsg.value = 'Selecciona una plota.')
 
   submitting.value = true
   try {
@@ -86,7 +86,7 @@ async function submitForm() {
       title: title.value,
       description: description.value,
       organizationId: selectedOrg.value.id,
-      cropId: selectedParcel.value.id,
+      plotId: selectedPlot.value.id,
       responsibleId: selectedFarmer.value.id,
     })
 
@@ -115,7 +115,7 @@ async function submitForm() {
     description.value = ''
     selectedOrg.value = null
     selectedFarmer.value = null
-    selectedParcel.value = null
+    selectedPlot.value = null
     checklist.value = { title: '', items: [] }
   } catch (err) {
     const msg = err.response?.data?.message
@@ -129,72 +129,72 @@ async function submitForm() {
 <template>
   <div class="container">
     <div class="card-form">
-      <h2>Registrar nueva tarea</h2>
+      <h2>{{ $t('tasksExt.registerNew') }}</h2>
 
       <!-- Datos de la tarea -->
       <section class="section">
-        <h3>Datos de la tarea</h3>
+        <h3>{{ $t('taskForm.taskData') }}</h3>
 
         <!-- Organización -->
         <div class="field">
-          <label>Organización</label>
+          <label>{{ $t('tasksExt.org') }}</label>
           <Select
             v-model="selectedOrg"
             :options="orgs"
             optionLabel="name"
-            placeholder="Selecciona una organización"
+            :placeholder="$t('tasksExt.selectOrg')"
             class="w-full"
           />
         </div>
 
         <!-- Título -->
         <div class="field">
-          <label>Título</label>
-          <pv-input-text v-model="title" placeholder="Ej. Revisión de riego" class="w-full" />
+          <label>{{ $t('taskForm.title') }}</label>
+          <pv-input-text v-model="title" :placeholder="$t('tasksExt.egIrrigation')" class="w-full" />
         </div>
 
         <!-- Descripción -->
         <div class="field">
-          <label>Descripción <span class="optional">(opcional)</span></label>
-          <pv-input-text v-model="description" placeholder="Descripción de la tarea" class="w-full" />
+          <label>{{ $t('tasks.description') }} <span class="optional">{{ $t('taskForm.optional') }}</span></label>
+          <pv-input-text v-model="description" :placeholder="$t('taskForm.taskDescPlaceholder')" class="w-full" />
         </div>
 
         <!-- Cargando datos de org -->
         <div v-if="loadingOrg" class="loading-inline">
-          <i class="pi pi-spin pi-spinner"></i> Cargando datos...
+          <i class="pi pi-spin pi-spinner"></i> {{ $t('tasksExt.loadingData') }}
         </div>
 
         <template v-else-if="selectedOrg">
-          <!-- Parcela (primero para filtrar farmers) -->
+          <!-- Plota (primero para filtrar farmers) -->
           <div class="field">
-            <label>Parcela</label>
-            <div v-if="parcels.length === 0" class="empty-hint">
+            <label>{{ $t('tasksExt.plot') }}</label>
+            <div v-if="plots.length === 0" class="empty-hint">
               <i class="pi pi-info-circle"></i>
-              No hay parcelas en esta organización. Crea una primero.
+              {{ $t('tasksExt.noPlots') }}
             </div>
             <Select
               v-else
-              v-model="selectedParcel"
-              :options="parcels"
+              v-model="selectedPlot"
+              :options="plots"
               optionLabel="name"
-              placeholder="Selecciona una parcela"
+              :placeholder="$t('tasksExt.selectPlot')"
               class="w-full"
             />
           </div>
 
           <!-- Agricultor responsable -->
           <div class="field">
-            <label>Agricultor responsable</label>
+            <label>{{ $t('taskForm.responsibleFarmer') }}</label>
             <div v-if="farmers.length === 0" class="empty-hint">
               <i class="pi pi-info-circle"></i>
-              No hay agricultores en esta organización. Invita uno primero.
+              {{ $t('tasksExt.noFarmersOrg') }}
             </div>
             <Select
               v-else
               v-model="selectedFarmer"
               :options="availableFarmers"
               optionLabel="displayName"
-              placeholder="Selecciona un agricultor"
+              :placeholder="$t('taskForm.selectFarmer')"
               class="w-full"
             />
           </div>
@@ -203,17 +203,17 @@ async function submitForm() {
 
       <!-- Checklist -->
       <section class="section border-top">
-        <h3>Checklist asociada <span class="optional">(opcional)</span></h3>
+        <h3>{{ $t('tasksExt.associatedChecklist') }} <span class="optional">{{ $t('taskForm.optional') }}</span></h3>
         <div class="field">
-          <label>Título del checklist</label>
-          <pv-input-text v-model="checklist.title" placeholder="Ej. Revisión de maquinaria" class="w-full" />
+          <label>{{ $t('tasksExt.checklistTitle') }}</label>
+          <pv-input-text v-model="checklist.title" :placeholder="$t('tasksExt.checklistTitlePlaceholder')" class="w-full" />
         </div>
-        <label class="field-label">Ítems</label>
+        <label class="field-label">{{ $t('tasksExt.items') }}</label>
         <div v-for="(item, i) in checklist.items" :key="item.id" class="item-row">
-          <pv-input-text v-model="item.description" placeholder="Descripción del ítem" class="flex-1" />
+          <pv-input-text v-model="item.description" :placeholder="$t('taskForm.itemDescPlaceholder')" class="flex-1" />
           <pv-button icon="pi pi-trash" severity="danger" text @click="removeItem(i)" />
         </div>
-        <pv-button icon="pi pi-plus" label="Añadir ítem" outlined class="add-item-btn" @click="addItem" />
+        <pv-button icon="pi pi-plus" :label="$t('tasks.addItem')" outlined class="add-item-btn" @click="addItem" />
       </section>
 
       <!-- Mensajes -->
@@ -227,7 +227,7 @@ async function submitForm() {
       <!-- Botón -->
       <div class="submit-row">
         <pv-button
-          label="Registrar tarea"
+          :label="$t('tasksExt.registerNew')"
           icon="pi pi-check"
           class="submit-btn"
           :loading="submitting"

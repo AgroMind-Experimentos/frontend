@@ -53,7 +53,7 @@ class PlotService {
     }
 
     /**
-     * Obtiene una parcela por ID
+     * Obtiene una plota por ID
      */
     async getPlotById(id) {
         this.state.loading = true;
@@ -63,7 +63,7 @@ class PlotService {
             this.state.currentPlot = data; // La API ya retorna entidad convertida
             return data;
         } catch (error) {
-            this.state.error = error.message || 'Error al cargar la parcela';
+            this.state.error = error.message || 'Error al cargar la plota';
             console.error(`Error fetching plot ${id}:`, error);
             throw error;
         } finally {
@@ -72,7 +72,7 @@ class PlotService {
     }
 
     /**
-     * Crea una nueva parcela
+     * Crea una nueva plota
      */
     async createPlot(plotData) {
         this.state.loading = true;
@@ -83,7 +83,7 @@ class PlotService {
             this.state.plots.push(newPlot);
             return newPlot;
         } catch (error) {
-            this.state.error = error.message || 'Error al crear la parcela';
+            this.state.error = error.message || 'Error al crear la plota';
             console.error('Error creating plot:', error);
             throw error;
         } finally {
@@ -92,7 +92,7 @@ class PlotService {
     }
 
     /**
-     * Actualiza una parcela existente
+     * Actualiza una plota existente
      */
     async updatePlot(id, plotData) {
         this.state.loading = true;
@@ -114,7 +114,7 @@ class PlotService {
 
             return updatedPlot;
         } catch (error) {
-            this.state.error = error.message || 'Error al actualizar la parcela';
+            this.state.error = error.message || 'Error al actualizar la plota';
             console.error(`Error updating plot ${id}:`, error);
             throw error;
         } finally {
@@ -123,7 +123,7 @@ class PlotService {
     }
 
     /**
-     * Elimina una parcela
+     * Elimina una plota
      */
     async deletePlot(id) {
         this.state.loading = true;
@@ -141,7 +141,7 @@ class PlotService {
 
             return true;
         } catch (error) {
-            this.state.error = error.message || 'Error al eliminar la parcela';
+            this.state.error = error.message || 'Error al eliminar la plota';
             console.error(`Error deleting plot ${id}:`, error);
             throw error;
         } finally {
@@ -150,7 +150,7 @@ class PlotService {
     }
 
     /**
-     * Agrega un miembro a una parcela
+     * Agrega un miembro a una plota
      */
     async addMemberToPlot(plotId, memberId) {
         this.state.loading = true;
@@ -175,7 +175,7 @@ class PlotService {
     }
 
     /**
-     * Remueve un miembro de una parcela
+     * Remueve un miembro de una plota
      */
     async removeMemberFromPlot(plotId, memberId) {
         this.state.loading = true;

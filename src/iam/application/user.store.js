@@ -1,36 +1,34 @@
 import { reactive } from 'vue';
 import { AuthApi } from '../infrastructure/auth-api.js';
 import { AuthAssembler } from '../infrastructure/auth.assembler.js';
+import { UserProfileApi } from '../../profile/infrastructure/user-profile-api.js';
+import { User } from '../domain/model/user.entity.js';
 
 class UserStore {
     state = reactive({
         loading: false,
-        errorKey: null,     // i18n key (p.e. 'auth.invalidCredentials')
-        user: this.#loadFromStorage('user'),
-        tokens: this.#loadFromStorage('tokens')
+        errorKey: null,
+        successKey: null,
+        user: null,
     });
 
     #api = new AuthApi();
     #assembler = new AuthAssembler();
+    #profileApi = new UserProfileApi();
 
-    #loadFromStorage(key) {
+    async restoreSession() {
         try {
-            const item = localStorage.getItem(`ecotrack_${key}`);
-            return item ? JSON.parse(item) : null;
-        } catch {
-            return null;
-        }
-    }
-
-    #saveToStorage(key, value) {
-        try {
-            if (value) {
-                localStorage.setItem(`ecotrack_${key}`, JSON.stringify(value));
-            } else {
-                localStorage.removeItem(`ecotrack_${key}`);
+            const profile = await this.#profileApi.getMe();
+            if (profile) {
+                this.state.user = new User({
+                    id: profile.id ?? profile.userId ?? null,
+                    name: profile.displayName || profile.name || '',
+                    email: profile.email || '',
+                    role: profile.role || ''
+                });
             }
-        } catch (error) {
-            console.error(`Error saving ${key} to localStorage:`, error);
+        } catch {
+            this.state.user = null;
         }
     }
 
@@ -40,19 +38,10 @@ class UserStore {
         try {
             const data = await this.#api.login(email, password);
             this.state.user = this.#assembler.toUser(data.user);
-            this.state.tokens = this.#assembler.toTokens(data.tokens);
-
-            // Guardar en localStorage
-            this.#saveToStorage('user', this.state.user);
-            this.#saveToStorage('tokens', this.state.tokens);
-
             return true;
         } catch (err) {
-            this.state.errorKey = err?.response?.status === 401
-                ? 'auth.invalidCredentials'
-                : err?.response?.status === 503
-                ? 'common.serviceUnavailable'
-                : 'common.unexpectedError';
+            const msg = err?.response?.data?.message;
+            this.state.errorKey = msg ? `auth.${msg}` : 'common.unexpectedError';
             return false;
         } finally {
             this.state.loading = false;
@@ -62,27 +51,29 @@ class UserStore {
     async register({ name, email, password, role }) {
         this.state.loading = true;
         this.state.errorKey = null;
+        this.state.successKey = null;
         try {
             await this.#api.register(name, email, password, role);
+            this.state.successKey = 'iam.registerSuccess';
             return true;
         } catch (err) {
-            this.state.errorKey = err?.response?.status === 409
-                ? 'auth.emailAlreadyExists'
-                : err?.response?.status === 400
-                ? 'auth.invalidData'
-                : 'common.unexpectedError';
+            const msg = err?.response?.data?.message;
+            this.state.errorKey = msg ? `auth.${msg}` : 'common.unexpectedError';
             return false;
         } finally {
             this.state.loading = false;
         }
     }
 
-    logout() {
-        this.state.user = null;
-        this.state.tokens = null;
-        // Limpiar localStorage
-        this.#saveToStorage('user', null);
-        this.#saveToStorage('tokens', null);
+    async logout() {
+        try {
+            await this.#api.logout();
+        } catch (err) {
+            const msg = err?.response?.data?.message;
+            if (msg) this.state.errorKey = `auth.${msg}`;
+        } finally {
+            this.state.user = null;
+        }
     }
 }
 

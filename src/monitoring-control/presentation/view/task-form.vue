@@ -114,52 +114,52 @@ async function save() {
 <template>
   <div class="container">
     <div class="card-form">
-      <h2>Editar tarea</h2>
+      <h2>{{ $t('taskForm.editTask') }}</h2>
 
       <div v-if="loading" class="loading-state">
         <i class="pi pi-spinner pi-spin"></i>
-        <span>Cargando...</span>
+        <span>{{ $t('common.loading') }}</span>
       </div>
 
       <template v-else>
         <section class="section">
-          <h3>Datos de la tarea</h3>
+          <h3>{{ $t('taskForm.taskData') }}</h3>
 
           <div class="field">
-            <label>Título</label>
-            <pv-input-text v-model="title" placeholder="Título de la tarea" class="w-full" />
+            <label>{{ $t('taskForm.title') }}</label>
+            <pv-input-text v-model="title" :placeholder="$t('taskForm.taskTitlePlaceholder')" class="w-full" />
           </div>
 
           <div class="field">
-            <label>Descripción <span class="optional">(opcional)</span></label>
-            <pv-input-text v-model="description" placeholder="Descripción de la tarea" class="w-full" />
+            <label>{{ $t('tasks.description') }} <span class="optional">{{ $t('taskForm.optional') }}</span></label>
+            <pv-input-text v-model="description" :placeholder="$t('taskForm.taskDescPlaceholder')" class="w-full" />
           </div>
 
           <div class="field">
-            <label>Agricultor responsable</label>
+            <label>{{ $t('taskForm.responsibleFarmer') }}</label>
             <div v-if="farmers.length === 0" class="empty-hint">
               <i class="pi pi-info-circle"></i>
-              No hay agricultores disponibles en esta organización.
+              {{ $t('taskForm.noFarmersAvailable') }}
             </div>
             <Select
               v-else
               v-model="selectedFarmer"
               :options="farmers"
               optionLabel="displayName"
-              placeholder="Selecciona un agricultor"
+              :placeholder="$t('taskForm.selectFarmer')"
               class="w-full"
             />
           </div>
         </section>
 
         <section class="section border-top">
-          <h3>Checklist <span class="optional">(opcional)</span></h3>
-          <label class="field-label">Ítems</label>
+          <h3>{{ $t('tasksExt.checklist') }} <span class="optional">{{ $t('taskForm.optional') }}</span></h3>
+          <label class="field-label">{{ $t('taskForm.items') }}</label>
           <div v-for="(item, i) in items" :key="item.uid" class="item-row">
-            <pv-input-text v-model="item.description" placeholder="Descripción del ítem" class="flex-1" />
+            <pv-input-text v-model="item.description" :placeholder="$t('taskForm.itemDescPlaceholder')" class="flex-1" />
             <pv-button icon="pi pi-trash" severity="danger" text @click="removeItem(i)" />
           </div>
-          <pv-button icon="pi pi-plus" label="Añadir ítem" outlined class="add-item-btn" @click="addItem" />
+          <pv-button icon="pi pi-plus" :label="$t('taskForm.addItem')" outlined class="add-item-btn" @click="addItem" />
         </section>
 
         <div v-if="errorMsg" class="msg error">
@@ -171,7 +171,7 @@ async function save() {
 
         <div class="submit-row">
           <pv-button
-            label="Cancelar"
+            :label="$t('common.cancel')"
             icon="pi pi-times"
             class="cancel-btn"
             severity="secondary"
@@ -179,7 +179,7 @@ async function save() {
             @click="router.push('/tasks/pending')"
           />
           <pv-button
-            label="Guardar cambios"
+            :label="$t('taskForm.saveChanges')"
             icon="pi pi-check"
             class="submit-btn"
             :loading="saving"
