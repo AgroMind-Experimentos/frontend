@@ -9,6 +9,7 @@ import AppLayout from '../../../shared/presentation/components/app-layout.vue';
 import Card from 'primevue/card';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
+import Dropdown from 'primevue/dropdown';
 
 const { t } = useI18n();
 const toast = useToast();
@@ -27,6 +28,27 @@ const area = ref('');
 const locationTxt = ref('');
 const crop = ref('');
 const orgId = ref(null);
+
+const cropKeys = [
+  'corn',
+  'rice',
+  'wheat',
+  'organicCorn',
+  'quinoa',
+  'nativePotatoes',
+  'potato',
+  'cotton',
+  'barley',
+  'coffee',
+  'cocoa'
+];
+
+const cropOptions = computed(() => {
+  const query = crop.value ? String(crop.value).toLowerCase() : '';
+  return cropKeys
+    .map(key => t(`crops.${key}`))
+    .filter(val => val.toLowerCase().includes(query));
+});
 
 onMounted(async () => {
   try {
@@ -141,7 +163,7 @@ function goBack() {
               <InputText v-model="locationTxt" :placeholder="$t('organization.location')" class="mb-3" />
 
               <label class="label">{{ $t('organization.crop') }}</label>
-              <InputText v-model="crop" :placeholder="$t('organization.crop')" />
+              <Dropdown v-model="crop" :options="cropOptions" editable :placeholder="$t('organization.crop')" />
             </div>
           </template>
         </Card>
@@ -175,6 +197,16 @@ function goBack() {
 /* inputs primevue blancos y texto negro */
 :deep(.p-inputtext){ background:#fff !important; color:#111 !important; border-color:#d1d5db; }
 :deep(.p-inputtext::placeholder){ color:#9ca3af; }
+
+:deep(.p-dropdown) { background:#fff !important; color:#111 !important; border-color:#d1d5db; }
+:deep(.p-dropdown .p-dropdown-label) { color:#111 !important; }
+:deep(.p-dropdown .p-dropdown-trigger) { color:#6b7280; }
+:deep(.p-dropdown-panel) { background:#fff !important; }
+:deep(.p-dropdown-panel .p-dropdown-items) { display: flex; flex-direction: column-reverse; }
+:deep(.p-dropdown-panel .p-dropdown-items .p-dropdown-item) { color:#111 !important; }
+:deep(.p-dropdown-panel .p-dropdown-items .p-dropdown-item:hover) { background:#f3f4f6 !important; }
+:deep(.p-dropdown-panel .p-dropdown-header) { background:#fff !important; }
+:deep(.p-dropdown-panel .p-dropdown-filter) { background:#fff !important; color:#111 !important; }
 
 .actions{display:flex;justify-content:center;gap:1rem;margin-top:28px}
 .btn-primary{min-width:160px}
