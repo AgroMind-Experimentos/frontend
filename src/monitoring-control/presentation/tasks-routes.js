@@ -1,29 +1,19 @@
-const completedTasks = ()=> import('./views/farmer/completed-tasks.component.vue')
-const pendingTasks = ()=> import('./views/farmer/pending-tasks.component.vue')
-const inProgressTasks = ()=> import('./views/farmer/in-progress-tasks.component.vue')
 const logs = ()=> import('./views/farmer/logs.component.vue')
 const checkList = ()=> import('./views/farmer/checklist-view.component.vue')
 const taskDashboard = ()=> import('./views/farmer/task-dashboard.component.vue')
 const newTask = ()=> import('./views/farmer/new-task.component.vue')
 const taskForm = ()=> import('./view/task-form.vue')
+const taskKanban = ()=> import('./views/farmer/task-kanban.component.vue')
 
 const tasksRoutes = [
     {
         path: "/tasks",
         component: taskDashboard,
-        redirect: "/tasks/completed",
+        redirect: "/tasks/kanban",
         children: [
             {
-                path: "completed",
-                components: {"task-dashboard": completedTasks},
-            },
-            {
-                path: "in-progress",
-                components: {"task-dashboard": inProgressTasks},
-            },
-            {
-                path: "pending",
-                components: {"task-dashboard": pendingTasks},
+                path: "kanban",
+                components: {"task-dashboard": taskKanban},
             },
             {
                 path: "logs",

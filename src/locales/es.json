@@ -177,6 +177,8 @@
     "pendingTasks": "Pendientes",
     "inProgressTasks": "En Progreso",
     "completedTasks": "Completadas",
+    "kanbanBoard": "Tablero Kanban",
+    "kanbanInstructions": "Puedes arrastrar y soltar las tareas entre columnas para actualizar su estado. Haz click en una tarea para ver su checklist.",
     "newTask": "Nueva Tarea",
     "createTask": "Crear Tarea",
     "editTask": "Editar Tarea",

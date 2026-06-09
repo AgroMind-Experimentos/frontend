@@ -5,10 +5,13 @@ import {onMounted, ref, computed} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { userStore } from '../../../../iam/application/user.store.js'
+import { useToast } from 'primevue/usetoast'
+import ConfirmationModal from '../../../../shared/presentation/components/confirmation-modal.vue'
 
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
+const toast = useToast()
 const checklist = ref(null)
 const checkedItems = ref({})
 const togglingItem = ref(null)
@@ -18,6 +21,33 @@ const taskService = new TaskService()
 const task = ref(null)
 const isAgronomist = computed(() => userStore.state.user?.role === 'Agronomist')
 const completeError = ref('')
+const showDeleteConfirm = ref(false)
+
+const editTask = () => {
+  router.push(`/tasks/${taskId}/edit`)
+}
+
+const confirmDelete = () => {
+  showDeleteConfirm.value = true
+}
+
+const handleDeleteConfirm = async () => {
+  try {
+    await taskService.deleteTask(Number(taskId))
+    toast.add({
+      severity: 'success',
+      summary: 'Éxito',
+      detail: 'Tarea eliminada correctamente',
+      life: 3000
+    })
+    router.push('/tasks/kanban')
+  } catch (error) {
+    console.error('Error al eliminar la tarea:', error)
+    completeError.value = t('tasks.deleteError') || 'Error al eliminar la tarea.'
+  } finally {
+    showDeleteConfirm.value = false
+  }
+}
 
 onMounted(async ()=>{
   const taskResponse = await taskService.getTaskById(taskId)
@@ -62,7 +92,7 @@ async function completeTask(){
     await taskService.updateCompletedDate(numericID, completedAt);
     await taskService.updateStatus(numericID, 'Completed');
     task.value.status = "Completed"
-    await router.push('/tasks/in-progress')
+    await router.push('/tasks/kanban')
   } catch(error) {
     console.error(error)
     completeError.value = 'Error al completar la tarea. Intenta de nuevo.'
@@ -115,6 +145,31 @@ const finishTask = ()=>{
       class="finish-btn"
       :disabled="task?.status === 'Completed'"
     >{{ $t('tasks.finish') }}</pv-button>
+
+    <div v-if="isAgronomist" class="admin-actions">
+      <pv-button
+        @click="editTask"
+        class="edit-btn"
+        severity="secondary"
+        outlined
+      >
+        <i class="pi pi-pencil"></i> {{ $t('tasks.editTask') }}
+      </pv-button>
+      <pv-button
+        @click="confirmDelete"
+        class="delete-btn"
+        severity="danger"
+        outlined
+      >
+        <i class="pi pi-trash"></i> {{ $t('tasks.delete') }}
+      </pv-button>
+    </div>
+
+    <ConfirmationModal
+      v-model:visible="showDeleteConfirm"
+      messageKey="tasks.deleteConfirm"
+      @confirm="handleDeleteConfirm"
+    />
   </div>
 </template>
 
@@ -240,5 +295,22 @@ const finishTask = ()=>{
   background-color: #bbbbbb !important;
   cursor: not-allowed;
   transform: none;
+}
+
+.admin-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 3rem;
+}
+
+.edit-btn, .delete-btn {
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
 }
 </style>
