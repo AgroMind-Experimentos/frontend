@@ -15,7 +15,7 @@ export class Organization {
         this._id = organization.id;
         this._name = organization.name;
         this._description = organization.description;
-        this._location = organization.location;
+        this._coordinates = organization.coordinates || null;
         this._members = organization.members || [];
         this._createdAt = organization.createdAt;
         this._agronomistId = organization.agronomistId;
@@ -77,12 +77,12 @@ export class Organization {
         this._createdAt = value;
     }
 
-    get location() {
-        return this._location;
+    get coordinates() {
+        return this._coordinates;
     }
 
-    set location(value) {
-        this._location = value;
+    set coordinates(value) {
+        this._coordinates = value;
     }
 
     // Domain methods

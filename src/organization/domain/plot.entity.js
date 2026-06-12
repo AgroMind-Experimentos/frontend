@@ -15,7 +15,7 @@ export class Plot {
         this._organizationId = plot.organizationId;
         this._name = plot.name;
         this._area = plot.area;
-        this._location = plot.location;
+        this._coordinates = plot.coordinates || null;
         this._crop = plot.crop;
         this._status = plot.status;
         this._createdAt = plot.createdAt;
@@ -54,12 +54,12 @@ export class Plot {
         this._area = value;
     }
 
-    get location() {
-        return this._location;
+    get coordinates() {
+        return this._coordinates;
     }
 
-    set location(value) {
-        this._location = value;
+    set coordinates(value) {
+        this._coordinates = value;
     }
 
     get crop() {

@@ -40,11 +40,16 @@ export class PlotsApi {
 
     async create(plotData) {
         try {
-            const payload = PlotAssembler.fromFormData(plotData);
+            const payload = {
+                organizationId: Number(plotData.organizationId),
+                name: plotData.name.trim(),
+                area: Number(plotData.area),
+                crop: plotData.crop.trim(),
+                latitude: plotData.latitude ? Number(plotData.latitude) : null,
+                longitude: plotData.longitude ? Number(plotData.longitude) : null
+            };
             const { data } = await this.http.post(this.cropsEndpoint, payload);
-            const entity = PlotAssembler.toEntityFromResponse(data);
-            if (data.message) entity.messageKey = data.message;
-            return entity;
+            return data;
         } catch (error) {
             throw error;
         }
@@ -52,11 +57,16 @@ export class PlotsApi {
 
     async update(id, plotData) {
         try {
-            const payload = PlotAssembler.fromFormData(plotData);
+            const payload = {
+                organizationId: Number(plotData.organizationId),
+                name: plotData.name.trim(),
+                area: Number(plotData.area),
+                crop: plotData.crop.trim(),
+                latitude: plotData.latitude ? Number(plotData.latitude) : null,
+                longitude: plotData.longitude ? Number(plotData.longitude) : null
+            };
             const { data } = await this.http.patch(`${this.cropsEndpoint}/${id}`, payload);
-            const entity = PlotAssembler.toEntityFromResponse(data);
-            if (data.message) entity.messageKey = data.message;
-            return entity;
+            return data;
         } catch (error) {
             throw error;
         }

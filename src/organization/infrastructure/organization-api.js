@@ -36,7 +36,8 @@ export class OrganizationApi {
             const payload = {
                 name: organizationData.name,
                 description: organizationData.description,
-                location: organizationData.location,
+                latitude: organizationData.latitude ? Number(organizationData.latitude) : null,
+                longitude: organizationData.longitude ? Number(organizationData.longitude) : null,
                 agronomistId: organizationData.agronomistId || userStore.state.user?.id || null
             };
             const { data } = await this.http.post(this.organizationsEndpoint, payload);
@@ -44,15 +45,21 @@ export class OrganizationApi {
             if (data.message) entity.messageKey = data.message;
             return entity;
         } catch (error) {
-            console.error('❌ Error creating organization:', error.response?.data);
+            console.error('Error creating organization:', error.response?.data);
             throw error;
         }
     }
 
     async update(id, organizationData) {
         try {
-            // El backend usa PATCH según el snippet proveído
-            const { data } = await this.http.patch(`${this.organizationsEndpoint}/${id}`, organizationData);
+            const payload = {
+                name: organizationData.name,
+                description: organizationData.description,
+                latitude: organizationData.latitude ? Number(organizationData.latitude) : null,
+                longitude: organizationData.longitude ? Number(organizationData.longitude) : null,
+                memberIds: organizationData.memberIds || []
+            };
+            const { data } = await this.http.patch(`${this.organizationsEndpoint}/${id}`, payload);
             const entity = new OrganizationAssembler().toOrganization(data);
             if (data.message) entity.messageKey = data.message;
             return entity;
