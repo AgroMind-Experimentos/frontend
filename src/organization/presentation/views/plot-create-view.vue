@@ -1,14 +1,14 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useToast } from 'primevue/usetoast';
 import { plotService } from '../../application/plot.service.js';
 import AppLayout from '../../../shared/presentation/components/app-layout.vue';
-
 import Card from 'primevue/card';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
+import MapPicker from "../../../shared/presentation/components/MapPicker.vue";
 
 const { t } = useI18n();
 const toast = useToast();
@@ -16,14 +16,13 @@ const route = useRoute();
 const router = useRouter();
 const orgId = route.query.orgId ?? null;
 
-// Estados del servicio
 const loading = computed(() => plotService.state.loading);
 const error = computed(() => plotService.state.error);
 
-// ---- Formulario ----
 const name = ref('');
 const area = ref('');
-const locationTxt = ref('');
+const latitude = ref(null);
+const longitude = ref(null);
 const crop = ref('');
 
 async function createPlot() {
@@ -40,7 +39,6 @@ async function createPlot() {
   try {
     const description = [
       area.value.trim() ? `Área: ${area.value.trim()}` : '',
-      locationTxt.value.trim() ? `Ubicación: ${locationTxt.value.trim()}` : '',
       crop.value.trim() ? `Cultivo: ${crop.value.trim()}` : ''
     ].filter(Boolean).join(' | ');
 
@@ -49,7 +47,8 @@ async function createPlot() {
       name: name.value.trim(),
       description: description,
       area: area.value.trim(),
-      location: locationTxt.value.trim(),
+      latitude: latitude.value,
+      longitude: longitude.value,
       crop: crop.value.trim()
     };
 
@@ -81,7 +80,6 @@ function goBack() {
       <h2 class="page-title">{{ $t('organizationExt.createPlot') }}</h2>
 
       <div class="form-container">
-        <!-- Panel: Datos -->
         <Card class="panel">
           <template #title>
             <div class="panel-title">
@@ -97,11 +95,22 @@ function goBack() {
               <label class="label">{{ $t('organization.area') }}</label>
               <InputText v-model="area" :placeholder="$t('organization.areaPlaceholder')" class="mb-3" />
 
-              <label class="label">{{ $t('organization.location') }}</label>
-              <InputText v-model="locationTxt" :placeholder="$t('organization.location')" class="mb-3" />
-
               <label class="label">{{ $t('organization.crop') }}</label>
-              <InputText v-model="crop" :placeholder="$t('organization.crop')" />
+              <InputText v-model="crop" :placeholder="$t('organization.crop')" class="mb-3" />
+
+              <label class="label">Ubicación de la Parcela</label>
+              <MapPicker v-model:latitude="latitude" v-model:longitude="longitude" />
+
+              <div class="formgrid grid">
+                <div class="field col-6">
+                  <label class="label">Latitud</label>
+                  <InputText v-model="latitude" type="number" step="any" readonly />
+                </div>
+                <div class="field col-6">
+                  <label class="label">Longitud</label>
+                  <InputText v-model="longitude" type="number" step="any" readonly />
+                </div>
+              </div>
             </div>
           </template>
         </Card>
@@ -118,27 +127,22 @@ function goBack() {
 <style scoped>
 .wrap{max-width:1000px;margin:0 auto}
 .page-title{margin:12px 0 22px 0;text-align:center;color:#111}
-
 .panel{background:#fff;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,.08);color:#111}
 .panel-title{display:flex;align-items:center;font-weight:700;color:#111}
 .label{display:block;font-weight:600;margin-bottom:6px;color:#111}
 
-/* inputs primevue blancos y texto negro */
 :deep(.p-inputtext){ background:#fff !important; color:#111 !important; border-color:#d1d5db; }
 :deep(.p-inputtext::placeholder){ color:#9ca3af; }
+
+:deep(.p-inputtext[readonly]) {
+  background: #f3f4f6 !important;
+  color: #6b7280 !important;
+  cursor: not-allowed;
+}
 
 .actions{display:flex;justify-content:center;gap:1rem;margin-top:28px}
 .btn-primary{min-width:160px}
 .btn-cancel{min-width:120px}
-
-.form-container {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-}
-
-.panel {
-  width: 100%;
-  max-width: 600px;
-}
+.form-container { display: flex; justify-content: center; width: 100%; }
+.panel { width: 100%; max-width: 600px; }
 </style>

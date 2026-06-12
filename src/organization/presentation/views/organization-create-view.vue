@@ -9,6 +9,7 @@ import AppLayout from '../../../shared/presentation/components/app-layout.vue';
 import Card from 'primevue/card';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
+import MapPicker from "../../../shared/presentation/components/MapPicker.vue";
 
 const { t } = useI18n();
 const toast = useToast();
@@ -16,7 +17,8 @@ const router = useRouter();
 
 const name = ref('');
 const description = ref('');
-const locationTxt = ref('');
+const latitude = ref(null);
+const longitude = ref(null);
 
 const loading = computed(() => organizationService.state.loading);
 
@@ -32,7 +34,8 @@ async function createOrg() {
     const newOrg = await organizationService.createOrganization({
       name: name.value.trim(),
       description: description.value.trim(),
-      location: locationTxt.value.trim(),
+      latitude: latitude.value,
+      longitude: longitude.value,
       status: 'active',
       agronomistId
     });
@@ -41,7 +44,7 @@ async function createOrg() {
     toast.add({ severity: 'success', summary: t(successKey), life: 3000 });
     router.push({ name: 'dashboard' });
   } catch (err) {
-    console.error('❌ Error creating organization:', err);
+    console.error('Error creating organization:', err);
     const msgKey = err?.response?.data?.message;
     const summary = msgKey ? t(`auth.${msgKey}`) : t('organization.createError');
     toast.add({ severity: 'error', summary, life: 3000 });
@@ -56,22 +59,27 @@ async function createOrg() {
       <h2 class="page-title">{{ t('organization.create') }}</h2>
 
       <Card class="panel">
-        <template #title>
-          <div class="panel-title">
-            <i class="pi pi-building mr-2 text-orange-500"></i>
-            <span>{{ t('organization.data') }}:</span>
-          </div>
-        </template>
         <template #content>
           <div class="p-fluid">
             <label class="label">{{ t('organization.name') }}</label>
-            <InputText v-model="name" :placeholder="t('organization.name')" class="mb-3" />
+            <InputText v-model="name" class="mb-3" />
 
             <label class="label">{{ t('organization.description') }}</label>
-            <InputText v-model="description" :placeholder="t('organization.description')" class="mb-3" />
+            <InputText v-model="description" class="mb-3" />
 
-            <label class="label">{{ t('organization.location') }}</label>
-            <InputText v-model="locationTxt" :placeholder="t('organization.location')" />
+            <label class="label">Ubicación Geográfica</label>
+            <MapPicker v-model:latitude="latitude" v-model:longitude="longitude" />
+
+            <div class="formgrid grid">
+              <div class="field col-6">
+                <label class="label">Latitud</label>
+                <InputText v-model="latitude" type="number" step="any" readonly class="bg-gray-100" />
+              </div>
+              <div class="field col-6">
+                <label class="label">Longitud</label>
+                <InputText v-model="longitude" type="number" step="any" readonly class="bg-gray-100" />
+              </div>
+            </div>
           </div>
         </template>
       </Card>

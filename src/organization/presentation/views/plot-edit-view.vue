@@ -5,10 +5,10 @@ import { useI18n } from 'vue-i18n';
 import { useToast } from 'primevue/usetoast';
 import { plotService } from '../../application/plot.service.js';
 import AppLayout from '../../../shared/presentation/components/app-layout.vue';
-
 import Card from 'primevue/card';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
+import MapPicker from "../../../shared/presentation/components/MapPicker.vue";
 
 const { t } = useI18n();
 const toast = useToast();
@@ -16,28 +16,30 @@ const route = useRoute();
 const router = useRouter();
 const plotId = route.params.id;
 
-// Estados del servicio
 const loading = computed(() => plotService.state.loading);
 const error = computed(() => plotService.state.error);
 const currentPlot = computed(() => plotService.state.currentPlot);
 
-// ---- Formulario ----
 const name = ref('');
 const area = ref('');
-const locationTxt = ref('');
+const latitude = ref(null);
+const longitude = ref(null);
 const crop = ref('');
 const orgId = ref(null);
 
 onMounted(async () => {
   try {
     await plotService.getPlotById(plotId);
-    // Llenar el formulario con los datos actuales
     if (currentPlot.value) {
       name.value = currentPlot.value.name;
       area.value = String(currentPlot.value.area);
-      locationTxt.value = currentPlot.value.location;
       crop.value = currentPlot.value.crop;
       orgId.value = currentPlot.value.organizationId;
+
+      if (currentPlot.value.coordinates) {
+        latitude.value = currentPlot.value.coordinates.latitude;
+        longitude.value = currentPlot.value.coordinates.longitude;
+      }
     }
   } catch (err) {
     console.error('Error loading plot data:', err);
@@ -51,14 +53,13 @@ async function updatePlot() {
   }
 
   if (!orgId.value) {
-    console.error('❌ Missing organizationId for plot');
+    console.error('Missing organizationId for plot');
     return;
   }
 
   try {
     const description = [
       area.value.trim() ? `Área: ${area.value.trim()}` : '',
-      locationTxt.value.trim() ? `Ubicación: ${locationTxt.value.trim()}` : '',
       crop.value.trim() ? `Cultivo: ${crop.value.trim()}` : ''
     ].filter(Boolean).join(' | ');
 
@@ -67,19 +68,19 @@ async function updatePlot() {
       name: name.value.trim(),
       description: description,
       area: area.value.trim(),
-      location: locationTxt.value.trim(),
+      latitude: latitude.value,
+      longitude: longitude.value,
       crop: crop.value.trim()
     };
 
     const updatedPlot = await plotService.updatePlot(plotId, plotData);
-    
-    // Only redirect if updatePlot was successful (didn't throw)
+
     const successKey = updatedPlot.messageKey ? `auth.${updatedPlot.messageKey}` : 'organization.plotUpdateSuccess';
     toast.add({ severity: 'success', summary: t(successKey), life: 3000 });
-    
+
     router.push({ name: 'organization-detail', params: { id: orgId.value } });
   } catch (err) {
-    console.error('❌ Error updating plot:', err);
+    console.error('Error updating plot:', err);
     const msgKey = err?.response?.data?.message;
     const summary = msgKey ? t(`auth.${msgKey}`) : t('organization.plotUpdateError');
     toast.add({ severity: 'error', summary, life: 3000 });
@@ -101,27 +102,23 @@ function goBack() {
     <div class="wrap">
       <h2 class="page-title">{{ $t('organizationExt.editPlot') }}</h2>
 
-      <!-- Estado de carga -->
       <div v-if="loading" class="loading-state">
         <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
         <p>{{ $t('organizationExt.loadingPlot') }}</p>
       </div>
 
-      <!-- Estado de error -->
       <div v-else-if="error && !currentPlot" class="error-state">
         <i class="pi pi-exclamation-triangle" style="font-size: 2rem; color: #e74c3c"></i>
         <p>{{ error }}</p>
         <Button
-          :label="$t('common.back')"
-          icon="pi pi-arrow-left"
-          @click="goBack"
-          class="p-button-outlined"
+            :label="$t('common.back')"
+            icon="pi pi-arrow-left"
+            @click="goBack"
+            class="p-button-outlined"
         />
       </div>
 
-      <!-- Formulario de edición -->
       <div v-if="currentPlot && !loading" class="form-container">
-        <!-- Panel: Datos -->
         <Card class="panel">
           <template #title>
             <div class="panel-title">
@@ -137,27 +134,38 @@ function goBack() {
               <label class="label">{{ $t('organization.area') }}</label>
               <InputText v-model="area" :placeholder="$t('organization.areaPlaceholder')" class="mb-3" />
 
-              <label class="label">{{ $t('organization.location') }}</label>
-              <InputText v-model="locationTxt" :placeholder="$t('organization.location')" class="mb-3" />
-
               <label class="label">{{ $t('organization.crop') }}</label>
-              <InputText v-model="crop" :placeholder="$t('organization.crop')" />
+              <InputText v-model="crop" :placeholder="$t('organization.crop')" class="mb-3" />
+
+              <label class="label">Ubicación de la Parcela</label>
+              <MapPicker v-model:latitude="latitude" v-model:longitude="longitude" />
+
+              <div class="formgrid grid">
+                <div class="field col-6">
+                  <label class="label">Latitud</label>
+                  <InputText v-model="latitude" type="number" step="any" readonly />
+                </div>
+                <div class="field col-6">
+                  <label class="label">Longitud</label>
+                  <InputText v-model="longitude" type="number" step="any" readonly />
+                </div>
+              </div>
             </div>
           </template>
         </Card>
       </div>
 
-      <div class="actions" v-if="currentPlot">
+      <div class="actions" v-if="currentPlot && !loading">
         <Button
-          :label="$t('common.cancel')"
-          class="p-button-outlined btn-cancel"
-          @click="goBack"
+            :label="$t('common.cancel')"
+            class="p-button-outlined btn-cancel"
+            @click="goBack"
         />
         <Button
-          :label="$t('reports.update')"
-          class="btn-primary"
-          @click="updatePlot"
-          :loading="loading"
+            :label="$t('reports.update')"
+            class="btn-primary"
+            @click="updatePlot"
+            :loading="loading"
         />
       </div>
     </div>
@@ -167,29 +175,24 @@ function goBack() {
 <style scoped>
 .wrap{max-width:1000px;margin:0 auto}
 .page-title{margin:12px 0 22px 0;text-align:center;color:#111}
-
 .panel{background:#fff;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,.08);color:#111}
 .panel-title{display:flex;align-items:center;font-weight:700;color:#111}
 .label{display:block;font-weight:600;margin-bottom:6px;color:#111}
 
-/* inputs primevue blancos y texto negro */
 :deep(.p-inputtext){ background:#fff !important; color:#111 !important; border-color:#d1d5db; }
 :deep(.p-inputtext::placeholder){ color:#9ca3af; }
+
+:deep(.p-inputtext[readonly]) {
+  background: #f3f4f6 !important;
+  color: #6b7280 !important;
+  cursor: not-allowed;
+}
 
 .actions{display:flex;justify-content:center;gap:1rem;margin-top:28px}
 .btn-primary{min-width:160px}
 .btn-cancel{min-width:120px}
-
-.form-container {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-}
-
-.panel {
-  width: 100%;
-  max-width: 600px;
-}
+.form-container { display: flex; justify-content: center; width: 100%; }
+.panel { width: 100%; max-width: 600px; }
 
 .loading-state, .error-state {
   display: flex;
