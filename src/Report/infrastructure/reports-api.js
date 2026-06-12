@@ -17,5 +17,13 @@ export class ReportsApi {
         });
         return response.data;
     }
+
+    async downloadExcel() {
+        const endpoint = `${this.baseUrl}${this.reportsEndpoint}/excel`;
+        const response = await axios.get(endpoint, {
+            responseType: 'blob'
+        });
+        return response.data;
+    }
 }
 

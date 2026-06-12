@@ -235,6 +235,7 @@
     "generatedAt": "Generado el:",
     "update": "Actualizar",
     "downloadPDF": "Descargar PDF",
+    "downloadExcel": "Descargar excel",
     "totalTasks": "Total de Tareas",
     "completed": "Completadas",
     "inProgress": "En Progreso",
