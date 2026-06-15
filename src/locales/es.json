@@ -318,6 +318,7 @@
     "placeholder": "Ingresa ciudad, región",
     "egCity": "Ej: Lima, Puno",
     "loadingWeather": "Cargando información del clima...",
+    "aiLoading": "Generando consejos con IA...",
     "currentConditions": "Condiciones Actuales",
     "humidity": "Humedad",
     "wind": "Viento",

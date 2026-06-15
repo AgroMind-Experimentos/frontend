@@ -1,5 +1,6 @@
 <script setup lang="js">
 import { WeatherService } from '../../application/weather.service.js'
+import { WeatherAiService } from '../../application/weather-ai.service.js'
 import { onMounted, ref, computed } from 'vue'
 import AppLayout from '../../../shared/presentation/components/app-layout.vue'
 import Card from 'primevue/card'
@@ -11,8 +12,11 @@ const loading = ref(true)
 const error = ref(null)
 const locationInput = ref('Peru')
 const currentLocation = ref('Peru')
+const aiContent = ref(null)
+const loadingAI = ref(false)
 
 const weather = new WeatherService()
+const weatherAI = new WeatherAiService()
 
 onMounted(async () => {
   await loadWeather()
@@ -21,13 +25,26 @@ onMounted(async () => {
 const loadWeather = async () => {
   loading.value = true
   error.value = null
+  aiContent.value = null
   try {
     const result = await weather.getWeather(currentLocation.value)
     weatherData.value = result
+    fetchAIComments(result.temperature, result.condition)
   } catch (err) {
     error.value = err.message || 'Error al cargar el clima'
   } finally {
     loading.value = false
+  }
+}
+
+const fetchAIComments = async (temperature, condition) => {
+  loadingAI.value = true
+  try {
+    aiContent.value = await weatherAI.getWeatherComments(temperature, condition)
+  } catch (err) {
+    console.warn('No se pudieron cargar los comentarios de IA:', err.message)
+  } finally {
+    loadingAI.value = false
   }
 }
 
@@ -48,100 +65,18 @@ const handleKeyPress = (event) => {
   }
 }
 
-// Información agrícola dinámica según temperatura (solo retorna claves i18n e íconos)
-const agriculturalInfo = computed(() => {
+const agriculturalVisuals = computed(() => {
   if (!weatherData.value || weatherData.value.temperature === undefined) {
-    return {
-      gradient: 'linear-gradient(135deg, #6c757d, #868e96)',
-      icon: 'pi-info-circle',
-      iconColor: '#6c757d',
-      title: 'weather.agriInfo.loading.title',
-      tips: [
-        { icon: 'pi-info-circle', color: '#17a2b8', text: 'weather.agriInfo.loading.tip' }
-      ]
-    }
+    return { gradient: 'linear-gradient(135deg, #6c757d, #868e96)', icon: 'pi-info-circle', iconColor: '#6c757d' }
   }
-  
+
   const temp = weatherData.value.temperature
 
-  // Muy frío (< 5°C)
-  if (temp < 5) {
-    return {
-      gradient: 'linear-gradient(135deg, #6495ED, #87CEEB)',
-      icon: 'pi-bolt',
-      iconColor: '#4169E1',
-      title: 'weather.agriInfo.veryCold.title',
-      tips: [
-        { icon: 'pi-exclamation-triangle', color: '#dc3545', text: 'weather.agriInfo.veryCold.tip1' },
-        { icon: 'pi-times-circle', color: '#dc3545', text: 'weather.agriInfo.veryCold.tip2' },
-        { icon: 'pi-shield', color: '#ffc107', text: 'weather.agriInfo.veryCold.tip3' },
-        { icon: 'pi-eye', color: '#17a2b8', text: 'weather.agriInfo.veryCold.tip4' }
-      ]
-    }
-  }
-
-  // Frío (5°C - 15°C)
-  if (temp >= 5 && temp < 15) {
-    return {
-      gradient: 'linear-gradient(135deg, #4FC3F7, #81D4FA)',
-      icon: 'pi-cloud',
-      iconColor: '#0288D1',
-      title: 'weather.agriInfo.cold.title',
-      tips: [
-        { icon: 'pi-check-circle', color: '#28a745', text: 'weather.agriInfo.cold.tip1' },
-        { icon: 'pi-calendar', color: '#17a2b8', text: 'weather.agriInfo.cold.tip2' },
-        { icon: 'pi-times-circle', color: '#dc3545', text: 'weather.agriInfo.cold.tip3' },
-        { icon: 'pi-sun', color: '#ffc107', text: 'weather.agriInfo.cold.tip4' }
-      ]
-    }
-  }
-
-  // Templado (15°C - 25°C)
-  if (temp >= 15 && temp < 25) {
-    return {
-      gradient: 'linear-gradient(135deg, #4CAF50, #66BB6A)',
-      icon: 'pi-check-circle',
-      iconColor: '#2E7D32',
-      title: 'weather.agriInfo.temperate.title',
-      tips: [
-        { icon: 'pi-thumbs-up', color: '#28a745', text: 'weather.agriInfo.temperate.tip1' },
-        { icon: 'pi-calendar-plus', color: '#28a745', text: 'weather.agriInfo.temperate.tip2' },
-        { icon: 'pi-leaf', color: '#28a745', text: 'weather.agriInfo.temperate.tip3' },
-        { icon: 'pi-sun', color: '#ffc107', text: 'weather.agriInfo.temperate.tip4' }
-      ]
-    }
-  }
-
-  // Cálido (25°C - 32°C)
-  if (temp >= 25 && temp < 32) {
-    return {
-      gradient: 'linear-gradient(135deg, #FF9800, #FFB74D)',
-      icon: 'pi-sun',
-      iconColor: '#F57C00',
-      title: 'weather.agriInfo.warm.title',
-      tips: [
-        { icon: 'pi-check-circle', color: '#28a745', text: 'weather.agriInfo.warm.tip1' },
-        { icon: 'pi-tint', color: '#17a2b8', text: 'weather.agriInfo.warm.tip2' },
-        { icon: 'pi-calendar', color: '#ffc107', text: 'weather.agriInfo.warm.tip3' },
-        { icon: 'pi-eye', color: '#17a2b8', text: 'weather.agriInfo.warm.tip4' }
-      ]
-    }
-  }
-
-  // Muy caliente (> 32°C)
-  return {
-    gradient: 'linear-gradient(135deg, #FF5722, #FF7043)',
-    icon: 'pi-exclamation-triangle',
-    iconColor: '#D84315',
-    title: 'weather.agriInfo.veryHot.title',
-    tips: [
-      { icon: 'pi-exclamation-triangle', color: '#dc3545', text: 'weather.agriInfo.veryHot.tip1' },
-      { icon: 'pi-tint', color: '#dc3545', text: 'weather.agriInfo.veryHot.tip2' },
-      { icon: 'pi-times-circle', color: '#dc3545', text: 'weather.agriInfo.veryHot.tip3' },
-      { icon: 'pi-shield', color: '#ffc107', text: 'weather.agriInfo.veryHot.tip4' },
-      { icon: 'pi-eye', color: '#17a2b8', text: 'weather.agriInfo.veryHot.tip5' }
-    ]
-  }
+  if (temp < 5)  return { gradient: 'linear-gradient(135deg, #6495ED, #87CEEB)', icon: 'pi-bolt',               iconColor: '#4169E1' }
+  if (temp < 15) return { gradient: 'linear-gradient(135deg, #4FC3F7, #81D4FA)', icon: 'pi-cloud',              iconColor: '#0288D1' }
+  if (temp < 25) return { gradient: 'linear-gradient(135deg, #4CAF50, #66BB6A)', icon: 'pi-check-circle',       iconColor: '#2E7D32' }
+  if (temp < 32) return { gradient: 'linear-gradient(135deg, #FF9800, #FFB74D)', icon: 'pi-sun',                iconColor: '#F57C00' }
+  return           { gradient: 'linear-gradient(135deg, #FF5722, #FF7043)', icon: 'pi-exclamation-triangle', iconColor: '#D84315' }
 })
 </script>
 
@@ -254,25 +189,33 @@ const agriculturalInfo = computed(() => {
           </template>
         </Card>
 
-        <!-- Información adicional para agricultura -->
-        <Card class="agricultural-info" :style="{ background: agriculturalInfo.gradient }">
+        <!-- Información adicional para agricultura generada por IA -->
+        <Card class="agricultural-info" :style="{ background: agriculturalVisuals.gradient }">
           <template #header>
             <div class="info-header">
-              <i class="pi" :class="agriculturalInfo.icon" :style="{ color: agriculturalInfo.iconColor }"></i>
-              <!-- Uso de $t para traducir la clave dinámica -->
-              <h3>{{ $t(agriculturalInfo.title) }}</h3>
+              <i class="pi" :class="agriculturalVisuals.icon" :style="{ color: agriculturalVisuals.iconColor }"></i>
+              <h3>{{ aiContent ? aiContent.title : $t('weather.agriInfo.loading.title') }}</h3>
             </div>
           </template>
           <template #content>
-            <div class="agricultural-tips">
+            <div v-if="loadingAI" class="ai-loading">
+              <i class="pi pi-spin pi-spinner"></i>
+              <span>{{ $t('weather.aiLoading') }}</span>
+            </div>
+            <div v-else-if="aiContent" class="agricultural-tips">
               <div
-                v-for="(tip, index) in agriculturalInfo.tips"
+                v-for="(tip, index) in aiContent.tips"
                 :key="index"
                 class="tip-item"
               >
-                <i class="pi" :class="tip.icon" :style="{ color: tip.color }"></i>
-                <!-- Uso de $t para traducir la clave dinámica -->
-                <span>{{ $t(tip.text) }}</span>
+                <i class="pi pi-sparkles" style="color: #9c27b0"></i>
+                <span>{{ tip }}</span>
+              </div>
+            </div>
+            <div v-else class="agricultural-tips">
+              <div class="tip-item">
+                <i class="pi pi-info-circle" style="color: #17a2b8"></i>
+                <span>{{ $t('weather.agriInfo.loading.tip') }}</span>
               </div>
             </div>
           </template>
@@ -595,6 +538,16 @@ const agriculturalInfo = computed(() => {
   margin-top: 0.25rem;
   flex-shrink: 0;
   font-size: 1.1rem;
+}
+
+.ai-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.95);
+  color: #555;
+  font-size: 0.95rem;
 }
 
 /* Responsive */

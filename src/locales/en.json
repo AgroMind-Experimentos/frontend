@@ -318,6 +318,7 @@
     "placeholder": "Enter city, region",
     "egCity": "E.g. Lima, Puno",
     "loadingWeather": "Loading weather information...",
+    "aiLoading": "Generating AI-powered tips...",
     "currentConditions": "Current Conditions",
     "humidity": "Humidity",
     "wind": "Wind",
