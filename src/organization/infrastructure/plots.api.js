@@ -44,7 +44,7 @@ export class PlotsApi {
                 organizationId: Number(plotData.organizationId),
                 name: plotData.name.trim(),
                 area: Number(plotData.area),
-                crop: plotData.crop.trim(),
+                cultivation: plotData.crop.trim(),
                 latitude: plotData.latitude ? Number(plotData.latitude) : null,
                 longitude: plotData.longitude ? Number(plotData.longitude) : null
             };
