@@ -3,6 +3,7 @@ import { AuthApi } from '../infrastructure/auth-api.js';
 import { AuthAssembler } from '../infrastructure/auth.assembler.js';
 import { UserProfileApi } from '../../profile/infrastructure/user-profile-api.js';
 import { User } from '../domain/model/user.entity.js';
+import { getStoredToken, setStoredToken, clearStoredToken } from '../../shared/infrastructure/auth-token.js';
 
 class UserStore {
     state = reactive({
@@ -24,6 +25,11 @@ class UserStore {
     async restoreSession() {
         if (this.state.isSessionRestored) return;
 
+        if (!getStoredToken()) {
+            this.state.isSessionRestored = true;
+            return;
+        }
+
         try {
             const profile = await this.#profileApi.getMe();
             if (profile) {
@@ -36,6 +42,7 @@ class UserStore {
             }
         } catch {
             this.state.user = null;
+            clearStoredToken();
         } finally {
             this.state.isSessionRestored = true;
         }
@@ -47,6 +54,7 @@ class UserStore {
         try {
             const data = await this.#api.login(email, password);
             this.state.user = this.#assembler.toUser(data.user);
+            setStoredToken(data.tokens?.accessToken);
             return true;
         } catch (err) {
             const msg = err?.response?.data?.message;
@@ -82,6 +90,7 @@ class UserStore {
             if (msg) this.state.errorKey = `auth.${msg}`;
         } finally {
             this.state.user = null;
+            clearStoredToken();
         }
     }
 }

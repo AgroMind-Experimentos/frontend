@@ -1,12 +1,12 @@
 import axios from 'axios';
+import { attachAuthToken } from '../../shared/infrastructure/http-auth.interceptor.js';
 
 export class UserProfileApi {
     #profilesEndpoint = import.meta.env.VITE_PROFILES_ENDPOINT;
     #settingsEndpoint = import.meta.env.VITE_SETTINGS_ENDPOINT;
-    http = axios.create({
-        baseURL: import.meta.env.VITE_API_BASE_URL,
-        withCredentials: true,
-    });
+    http = attachAuthToken(axios.create({
+        baseURL: import.meta.env.VITE_API_BASE_URL
+    }));
 
     async getFarmers() {
         try {

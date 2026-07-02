@@ -1,7 +1,8 @@
 import axios from 'axios';
+import { attachAuthToken } from '../../shared/infrastructure/http-auth.interceptor.js';
 
 export class InvitationApi {
-    #http = axios.create({ baseURL: import.meta.env.VITE_API_BASE_URL, withCredentials: true });
+    #http = attachAuthToken(axios.create({ baseURL: import.meta.env.VITE_API_BASE_URL }));
     #orgsEndpoint = import.meta.env.VITE_ORGANIZATIONS_ENDPOINT;
     #invitationsEndpoint = import.meta.env.VITE_INVITATIONS_ENDPOINT;
 
