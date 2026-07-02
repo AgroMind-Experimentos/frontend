@@ -6,28 +6,22 @@ import { userStore } from '../../../../iam/application/user.store.js'
 
 const router = useRouter()
 const route = useRoute()
-const activeTab = ref('completed')
+const activeTab = ref('kanban')
 
 const isAgronomist = computed(() => userStore.state.user?.role === 'Agronomist')
 
 onMounted(() => {
   const currentPath = route.path
-  if (currentPath.includes('/completed')) {
-    activeTab.value = 'completed'
-  } else if (currentPath.includes('/in-progress')) {
-    activeTab.value = 'in-progress'
-  } else if (currentPath.includes('/pending')) {
-    activeTab.value = 'pending'
-  } else if (currentPath.includes('/logs')) {
-    activeTab.value = 'logs'
-  } else if (currentPath.includes('/new-task')) {
+  if (currentPath.includes('/new-task')) {
     if (!isAgronomist.value) {
-      router.push('/tasks/completed')
+      router.push('/tasks/kanban')
     } else {
       activeTab.value = 'new-task'
     }
+  } else if (currentPath.includes('/kanban')) {
+    activeTab.value = 'kanban'
   } else {
-    router.push('/tasks/completed')
+    router.push('/tasks/kanban')
   }
 })
 
@@ -52,25 +46,11 @@ const navigateToTab = (tab) => {
       <!-- Navigation Tabs -->
       <div class="tabs-navigation">
         <button
-          :class="['tab-button', { active: activeTab === 'completed' }]"
-          @click="navigateToTab('completed')"
+          :class="['tab-button', { active: activeTab === 'kanban' }]"
+          @click="navigateToTab('kanban')"
         >
-          <i class="pi pi-check-circle"></i>
-          {{ $t('tasks.completedTasks') }}
-        </button>
-        <button
-          :class="['tab-button', { active: activeTab === 'in-progress' }]"
-          @click="navigateToTab('in-progress')"
-        >
-          <i class="pi pi-clock"></i>
-          {{ $t('tasks.inProgressTasks') }}
-        </button>
-        <button
-          :class="['tab-button', { active: activeTab === 'pending' }]"
-          @click="navigateToTab('pending')"
-        >
-          <i class="pi pi-pause"></i>
-          {{ $t('tasks.pendingTasks') }}
+          <i class="pi pi-th-large"></i>
+          {{ $t('tasks.kanbanBoard') }}
         </button>
         <button
             v-if="isAgronomist"

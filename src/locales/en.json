@@ -177,6 +177,8 @@
     "pendingTasks": "Pending",
     "inProgressTasks": "In Progress",
     "completedTasks": "Completed",
+    "kanbanBoard": "Kanban Board",
+    "kanbanInstructions": "You can drag and drop tasks between columns to update their status. Click on a task to view its checklist.",
     "newTask": "New Task",
     "createTask": "Create Task",
     "editTask": "Edit Task",

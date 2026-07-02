@@ -27,7 +27,7 @@ const userName = userStore.state.user?.name || 'Usuario';
         <i class="pi pi-desktop"></i><span>{{ t('sidebar.home') }}</span>
       </router-link>
 
-      <router-link class="item" to="/tasks/completed">
+      <router-link class="item" to="/tasks/kanban">
         <i class="pi pi-check-square"></i><span>{{ t('sidebar.tasks') }}</span>
       </router-link>
 

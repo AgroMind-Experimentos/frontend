@@ -102,7 +102,7 @@ async function save() {
     }
 
     successMsg.value = '¡Tarea actualizada correctamente!'
-    setTimeout(() => router.push('/tasks/pending'), 1200)
+    setTimeout(() => router.push('/tasks/kanban'), 1200)
   } catch (e) {
     errorMsg.value = e.response?.data?.message || 'Error al guardar los cambios.'
   } finally {
@@ -176,7 +176,7 @@ async function save() {
             class="cancel-btn"
             severity="secondary"
             outlined
-            @click="router.push('/tasks/pending')"
+            @click="router.push('/tasks/kanban')"
           />
           <pv-button
             :label="$t('taskForm.saveChanges')"
