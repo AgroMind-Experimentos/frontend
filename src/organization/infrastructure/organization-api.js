@@ -1,12 +1,11 @@
 import axios from 'axios';
 import { OrganizationAssembler } from './organization-assembler.js';
 import { userStore } from '../../iam/application/user.store.js';
-import { attachAuthToken } from '../../shared/infrastructure/http-auth.interceptor.js';
 
 export class OrganizationApi {
     baseUrl = import.meta.env.VITE_API_BASE_URL;
     organizationsEndpoint = import.meta.env.VITE_ORGANIZATIONS_ENDPOINT;
-    http = attachAuthToken(axios.create({ baseURL: this.baseUrl }));
+    http = axios.create({ baseURL: this.baseUrl });
 
     async getAll(profileId) {
         try {

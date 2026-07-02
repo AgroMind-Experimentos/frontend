@@ -1,18 +1,14 @@
 import { createApp } from 'vue'
-import axios from 'axios'
 import './style.css'
 import App from './App.vue'
 import router from './router.js'
 import i18n from './i18n.js'
-import { attachAuthToken } from './shared/infrastructure/http-auth.interceptor.js'
 import PrimeVue from 'primevue/config'
 import Lara from '@primevue/themes/lara';
 import {Button, FloatLabel, Card, Checkbox, InputText, DatePicker, Toolbar, SelectButton, Dialog} from 'primevue'
 import ToastService from 'primevue/toastservice'
 import 'primeicons/primeicons.css'
 import 'primeflex/primeflex.css'
-
-attachAuthToken(axios)
 
 createApp(App)
     .use(PrimeVue, { theme: { preset: Lara, options: { darkModeSelector: false } } })

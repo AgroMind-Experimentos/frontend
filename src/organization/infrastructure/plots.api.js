@@ -1,16 +1,15 @@
 import axios from 'axios';
 import { PlotAssembler } from './plot-assembler.js';
-import { attachAuthToken } from '../../shared/infrastructure/http-auth.interceptor.js';
 
 export class PlotsApi {
     baseUrl = import.meta.env.VITE_API_BASE_URL;
     cropsEndpoint = import.meta.env.VITE_CROPS_ENDPOINT;
-    http = attachAuthToken(axios.create({
+    http = axios.create({
         baseURL: this.baseUrl,
         headers: {
             'Content-Type': 'application/json'
         }
-    }));
+    });
 
     async getAll() {
         try {

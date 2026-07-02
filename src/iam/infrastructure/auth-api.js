@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { attachAuthToken } from '../../shared/infrastructure/http-auth.interceptor.js';
 
 export class AuthApi {
     baseUrl = import.meta.env.VITE_API_BASE_URL;
@@ -8,9 +7,10 @@ export class AuthApi {
     logoutEndpoint = import.meta.env.VITE_LOGOUT_ENDPOINT;
     updatePasswordEndpoint = import.meta.env.VITE_UPDATE_PASSWORD_ENDPOINT;
 
-    http = attachAuthToken(axios.create({
-        baseURL: this.baseUrl
-    }));
+    http = axios.create({
+        baseURL: this.baseUrl,
+        withCredentials: true
+    });
 
     /**
      * Consume el nuevo LoginCommandService.
@@ -79,6 +79,7 @@ export class AuthApi {
 
     /**
      * Consume el nuevo LogoutCommandService.
+     * La cookie 'sid' se envía automáticamente gracias a withCredentials.
      */
     async logout() {
         try {
