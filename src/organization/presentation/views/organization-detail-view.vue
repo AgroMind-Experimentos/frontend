@@ -155,21 +155,44 @@ const parseDescription = (description) => {
 };
 
 const getPlotField = (plot, field) => {
-  if (plot[field]) return plot[field];
-  const parsedData = parseDescription(plot.description);
-  return parsedData[field] || '-';
+  if (!plot) return '-';
+
+  if (field === 'crop') {
+    return plot.crop || '-';
+  }
+
+  if (field === 'location') {
+    return plot.latitude && plot.longitude
+        ? `${plot.latitude}, ${plot.longitude}`
+        : '-';
+  }
+
+  return plot[field] !== null && plot[field] !== undefined ? plot[field] : '-';
 };
 
 const getMemberCount = (plot) => {
-  if (plot.members && Array.isArray(plot.members)) {
+  if (plot && plot.members && Array.isArray(plot.members)) {
     return plot.members.length;
   }
-  if (plot.getMemberCount) {
-    return plot.getMemberCount();
-  }
-  const parsedData = parseDescription(plot.description);
-  return parsedData.membersCount || '0';
+  return '0';
 };
+
+async function retryLoadPlots() {
+  try {
+    await plotService.getPlotsByOrganizationId(orgId);
+  } catch (err) {
+    console.error("Error reintentando cargar plots:", err);
+  }
+}
+
+function openInGoogleMaps(latitude, longitude) {
+  if (!latitude || !longitude) return;
+
+  const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+
+  window.open(googleMapsUrl, '_blank', 'noopener,noreferrer');
+}
+
 </script>
 
 <template>
@@ -213,7 +236,6 @@ const getMemberCount = (plot) => {
         </div>
       </div>
 
-      <!-- Panel: Invitar farmer por email (solo Agrónomo) -->
       <div v-if="isOwner" class="invite-panel">
         <h2 class="invite-title">
           <i class="pi pi-envelope"></i>
@@ -250,10 +272,9 @@ const getMemberCount = (plot) => {
         <i class="pi pi-exclamation-triangle" style="font-size: 2rem; color: #e74c3c"></i>
         <p>{{ error }}</p>
         <Button
-          :label="t('common.retry')"
-          icon="pi pi-refresh"
-          @click="plotService.getPlotsByOrganizationId(orgId)"
-          class="p-button-outlined"
+            :label="t('common.retry')"
+            icon="pi pi-refresh"
+            @click="retryLoadPlots" class="p-button-outlined"
         />
       </div>
 
@@ -272,11 +293,11 @@ const getMemberCount = (plot) => {
 
           <Column field="area" :header="t('organization.area')" :sortable="true">
             <template #body="slotProps">
-              <span class="area-badge">{{ getPlotField(slotProps.data, 'area') }}</span>
+              <span class="area-badge">{{ slotProps.data.area || '-' }} ha</span>
             </template>
           </Column>
 
-          <Column field="crop" :header="t('organization.crop')" :sortable="true">
+          <Column field="cultivation" :header="t('organization.crop')" :sortable="true">
             <template #body="slotProps">
               <div class="crop-info">
                 <i class="pi pi-leaf text-green-500"></i>
@@ -287,7 +308,16 @@ const getMemberCount = (plot) => {
 
           <Column field="location" :header="t('organization.location')">
             <template #body="slotProps">
-              <span class="location-text">{{ getPlotField(slotProps.data, 'location') }}</span>
+              <div v-if="slotProps.data.latitude && slotProps.data.longitude" class="location-link">
+                <Button
+                    icon="pi pi-map-marker"
+                    :label="`${slotProps.data.latitude}, ${slotProps.data.longitude}`"
+                    class="p-button-text p-button-success p-button-sm p-0 text-left underline-hover"
+                    @click="openInGoogleMaps(slotProps.data.latitude, slotProps.data.longitude)"
+                    :title="'Ver en Google Maps'"
+                />
+              </div>
+              <span v-else class="location-text">-</span>
             </template>
           </Column>
 
@@ -295,16 +325,16 @@ const getMemberCount = (plot) => {
             <template #body="slotProps">
               <div class="action-buttons">
                 <Button
-                  icon="pi pi-pencil"
-                  class="p-button-rounded p-button-text p-button-info"
-                  @click="editPlot(slotProps.data)"
-                  :title="t('organization.editPlot')"
+                    icon="pi pi-pencil"
+                    class="p-button-rounded p-button-text p-button-info"
+                    @click="editPlot(slotProps.data)"
+                    :title="t('organization.editPlot')"
                 />
                 <Button
-                  icon="pi pi-trash"
-                  class="p-button-rounded p-button-text p-button-danger"
-                  @click="deletePlot(slotProps.data)"
-                  :title="t('organization.deletePlot')"
+                    icon="pi pi-trash"
+                    class="p-button-rounded p-button-text p-button-danger"
+                    @click="deletePlot(slotProps.data)"
+                    :title="t('organization.deletePlot')"
                 />
               </div>
             </template>
@@ -510,6 +540,21 @@ const getMemberCount = (plot) => {
 :deep(.invite-input.p-inputtext) {
   background: #fff !important;
   color: #111 !important;
+}
+
+.location-link :deep(.p-button) {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #16a34a !important;
+  text-align: left;
+}
+
+.underline-hover:hover {
+  text-decoration: underline !important;
+}
+
+.location-text {
+  color: #6b7280;
 }
 
 .invite-msg {

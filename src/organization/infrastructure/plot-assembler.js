@@ -13,40 +13,31 @@ export class PlotAssembler {
     }
 
     static toEntityFromResponse(response) {
-        const parsedData = this.parseDescription(response.description);
+        if (!response) return null;
 
-        return new Plot({
+        return {
             id: response.id,
             organizationId: response.organizationId,
             name: response.name,
-            description: response.description,
-            area: response.area ?? parsedData.area ?? '',
-            crop: response.cultivation || response.crop || parsedData.crop || '',
+            area: response.area || 0,
 
-            coordinates: response.coordinates ? {
-                latitude: response.coordinates.latitude,
-                longitude: response.coordinates.longitude
-            } : null,
+            crop: response.cultivation || response.crop || '',
+
+            latitude: response.latitude !== null && response.latitude !== undefined ? Number(response.latitude) : null,
+            longitude: response.longitude !== null && response.longitude !== undefined ? Number(response.longitude) : null,
 
             createdAt: response.createdAt,
             status: response.status || 'active',
             members: response.memberIds || response.members || []
-        });
+        };
     }
 
     static fromFormData(formData) {
-        const descriptionParts = [];
-        if (formData.area) descriptionParts.push(`Área: ${String(formData.area).trim()}`);
-        if (formData.crop) descriptionParts.push(`Cultivo: ${formData.crop.trim()}`);
-        const description = descriptionParts.join(' | ');
-
         return {
-            name: formData.name,
+            name: formData.name ? formData.name.trim() : '',
             area: parseFloat(formData.area) || 0,
-            cultivation: formData.crop || '',
+            cultivation: formData.crop ? formData.crop.trim() : '',
             organizationId: parseInt(formData.organizationId),
-            description: description,
-
             latitude: formData.latitude ? parseFloat(formData.latitude) : null,
             longitude: formData.longitude ? parseFloat(formData.longitude) : null
         };
@@ -55,7 +46,6 @@ export class PlotAssembler {
     static toApiFormat(plot) {
         return {
             name: plot.name,
-            description: plot.description,
             organizationId: plot.organizationId
         };
     }
