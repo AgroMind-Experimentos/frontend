@@ -415,5 +415,18 @@
     "english": "English",
     "appliesImmediately": "Applies immediately.",
     "ddmm": "MM/DD"
+  },
+  "crops": {
+    "corn": "Corn",
+    "rice": "Rice",
+    "wheat": "Wheat",
+    "organicCorn": "Organic Corn",
+    "quinoa": "Quinoa",
+    "nativePotatoes": "Native Potatoes",
+    "potato": "Potato",
+    "cotton": "Cotton",
+    "barley": "Barley",
+    "coffee": "Coffee",
+    "cocoa": "Cocoa"
   }
 }

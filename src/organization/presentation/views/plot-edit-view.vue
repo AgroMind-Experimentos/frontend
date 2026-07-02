@@ -9,6 +9,7 @@ import Card from 'primevue/card';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 import MapPicker from "../../../shared/presentation/components/MapPicker.vue";
+import Dropdown from 'primevue/dropdown';
 
 const { t } = useI18n();
 const toast = useToast();
@@ -26,6 +27,27 @@ const latitude = ref(null);
 const longitude = ref(null);
 const crop = ref('');
 const orgId = ref(null);
+
+const cropKeys = [
+  'corn',
+  'rice',
+  'wheat',
+  'organicCorn',
+  'quinoa',
+  'nativePotatoes',
+  'potato',
+  'cotton',
+  'barley',
+  'coffee',
+  'cocoa'
+];
+
+const cropOptions = computed(() => {
+  const query = crop.value ? String(crop.value).toLowerCase() : '';
+  return cropKeys
+    .map(key => t(`crops.${key}`))
+    .filter(val => val.toLowerCase().includes(query));
+});
 
 onMounted(async () => {
   try {
@@ -135,7 +157,7 @@ function goBack() {
               <InputText v-model="area" :placeholder="$t('organization.areaPlaceholder')" class="mb-3" />
 
               <label class="label">{{ $t('organization.crop') }}</label>
-              <InputText v-model="crop" :placeholder="$t('organization.crop')" class="mb-3" />
+              <Dropdown v-model="crop" :options="cropOptions" editable :placeholder="$t('organization.crop')" />
 
               <label class="label">Ubicación de la Parcela</label>
               <MapPicker v-model:latitude="latitude" v-model:longitude="longitude" />
@@ -187,6 +209,16 @@ function goBack() {
   color: #6b7280 !important;
   cursor: not-allowed;
 }
+
+:deep(.p-dropdown) { background:#fff !important; color:#111 !important; border-color:#d1d5db; }
+:deep(.p-dropdown .p-dropdown-label) { color:#111 !important; }
+:deep(.p-dropdown .p-dropdown-trigger) { color:#6b7280; }
+:deep(.p-dropdown-panel) { background:#fff !important; }
+:deep(.p-dropdown-panel .p-dropdown-items) { display: flex; flex-direction: column-reverse; }
+:deep(.p-dropdown-panel .p-dropdown-items .p-dropdown-item) { color:#111 !important; }
+:deep(.p-dropdown-panel .p-dropdown-items .p-dropdown-item:hover) { background:#f3f4f6 !important; }
+:deep(.p-dropdown-panel .p-dropdown-header) { background:#fff !important; }
+:deep(.p-dropdown-panel .p-dropdown-filter) { background:#fff !important; color:#111 !important; }
 
 .actions{display:flex;justify-content:center;gap:1rem;margin-top:28px}
 .btn-primary{min-width:160px}
