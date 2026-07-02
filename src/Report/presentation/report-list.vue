@@ -14,6 +14,7 @@ const reportsData = ref(null)
 const loading = ref(true)
 const error = ref(null)
 const downloadingPDF = ref(false)
+const downloadingExcel = ref(false)
 
 onMounted(async () => {
   await loadReports()
@@ -37,6 +38,17 @@ const downloadPDF = async () => {
     await reportsService.downloadPDF()
   } catch (err) {
     error.value = 'Error al descargar el PDF'
+  } finally {
+    downloadingPDF.value = false
+  }
+}
+
+const downloadExcel = async () => {
+  downloadingPDF.value = true
+  try {
+    await reportsService.downloadExcel()
+  } catch (err) {
+    error.value = 'Error al descargar el reporte en excel'
   } finally {
     downloadingPDF.value = false
   }
@@ -98,6 +110,14 @@ const formatDate = (dateString) => {
           :loading="downloadingPDF"
           class="download-btn"
           severity="danger"
+        />
+        <Button
+            :label="$t('reports.downloadExcel')"
+            icon="pi pi-file-pdf"
+            @click="downloadExcel"
+            :loading="downloadingExcel"
+            class="download-btn-excel"
+            severity="danger"
         />
       </div>
 
@@ -338,6 +358,19 @@ const formatDate = (dateString) => {
 
 .download-btn:hover {
   background: linear-gradient(135deg, #c82333, #dc3545) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3) !important;
+}
+
+.download-btn-excel {
+  background: linear-gradient(135deg, #4CAF50, #66BB6A) !important;
+  border: none !important;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.download-btn-excel:hover {
+  background: linear-gradient(135deg, #4CAF50, #66BB6A) !important;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3) !important;
 }

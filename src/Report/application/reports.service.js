@@ -20,5 +20,17 @@ export class ReportsService {
         link.remove()
         window.URL.revokeObjectURL(url)
     }
+
+    async downloadExcel() {
+        const blob = await this.reportsApi.downloadExcel()
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', `excel-report-${new Date().toISOString().split('T')[0]}.xlsx`)
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+        window.URL.revokeObjectURL(url)
+    }
 }
 
