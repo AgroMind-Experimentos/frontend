@@ -86,6 +86,12 @@ const formatDate = (dateString) => {
     year: 'numeric', month: 'short', day: 'numeric'
   });
 };
+
+function openInGoogleMaps(latitude, longitude) {
+  if (latitude == null || longitude == null) return;
+  const url = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+  window.open(url, '_blank', 'noopener,noreferrer');
+}
 </script>
 
 <template>
@@ -187,10 +193,15 @@ const formatDate = (dateString) => {
 
           <Column field="location" :header="t('organization.location')">
             <template #body="{ data }">
-              <div v-if="data.location" class="location-cell">
+              <button
+                v-if="data.location"
+                type="button"
+                class="location-cell location-link"
+                @click="openInGoogleMaps(data.coordinates.latitude, data.coordinates.longitude)"
+              >
                 <i class="pi pi-map-marker"></i>
                 <span>{{ data.location }}</span>
-              </div>
+              </button>
               <span v-else class="muted">-</span>
             </template>
           </Column>
@@ -420,6 +431,19 @@ const formatDate = (dateString) => {
 }
 
 .location-cell i { color: #2c5530; font-size: 0.85rem; }
+
+.location-link {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  color: #16a34a;
+}
+
+.location-link:hover {
+  text-decoration: underline;
+}
 
 .members-badge {
   display: inline-flex;

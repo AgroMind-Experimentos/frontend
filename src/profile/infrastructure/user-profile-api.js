@@ -44,7 +44,9 @@ export class UserProfileApi {
             const { data } = await this.http.get(`${this.#profilesEndpoint}/me`);
             return data;
         } catch (error) {
-            console.error('Error fetching current profile:', error);
+            if (error?.response?.status !== 401) {
+                console.error('Error fetching current profile:', error);
+            }
             throw new Error('Failed to fetch profile');
         }
     }

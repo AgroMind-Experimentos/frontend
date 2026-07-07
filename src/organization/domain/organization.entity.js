@@ -85,6 +85,13 @@ export class Organization {
         this._coordinates = value;
     }
 
+    get location() {
+        if (!this._coordinates) return '';
+        const { latitude, longitude } = this._coordinates;
+        if (latitude == null || longitude == null) return '';
+        return `${latitude}, ${longitude}`;
+    }
+
     // Domain methods
     addMember(memberId) {
         if (!this._members.includes(memberId)) {

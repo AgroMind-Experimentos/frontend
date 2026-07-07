@@ -80,7 +80,7 @@
     "deletePlot": "Delete plot",
     "deletePlotConfirm": "Are you sure you want to delete the plot",
     "nameRequired": "Organization name is required.",
-    "deleteConfirm": "Are you sure you want to delete this organization?",
+    "deleteConfirm": "Are you sure you want to delete this organization? This action cannot be undone.",
     "deletePlotConfirmFull": "Are you sure you want to delete this plot?",
     "deleteSuccess": "Organization deleted successfully",
     "deleteError": "Error deleting the organization",
@@ -293,7 +293,8 @@
     "checklistTitlePlaceholder": "E.g. Machinery review",
     "associatedChecklist": "Associated Checklist",
     "checklistTitle": "Checklist Title",
-    "items": "Items"
+    "items": "Items",
+    "readOnlyChecklist": "Read-only mode: only the responsible farmer can check off checklist items."
   },
   "organizationExt": {
     "enter": "Enter",
@@ -403,7 +404,12 @@
     "welcomeBack": "Welcome back!",
     "loginError": "Invalid credentials. Verify your data.",
     "noAccount": "Don't have an account?",
-    "createAccountBtn": "Create account"
+    "createAccountBtn": "Create account",
+    "passwordRequirements": "Password must have:",
+    "passwordReqLength": "At least 8 characters",
+    "passwordReqUppercase": "An uppercase letter",
+    "passwordReqLowercase": "A lowercase letter",
+    "passwordReqNumber": "A number"
   },
   "settings": {
     "subscription": "Subscription",
