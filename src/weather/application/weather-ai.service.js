@@ -2,7 +2,9 @@ export class WeatherAiService {
   constructor() {
     this.apiKey = import.meta.env.VITE_GOOGLE_AI_API_KEY
     this.model = import.meta.env.VITE_GOOGLE_AI_MODEL || 'gemini-flash-lite-latest'
-    const defaultUrl = `/google-ai/v1beta/models/${this.model}:generateContent`
+    const defaultUrl = import.meta.env.DEV
+      ? `/google-ai/v1beta/models/${this.model}:generateContent`
+      : `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent`
     this.apiUrl = import.meta.env.VITE_GOOGLE_AI_URL || defaultUrl
   }
 
