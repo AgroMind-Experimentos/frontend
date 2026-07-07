@@ -117,8 +117,14 @@ const finishTask = ()=>{
 <template>
   <div class="container">
     <h3>{{ $t('tasksExt.checklist') }}</h3>
+
+    <div v-if="isAgronomist" class="readonly-banner">
+      <i class="pi pi-lock"></i>
+      {{ $t('tasksExt.readOnlyChecklist') }}
+    </div>
+
     <div v-if="checklist && checklist.items && checklist.items.length > 0">
-      <div v-for="item in checklist.items" :key="item.id" class="checklist-item">
+      <div v-for="item in checklist.items" :key="item.id" class="checklist-item" :class="{ readonly: isAgronomist }">
         <pv-checkbox
           :modelValue="checkedItems[item.id]"
           :inputId="`check-${item.id}`"
@@ -218,6 +224,30 @@ const finishTask = ()=>{
   box-shadow: 0 2px 8px rgba(0,0,0,0.07);
 }
 
+.checklist-item.readonly {
+  cursor: not-allowed;
+  opacity: 0.75;
+}
+
+.checklist-item.readonly:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.readonly-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: #eef2f7;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.85rem;
+}
+
 .checklist-name {
   font-size: 1.1rem;
   color: #444;
@@ -256,6 +286,19 @@ const finishTask = ()=>{
 /* Hover del checkbox */
 :deep(.p-checkbox:hover .p-checkbox-box) {
   border-color: #ff9900 !important;
+}
+
+/* Checkbox deshabilitado (sin permisos de edición) */
+:deep(.p-checkbox.p-disabled),
+:deep(.p-checkbox.p-checkbox-disabled) {
+  cursor: not-allowed !important;
+}
+
+:deep(.p-checkbox.p-disabled .p-checkbox-box),
+:deep(.p-checkbox.p-checkbox-disabled .p-checkbox-box) {
+  border-color: #cbd5e1 !important;
+  background-color: #f1f5f9 !important;
+  cursor: not-allowed !important;
 }
 
 .no-checklist {

@@ -10,10 +10,11 @@ export class OrganizationAssembler {
             name: data?.name || '',
             description: data?.description || '',
 
-            coordinates: data?.coordinates ? {
-                latitude: data.coordinates.latitude,
-                longitude: data.coordinates.longitude
-            } : null,
+            coordinates: (data?.latitude != null && data?.longitude != null)
+                ? { latitude: data.latitude, longitude: data.longitude }
+                : (data?.coordinates
+                    ? { latitude: data.coordinates.latitude, longitude: data.coordinates.longitude }
+                    : null),
 
             members,
             agronomistId: data?.agronomistId || data?.agronomistOwnerId || null,

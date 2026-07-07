@@ -35,11 +35,23 @@ export default {
     const errorKey = computed(() => userStore.state.errorKey);
     const successKey = computed(() => userStore.state.successKey);
 
+    const passwordChecks = computed(() => ({
+      length: password.value.length >= 8,
+      uppercase: /[A-Z]/.test(password.value),
+      lowercase: /[a-z]/.test(password.value),
+      number: /[0-9]/.test(password.value)
+    }));
+    const isPasswordValid = computed(() => Object.values(passwordChecks.value).every(Boolean));
+
     const goLogin = () => router.push({ name: 'user-login' });
 
     const submit = async () => {
       if (!name.value || !email.value || !password.value || !confirmPassword.value) {
         toast.add({ severity: 'warn', summary: t('auth.fieldsRequired'), life: 3000 });
+        return;
+      }
+      if (!isPasswordValid.value) {
+        toast.add({ severity: 'warn', summary: t('auth.insecurePassword'), life: 3000 });
         return;
       }
       if (password.value !== confirmPassword.value) {
@@ -69,7 +81,8 @@ export default {
 
     return {
       name, email, password, confirmPassword,
-      role, consentChecked, showPolicyModal, logoUrl, loading, errorKey, successKey, goLogin, submit
+      role, consentChecked, showPolicyModal, logoUrl, loading, errorKey, successKey,
+      passwordChecks, isPasswordValid, goLogin, submit
     };
   }
 };
@@ -147,6 +160,29 @@ export default {
                   class="password-field"
                 />
               </div>
+            </div>
+
+            <!-- Requisitos de contraseña -->
+            <div class="password-requirements">
+              <p class="requirements-title">{{ $t('iam.passwordRequirements') }}</p>
+              <ul class="requirements-list">
+                <li :class="{ met: passwordChecks.length }">
+                  <i :class="passwordChecks.length ? 'pi pi-check-circle' : 'pi pi-circle'"></i>
+                  {{ $t('iam.passwordReqLength') }}
+                </li>
+                <li :class="{ met: passwordChecks.uppercase }">
+                  <i :class="passwordChecks.uppercase ? 'pi pi-check-circle' : 'pi pi-circle'"></i>
+                  {{ $t('iam.passwordReqUppercase') }}
+                </li>
+                <li :class="{ met: passwordChecks.lowercase }">
+                  <i :class="passwordChecks.lowercase ? 'pi pi-check-circle' : 'pi pi-circle'"></i>
+                  {{ $t('iam.passwordReqLowercase') }}
+                </li>
+                <li :class="{ met: passwordChecks.number }">
+                  <i :class="passwordChecks.number ? 'pi pi-check-circle' : 'pi pi-circle'"></i>
+                  {{ $t('iam.passwordReqNumber') }}
+                </li>
+              </ul>
             </div>
 
             <!-- Selección de rol -->
@@ -241,7 +277,7 @@ export default {
               :label="$t('iam.createAccount')"
               class="register-button"
               :loading="loading"
-              :disabled="!name || !email || !password || !confirmPassword || !role || !consentChecked"
+              :disabled="!name || !email || !password || !confirmPassword || !role || !consentChecked || !isPasswordValid"
             />
 
             <!-- Divider -->
@@ -412,6 +448,52 @@ export default {
   border-color: #2E7D32 !important;
   box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1) !important;
   background: #fff !important;
+}
+
+.password-requirements {
+  background: #F5F5F5;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  margin: -0.5rem 0 1.25rem 0;
+}
+
+.requirements-title {
+  margin: 0 0 0.4rem 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #555;
+}
+
+.requirements-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem 1rem;
+}
+
+.requirements-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: #888;
+  transition: color 0.2s ease;
+}
+
+.requirements-list li i {
+  font-size: 0.85rem;
+  color: #bbb;
+  transition: color 0.2s ease;
+}
+
+.requirements-list li.met {
+  color: #2E7D32;
+}
+
+.requirements-list li.met i {
+  color: #2E7D32;
 }
 
 .roles-section {

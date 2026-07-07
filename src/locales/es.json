@@ -80,7 +80,7 @@
     "deletePlot": "Eliminar parcela",
     "deletePlotConfirm": "¿Estás seguro de que quieres eliminar la parcela",
     "nameRequired": "El nombre de la organización es requerido.",
-    "deleteConfirm": "¿Estás seguro de que quieres eliminar esta organización?",
+    "deleteConfirm": "¿Está seguro de que desea eliminar esta organización? Esta acción no se puede deshacer.",
     "deletePlotConfirmFull": "¿Estás seguro de que quieres eliminar esta parcela?",
     "deleteSuccess": "Organización eliminada exitosamente",
     "deleteError": "Error al eliminar la organización",
@@ -293,7 +293,8 @@
     "checklistTitlePlaceholder": "Ej. Revisión de maquinaria",
     "associatedChecklist": "Checklist asociada",
     "checklistTitle": "Título del checklist",
-    "items": "Ítems"
+    "items": "Ítems",
+    "readOnlyChecklist": "Modo solo lectura: solo el agricultor responsable puede marcar los ítems del checklist."
   },
   "organizationExt": {
     "enter": "Entrar",
@@ -403,7 +404,12 @@
     "welcomeBack": "¡Bienvenido de vuelta!",
     "loginError": "Credenciales inválidas. Verifica tus datos.",
     "noAccount": "¿No tienes cuenta?",
-    "createAccountBtn": "Crear cuenta"
+    "createAccountBtn": "Crear cuenta",
+    "passwordRequirements": "La contraseña debe tener:",
+    "passwordReqLength": "Mínimo 8 caracteres",
+    "passwordReqUppercase": "Una letra mayúscula",
+    "passwordReqLowercase": "Una letra minúscula",
+    "passwordReqNumber": "Un número"
   },
   "settings": {
     "subscription": "Suscripción",

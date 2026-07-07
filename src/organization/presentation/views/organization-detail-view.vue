@@ -203,10 +203,15 @@ function openInGoogleMaps(latitude, longitude) {
           <h1>{{ organization.name }}</h1>
           <p class="description">{{ organization.description }}</p>
           <div class="meta-info">
-            <div class="meta-item">
+            <button
+              type="button"
+              class="meta-item location-link"
+              v-if="organization.location"
+              @click="openInGoogleMaps(organization.coordinates.latitude, organization.coordinates.longitude)"
+            >
               <i class="pi pi-map-marker"></i>
               <span>{{ organization.location }}</span>
-            </div>
+            </button>
             <div class="meta-item">
               <i class="pi pi-users"></i>
               <span>{{ organization.getMemberCount() }} {{ t('organization.memberCount') }}</span>
@@ -412,6 +417,19 @@ function openInGoogleMaps(latitude, longitude) {
 
 .meta-item i {
   color: #2c5530;
+}
+
+button.meta-item.location-link {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  color: #555;
+}
+
+button.meta-item.location-link:hover {
+  text-decoration: underline;
 }
 
 .actions {

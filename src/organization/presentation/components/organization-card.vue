@@ -14,6 +14,11 @@ export default {
       const date = new Date(dateString);
       const locale = this.$i18n ? (this.$i18n.locale === 'en' ? 'en-US' : 'es-ES') : 'es-ES';
       return date.toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' });
+    },
+    openInGoogleMaps(latitude, longitude) {
+      if (latitude == null || longitude == null) return;
+      const url = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+      window.open(url, '_blank', 'noopener,noreferrer');
     }
   }
 };
@@ -29,10 +34,15 @@ export default {
           <i class="pi pi-users"></i>
           <span>{{ org.getMemberCount() }} {{ $t('organization.memberCount') }}</span>
         </div>
-        <div class="meta-item" v-if="org.location">
+        <button
+          type="button"
+          class="meta-item location-link"
+          v-if="org.location"
+          @click="openInGoogleMaps(org.coordinates.latitude, org.coordinates.longitude)"
+        >
           <i class="pi pi-map-marker"></i>
           <span>{{ org.location }}</span>
-        </div>
+        </button>
         <div class="meta-item" v-if="org.createdAt">
           <i class="pi pi-calendar"></i>
           <span>{{ $t('organization.createdAt') }}: {{ formatDate(org.createdAt) }}</span>
@@ -119,6 +129,18 @@ export default {
 .meta-item i {
   color: #2c5530;
   font-size: 0.9rem;
+}
+
+.location-link {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+.location-link:hover {
+  text-decoration: underline;
 }
 
 .right {

@@ -16,6 +16,7 @@ class UserStore {
     #api = new AuthApi();
     #assembler = new AuthAssembler();
     #profileApi = new UserProfileApi();
+    #restoringPromise = null;
 
     get isAuthenticated() {
         return !!this.state.user;
@@ -23,22 +24,28 @@ class UserStore {
 
     async restoreSession() {
         if (this.state.isSessionRestored) return;
+        if (this.#restoringPromise) return this.#restoringPromise;
 
-        try {
-            const profile = await this.#profileApi.getMe();
-            if (profile) {
-                this.state.user = new User({
-                    id: profile.id ?? profile.userId ?? null,
-                    name: profile.displayName || profile.name || '',
-                    email: profile.email || '',
-                    role: profile.role || ''
-                });
+        this.#restoringPromise = (async () => {
+            try {
+                const profile = await this.#profileApi.getMe();
+                if (profile) {
+                    this.state.user = new User({
+                        id: profile.id ?? profile.userId ?? null,
+                        name: profile.displayName || profile.name || '',
+                        email: profile.email || '',
+                        role: profile.role || ''
+                    });
+                }
+            } catch {
+                this.state.user = null;
+            } finally {
+                this.state.isSessionRestored = true;
+                this.#restoringPromise = null;
             }
-        } catch {
-            this.state.user = null;
-        } finally {
-            this.state.isSessionRestored = true;
-        }
+        })();
+
+        return this.#restoringPromise;
     }
 
     async login({ email, password }) {
