@@ -8,7 +8,10 @@ import Tag from 'primevue/tag'
 import ProgressBar from 'primevue/progressbar'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
+import { useToast } from 'primevue/usetoast'
+import Toast from 'primevue/toast'
 
+const toast = useToast()
 const reportsService = new ReportsService()
 const reportsData = ref(null)
 const loading = ref(true)
@@ -34,23 +37,49 @@ const loadReports = async () => {
 
 const downloadPDF = async () => {
   downloadingPDF.value = true
+
   try {
     await reportsService.downloadPDF()
+
+    toast.add({
+      severity: 'success',
+      summary: 'Success',
+      detail: 'PDF downloaded successfully!',
+      life: 3000
+    })
   } catch (err) {
-    error.value = 'Error al descargar el PDF'
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'PDF download failed!',
+      life: 3000
+    })
   } finally {
     downloadingPDF.value = false
   }
 }
 
 const downloadExcel = async () => {
-  downloadingPDF.value = true
+  downloadingExcel.value = true
+
   try {
     await reportsService.downloadExcel()
+
+    toast.add({
+      severity: 'success',
+      summary: 'Success',
+      detail: 'Excel downloaded successfully!',
+      life: 3000
+    })
   } catch (err) {
-    error.value = 'Error al descargar el reporte en excel'
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'Excel download failed!',
+      life: 3000
+    })
   } finally {
-    downloadingPDF.value = false
+    downloadingExcel.value = false
   }
 }
 
